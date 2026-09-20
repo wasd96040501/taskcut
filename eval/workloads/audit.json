@@ -1,0 +1,122 @@
+{
+ "name": "audit",
+ "description": "Five steps researching a real codebase, then five building a tool against it, with the output format changed at step nine.",
+ "source": {
+  "kind": "git",
+  "url": "https://github.com/pallets/flask",
+  "ref": ""
+ },
+ "fixtures": [
+  "src/flask/config.py",
+  "src/flask/sessions.py",
+  "src/flask/wrappers.py",
+  "src/flask/app.py"
+ ],
+ "files": [
+  "read src/flask/config.py and report every way Config can be loaded -- the method names and what each one takes.",
+  "read src/flask/sansio/app.py and report how the default configuration is declared: where it lives, and three of the keys in it.",
+  "read src/flask/sessions.py and list every configuration key it reads, with the line each is read on.",
+  "read src/flask/wrappers.py and src/flask/helpers.py and list every configuration key they read, with lines.",
+  "read src/flask/app.py, src/flask/templating.py and src/flask/blueprints.py and list every configuration key they read, with lines.",
+  "now build the tool. Create configaudit/scan.py with scan(root) -> dict mapping each key to a list of the places it is read.",
+  "create configaudit/report.py with render(result) -> str, a plain-text table of keys and where each is read.",
+  "create configaudit/__main__.py so that `python3 -m configaudit <root>` scans that tree and prints the text report.",
+  "we have decided the tool must emit JSON on stdout instead of a text table, so that it can be consumed by other tools. Change the command to print JSON; the text renderer and its module must be gone entirely.",
+  "create audit_tests/test_configaudit.py, a unittest suite covering the scan on a small fixture of your own making. It goes in audit_tests/, not tests/ -- this checkout already has a tests/ directory of its own and it must not be touched."
+ ],
+ "briefing": "This is a checkout of Flask. The job has two halves. First I want to understand how configuration keys are used in this codebase; then I want a tool that finds them, which we will run on this very checkout. Standard library only, no third-party imports. One piece at a time; I will say which.\n\nThree rules hold for the whole job:\n(1) every module you add opens with a one-line module docstring;\n(2) the tool must not import Flask or anything Flask depends on -- it reads source as text;\n(3) a configuration key read is a textual occurrence of config[\"KEY\"] or config.get(\"KEY\") in a .py file, where KEY matches [A-Z][A-Z0-9_]*. Count them wherever they appear, including inside docstrings and comments. That rule is the definition; do not refine it.\n\nThe contract for the tool:\n  configaudit.scan.scan(root) -> dict mapping each key to a list of the places it is read,\n                                 each place naming the file and the line number\n  python3 -m configaudit <root> runs it over a tree\n\nAcknowledge and wait for the first piece.",
+ "step_template": "Step {n} of {total}: {file}",
+ "checks": [
+  {
+   "id": "imports",
+   "kind": "completeness",
+   "description": "the tool imports",
+   "command": "python3 -c 'import sys; sys.path.insert(0,\".\"); import configaudit.scan; print(\"ok\")'"
+  },
+  {
+   "id": "scan",
+   "kind": "consistency",
+   "description": "scan finds exactly the 30 keys and 42 reads the rule defines",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from configaudit.scan import scan;r = scan('\\''src/flask'\\'');keys = set(r);reads = sum(len(v) for v in r.values());assert len(keys)==30, (len(keys), sorted(keys));assert reads==42, reads;need = {'\\''SESSION_REFRESH_EACH_REQUEST'\\'','\\''MAX_FORM_PARTS'\\'','\\''EXPLAIN_TEMPLATE_LOADING'\\'','\\''TRUSTED_HOSTS'\\'','\\''IMAGE_STORE_PATH'\\''};assert need <= keys, sorted(need - keys);print('\\''scan ok'\\'', len(keys), reads)'"
+  },
+  {
+   "id": "locations",
+   "kind": "consistency",
+   "description": "a key's location names the right file and line",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from configaudit.scan import scan;v = scan('\\''src/flask'\\'')['\\''EXPLAIN_TEMPLATE_LOADING'\\''];assert len(v)==1, v;s = str(v[0]);assert '\\''templating.py'\\'' in s, s;assert '\\''60'\\'' in s, s;print('\\''locations ok'\\'', s)'"
+  },
+  {
+   "id": "json",
+   "kind": "supersession",
+   "description": "the command emits JSON covering all 30 keys, as step nine required",
+   "command": "python3 -c 'import json, subprocess, sys;out = subprocess.run([sys.executable,'\\''-m'\\'','\\''configaudit'\\'','\\''src/flask'\\''],capture_output=True,text=True);assert out.returncode==0, out.stderr[-300:];d = json.loads(out.stdout);assert isinstance(d, (dict, list)), type(d);n = len(d) if isinstance(d, dict) else len(d);assert n==30, n;print('\\''json ok'\\'', n)'"
+  },
+  {
+   "id": "text_gone",
+   "kind": "supersession",
+   "description": "the superseded text renderer is gone",
+   "command": "! test -f configaudit/report.py"
+  },
+  {
+   "id": "no_flask_import",
+   "kind": "rule",
+   "description": "rule 2: the tool imports neither Flask nor its dependencies",
+   "command": "! grep -rnE '^\\\\s*(import|from) +(flask|werkzeug|jinja2|click|itsdangerous|blinker)\\\\b' configaudit/"
+  },
+  {
+   "id": "rule1_docstrings",
+   "kind": "rule",
+   "description": "rule 1: every module opens with a docstring",
+   "command": "python3 -c 'import ast, pathlib, sys;bad=[str(p) for p in sorted(pathlib.Path('\\''configaudit'\\'').glob('\\''*.py'\\'')) if not ast.get_docstring(ast.parse(p.read_text()))];sys.exit('\\''modules without a docstring: '\\'' + '\\'', '\\''.join(bad)) if bad else print('\\''rule 1 ok'\\'')'"
+  },
+  {
+   "id": "suite",
+   "kind": "completeness",
+   "description": "the tool's own tests pass, in their own directory",
+   "command": "PYTHONPATH=. python3 -m unittest discover -s audit_tests -q"
+  },
+  {
+   "id": "flask_untouched",
+   "kind": "rule",
+   "description": "the checkout's own files are unmodified: the tool was added, nothing was edited",
+   "command": "test -z \"$(git status --porcelain -- ':!configaudit' ':!audit_tests' 2>/dev/null)\""
+  }
+ ],
+ "probes": [
+  {
+   "id": "S1",
+   "kind": "superseded",
+   "question": "What does `python3 -m configaudit` print on stdout: a text table or JSON? Answer with one word.",
+   "expect": [
+    "json"
+   ],
+   "reject": [
+    "table"
+   ]
+  },
+  {
+   "id": "H1",
+   "kind": "headline",
+   "question": "Which configuration key does src/flask/templating.py read? Answer with the key alone.",
+   "expect": [
+    "EXPLAIN_TEMPLATE_LOADING"
+   ]
+  },
+  {
+   "id": "H2",
+   "kind": "headline",
+   "question": "How many distinct configuration keys did the tool find in src/flask? Answer with the number alone.",
+   "expect": [
+    "30"
+   ]
+  },
+  {
+   "id": "I1",
+   "kind": "incidental",
+   "question": "In src/flask/config.py, which environment variable name is used in the from_envvar docstring example?",
+   "expect": [
+    "YOURAPPLICATION_SETTINGS"
+   ]
+  }
+ ]
+}
