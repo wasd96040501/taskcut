@@ -89,17 +89,45 @@ def cmd_report(args) -> int:
     if not by_workload:
         raise SystemExit(f"no results in {results}")
 
-    chunks = []
+    chunks, summary = [], {}
     for name, runs in by_workload.items():
         runs.sort(key=lambda r: (r.arm != "off", r.arm))
         chunks.append(report.render(name, runs))
+        summary[name] = {r.arm: _numbers(r) for r in runs}
     text = "\n\n".join(chunks)
+
+    # The transcripts are large and full of absolute paths, so they stay out of
+    # history. These are what a later run is compared against.
+    (results / "runs.json").write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n")
     if args.out:
         Path(args.out).write_text(text + "\n")
         print(f"report -> {args.out}")
     else:
         print(text)
     return 0
+
+
+def _numbers(run) -> dict:
+    return {
+        "weighted_input": round(run.cost.weighted),
+        "cache_read": run.cost.read,
+        "cache_write": run.cost.write,
+        "output": run.cost.output,
+        "requests": run.cost.requests,
+        "context_first": run.prefix[0] if run.prefix else 0,
+        "context_peak": run.peak_context,
+        "context_last": run.prefix[-1] if run.prefix else 0,
+        "context_series": run.prefix,
+        "fidelity": {
+            kind: {
+                "asked": f.asked,
+                "correct": f.correct,
+                "went_to_disk": f.to_disk,
+                "tool_calls": f.tool_calls,
+            }
+            for kind, f in run.fidelity.items()
+        },
+    }
 
 
 def main(argv=None) -> int:

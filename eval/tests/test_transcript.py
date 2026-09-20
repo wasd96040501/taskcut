@@ -70,6 +70,20 @@ class Segmentation(unittest.TestCase):
         self.assertEqual([t.prompt for t in loaded.turns], ["first", "second"])
         self.assertEqual(loaded.ledger_messages, 1)
 
+    def test_a_dead_copy_left_last_by_a_later_cut_is_skipped(self):
+        # A cut after the prompt was answered re-emits it with nothing under
+        # it. Taking the last match would score a correct answer as wrong.
+        loaded = transcript.load(write([
+            user("what is it"),
+            assistant("req_1", [{"type": "text", "text": "the answer"}], USAGE),
+            user("what is it"),
+        ]))
+        self.assertEqual(loaded.turn_for("what is it").answer, "the answer")
+
+    def test_a_prompt_never_answered_still_resolves(self):
+        loaded = transcript.load(write([user("ignored")]))
+        self.assertEqual(loaded.turn_for("ignored").answer, "")
+
     def test_a_repeated_prompt_resolves_to_the_live_one(self):
         # A cut re-emits the human turns it kept, so an early prompt reappears
         # with no answer under it. Only the last copy is the one that ran.

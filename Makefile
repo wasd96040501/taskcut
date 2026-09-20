@@ -41,11 +41,11 @@ eval-verify: ## Check every probe is answerable from the material it ships with
 
 .PHONY: eval-run
 eval-run: ## Run one workload under one arm (WORKLOAD=, ARM=, MODEL=)
-	@$(PYTHON) -m taskcut_eval.cli run --workload $(WORKLOAD) --arm $(ARM) --model $(MODEL)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm $(ARM) --model $(MODEL)
 
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts
-	@$(PYTHON) -m taskcut_eval.cli report --results $(RESULTS)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report
 
 .PHONY: check
 check: validate eval-test ## validate + the harness tests

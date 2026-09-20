@@ -65,13 +65,21 @@ class Transcript:
         return [r for t in self.turns for r in t.requests]
 
     def turn_for(self, prompt: str) -> Turn | None:
-        """The last turn whose prompt is exactly `prompt`.
+        """The turn that actually answered `prompt`.
 
-        Last, not first: a cut re-emits the human turns it kept, so an early
-        prompt can appear several times, and only the live one has an answer.
+        A prompt can appear several times. A cut re-emits the human turns it
+        kept, so a copy of a recent prompt reappears with nothing under it, and
+        a cut that happens *after* a prompt was answered leaves that dead copy
+        last. Taking the last match therefore finds an empty turn and scores a
+        correct answer as wrong. The last match that has an answer is the one
+        that ran; the bare last match is the fallback for a prompt that was
+        never answered at all.
         """
         matches = [t for t in self.turns if t.prompt.strip() == prompt.strip()]
-        return matches[-1] if matches else None
+        if not matches:
+            return None
+        answered = [t for t in matches if t.requests or t.answer]
+        return answered[-1] if answered else matches[-1]
 
 
 def _text_of(message: dict) -> tuple[str, bool]:

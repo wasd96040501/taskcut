@@ -1,0 +1,182 @@
+{
+ "flask": {
+  "boundary": {
+   "cache_read": 1888168,
+   "cache_write": 235218,
+   "context_first": 37445,
+   "context_last": 62792,
+   "context_peak": 62792,
+   "context_series": [
+    37445,
+    39107,
+    40476,
+    41864,
+    43500,
+    45721,
+    48586,
+    51486,
+    54493,
+    56822,
+    57235,
+    57482,
+    59072,
+    59286,
+    60431,
+    60622,
+    61597,
+    62792
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 2,
+     "went_to_disk": 1
+    },
+    "incidental": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 6,
+     "went_to_disk": 4
+    }
+   },
+   "output": 18933,
+   "requests": 41,
+   "weighted_input": 482953
+  },
+  "off": {
+   "cache_read": 1449801,
+   "cache_write": 40170,
+   "context_first": 38122,
+   "context_last": 69975,
+   "context_peak": 69975,
+   "context_series": [
+    38122,
+    39533,
+    41737,
+    44875,
+    48203,
+    52294,
+    56969,
+    62337,
+    68583,
+    68694,
+    68948,
+    69036,
+    69328,
+    69393,
+    69577,
+    69663,
+    69850,
+    69975
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 0,
+     "went_to_disk": 0
+    },
+    "incidental": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 0,
+     "went_to_disk": 0
+    }
+   },
+   "output": 3341,
+   "requests": 26,
+   "weighted_input": 195279
+  }
+ },
+ "synthetic": {
+  "boundary": {
+   "cache_read": 1496938,
+   "cache_write": 226803,
+   "context_first": 38102,
+   "context_last": 44743,
+   "context_peak": 44743,
+   "context_series": [
+    38102,
+    38511,
+    39216,
+    39809,
+    40400,
+    40988,
+    41576,
+    42172,
+    42768,
+    43354,
+    43910,
+    44162,
+    44255,
+    44357,
+    44453,
+    44546,
+    44635,
+    44743
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 0,
+     "went_to_disk": 0
+    },
+    "incidental": {
+     "asked": 3,
+     "correct": 3,
+     "tool_calls": 0,
+     "went_to_disk": 0
+    }
+   },
+   "output": 7394,
+   "requests": 38,
+   "weighted_input": 433308
+  },
+  "off": {
+   "cache_read": 2236208,
+   "cache_write": 79330,
+   "context_first": 37270,
+   "context_last": 107857,
+   "context_peak": 107857,
+   "context_series": [
+    37270,
+    45309,
+    52221,
+    59082,
+    65963,
+    72819,
+    79706,
+    86635,
+    93537,
+    100440,
+    107274,
+    107394,
+    107463,
+    107556,
+    107632,
+    107693,
+    107760,
+    107857
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 0,
+     "went_to_disk": 0
+    },
+    "incidental": {
+     "asked": 3,
+     "correct": 3,
+     "tool_calls": 0,
+     "went_to_disk": 0
+    }
+   },
+   "output": 2019,
+   "requests": 28,
+   "weighted_input": 322873
+  }
+ }
+}
