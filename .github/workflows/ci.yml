@@ -77,6 +77,69 @@ jobs:
             process.exit(failed ? 1 : 0);
           "
 
+  benchmark:
+    name: Benchmark harness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # The harness has no third-party dependencies: it is standard library
+      # only, for the same reason the plugin is. Driving a real session needs a
+      # terminal and an API key, so CI checks everything except that -- the
+      # pure modules, the workload specifications, and that the code imports.
+      - name: Harness tests
+        run: make eval-test
+
+      - name: Workloads are well formed
+        run: |
+          PYTHONPATH=eval python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          from taskcut_eval import arms, workload
+          loaded = workload.load_all(Path("eval/workloads"))
+          if not loaded:
+              print("::error::no workloads found"); sys.exit(1)
+          failed = False
+          for name, w in loaded.items():
+              if not w.files:
+                  print(f"::error::{name} names no files"); failed = True
+              if not w.probes:
+                  print(f"::error::{name} has no probes"); failed = True
+              for probe in w.probes:
+                  if probe.kind not in (workload.KIND_HEADLINE, workload.KIND_INCIDENTAL):
+                      print(f"::error::{name}/{probe.id} has unknown kind {probe.kind!r}"); failed = True
+                  if not probe.expect:
+                      print(f"::error::{name}/{probe.id} expects nothing, so it can never fail"); failed = True
+              ids = [p.id for p in w.probes]
+              if len(set(ids)) != len(ids):
+                  print(f"::error::{name} has duplicate probe ids"); failed = True
+              print(f"ok  {name}: {len(w.files)} files, {len(w.probes)} probes")
+          for name, arm in arms.ARMS.items():
+              print(f"ok  arm {name}")
+          sys.exit(1 if failed else 0)
+          PY
+
+      # Every setting an arm overrides has to exist, or a run silently measures
+      # the default instead of the variable it was meant to change.
+      - name: Arms only override settings the plugin has
+        run: |
+          PYTHONPATH=eval python3 - <<'PY'
+          import json, sys
+          from taskcut_eval import arms
+          manifest = json.load(open(".claude-plugin/plugin.json"))["userConfig"]
+          failed = False
+          for name, arm in arms.ARMS.items():
+              for key in arm.config:
+                  if key not in manifest:
+                      print(f"::error::arm {name} sets {key!r}, which the plugin does not have")
+                      failed = True
+          sys.exit(1 if failed else 0)
+          PY
+
   hygiene:
     name: Repository hygiene
     runs-on: ubuntu-latest
@@ -88,7 +151,8 @@ jobs:
           for file in README.md LICENSE NOTICE CHANGELOG.md CONTRIBUTING.md \
                       CODE_OF_CONDUCT.md SECURITY.md SUPPORT.md \
                       .github/CODEOWNERS .claude-plugin/marketplace.json \
-                      docs/design.md docs/troubleshooting.md docs/compatibility.md; do
+                      docs/design.md docs/troubleshooting.md docs/compatibility.md \
+                      docs/measurement.md eval/README.md Makefile; do
             if [ ! -f "$file" ]; then echo "::error::$file is missing"; missing=1; fi
           done
           exit "$missing"
