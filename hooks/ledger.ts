@@ -86,10 +86,16 @@ export function droppedMessages(
 }
 
 /**
- * The standing task: the first human turn, which is the only record of what the
- * whole job is for. A directed extraction is directed at this and nothing else.
+ * The first human turn. It is the closest thing a transcript has to a statement
+ * of what the whole job is for, and it is often not one: in a session that
+ * opens by asking for the first step, this is that step and nothing more.
+ *
+ * Nothing can recover the difference, so the caller is told which it has rather
+ * than being handed a guess dressed as a fact. An extraction aimed at a first
+ * step as though it were the job writes down that the job is finished, and
+ * tells the next worker to go and do the step that was just closed.
  */
-export function standingTask(messages: readonly SessionMessage[]): string {
+export function openingRequest(messages: readonly SessionMessage[]): string {
   return humanTurnsOf(messages)[0]?.text?.trim() ?? ''
 }
 
@@ -129,17 +135,18 @@ export function renderDropped(messages: readonly SessionMessage[]): string {
  * matters -- and a writer following a checklist produces an inventory, which is
  * the failure the mode is meant to avoid.
  */
-export function directedPrompt(task: string, subTask: string, dropped: string): string {
+export function directedPrompt(opening: string, subTask: string, dropped: string): string {
   return [
-    'A long job is in progress. This is the standing task, in the words of the',
-    'person who set it:',
+    'A long job is in progress. This is the first thing the person asked for. It',
+    'may be the whole job, or only its first step -- there is no way to tell from',
+    'here, and more work is expected either way:',
     '',
-    task || '(the standing task was not recorded)',
+    opening || '(nothing was recorded)',
     '',
-    `A sub-task of it has just finished: ${subTask}`,
+    `A sub-task has just finished: ${subTask}`,
     '',
     'Below is everything that happened while it was worked on. It is about to be',
-    'deleted. Write what someone continuing the standing task will need.',
+    'deleted. Write what someone continuing the job will need.',
     '',
     '--- transcript ---',
     dropped,

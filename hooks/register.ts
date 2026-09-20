@@ -36,8 +36,8 @@ import {
   foldedEntry,
   planFold,
   renderDropped,
+  openingRequest,
   renderLedger,
-  standingTask,
   staleLedgerKeys,
   type Entry,
 } from './ledger'
@@ -140,7 +140,7 @@ async function directLastEntry(
   try {
     const written = await $.model.complete({
       model: config.foldModel,
-      prompt: directedPrompt(standingTask(all), last.task, renderDropped(dropped)),
+      prompt: directedPrompt(openingRequest(all), last.task, renderDropped(dropped)),
       maxTokens: 1024,
     })
     if (!written.trim()) return ledger

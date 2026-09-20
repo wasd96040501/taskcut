@@ -9,7 +9,7 @@ import {
   directedPrompt,
   droppedMessages,
   renderDropped,
-  standingTask,
+  openingRequest,
   foldPrompt,
   foldedEntry,
   humanTurnsOf,
@@ -202,14 +202,14 @@ describe('droppedMessages', () => {
   })
 })
 
-describe('standingTask', () => {
-  test('is the first human turn, which is the only record of the goal', () => {
+describe('openingRequest', () => {
+  test('is the first human turn, whatever that turn turned out to be', () => {
     const messages = [
       { role: 'user', text: '  audit every module  ', toolUses: [] },
       { role: 'assistant', text: 'on it', toolUses: [] },
       { role: 'user', text: 'next one', toolUses: [] },
     ] as SessionMessage[]
-    assert.equal(standingTask(messages), 'audit every module')
+    assert.equal(openingRequest(messages), 'audit every module')
   })
 
   test('ignores a user message that is only a tool result', () => {
@@ -217,11 +217,11 @@ describe('standingTask', () => {
       { role: 'user', text: 'output', toolUses: [], toolResults: [{ tool_use_id: 'x', text: 'output' }] },
       { role: 'user', text: 'the real task', toolUses: [] },
     ] as unknown as SessionMessage[]
-    assert.equal(standingTask(messages), 'the real task')
+    assert.equal(openingRequest(messages), 'the real task')
   })
 
   test('is empty when there is no human turn at all', () => {
-    assert.equal(standingTask([]), '')
+    assert.equal(openingRequest([]), '')
   })
 })
 
@@ -251,11 +251,12 @@ describe('directedPrompt', () => {
   test('aims the extractor at the standing task and names the sub-task', () => {
     const prompt = directedPrompt('audit every module', 'read config.py', 'transcript here')
     assert.match(prompt, /audit every module/)
+    assert.match(prompt, /may be the whole job, or only its first step/)
     assert.match(prompt, /read config.py/)
     assert.match(prompt, /transcript here/)
   })
 
   test('says so when the standing task was never recorded', () => {
-    assert.match(directedPrompt('', 'a sub-task', ''), /was not recorded/)
+    assert.match(directedPrompt('', 'a sub-task', ''), /nothing was recorded/)
   })
 })
