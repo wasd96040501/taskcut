@@ -1,0 +1,55 @@
+name: Bug report
+description: Something does not work the way it is documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, please walk through
+        [docs/troubleshooting.md](https://github.com/wasd96040501/taskcut/blob/main/docs/troubleshooting.md).
+        It covers the four things that account for most reports.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start a session with ...
+        2. Ask it to ...
+        3. After close_task, ...
+    validations:
+      required: true
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude Code version
+      description: Output of `claude --version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: session-kind
+    attributes:
+      label: Session kind
+      description: Compaction is unavailable in a headless session.
+      options:
+        - Terminal (interactive)
+        - claude --bg
+        - claude -p
+        - SDK / stream-json transport
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: validate
+    attributes:
+      label: Output of plugin validation
+      description: "`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin validate ~/.claude/skills/taskcut`"
+      render: shell
+    validations:
+      required: false

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Claude Code itself
+    url: https://github.com/anthropics/claude-code/issues
+    about: Bugs in the function-hooks API or the Claude Code binary belong here.
+  - name: Security report
+    url: https://github.com/wasd96040501/taskcut/security/advisories/new
+    about: Please report vulnerabilities privately, not as a public issue.

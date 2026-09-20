@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a change to what taskcut does.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that taskcut makes hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like it to do
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you have tried instead
+      description: Including settings under /config, and how far they got you.
+    validations:
+      required: false

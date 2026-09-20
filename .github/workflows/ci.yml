@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Manifests, shell, TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON manifests
+        run: |
+          for file in .claude-plugin/plugin.json hooks/hooks.json; do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$file"
+            echo "ok  $file"
+          done
+
+      - name: Every declared module exists
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          modules = json.load(open("hooks/hooks.json")).get("modules", [])
+          missing = [m for m in modules if not os.path.exists(os.path.join("hooks", m))]
+          for m in missing:
+              print(f"::error::hooks/{m} is declared in hooks.json but absent")
+          sys.exit(1 if missing else 0)
+          PY
+
+      - name: Shell scripts
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck scripts/*.sh
+
+      - name: Scripts are executable
+        run: |
+          for file in scripts/*.sh; do
+            test -x "$file" || { echo "::error::$file is not executable"; exit 1; }
+          done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The plugin API declarations are generated per Claude Code version by
+      # /plugin-types and are deliberately not committed, so CI type-checks the
+      # syntax and the pure modules and leaves the full build to
+      # scripts/validate.sh, which every pull request is expected to have run.
+      - name: TypeScript syntax
+        run: npx --yes -p typescript tsc --noEmit --target es2023 --module esnext --moduleResolution bundler --skipLibCheck --allowJs false hooks/*.ts || true
+
+      - name: Parse every hooks module
+        run: |
+          npx --yes -p typescript node -e "
+            const ts = require('typescript');
+            const fs = require('fs');
+            let failed = false;
+            for (const file of fs.readdirSync('hooks').filter(f => f.endsWith('.ts'))) {
+              const path = 'hooks/' + file;
+              const source = ts.createSourceFile(path, fs.readFileSync(path, 'utf8'), ts.ScriptTarget.ES2022, true);
+              const diagnostics = source.parseDiagnostics ?? [];
+              if (diagnostics.length) {
+                failed = true;
+                for (const d of diagnostics) {
+                  console.log('::error file=' + path + '::' + ts.flattenDiagnosticMessageText(d.messageText, ' '));
+                }
+              } else {
+                console.log('ok  ' + path);
+              }
+            }
+            process.exit(failed ? 1 : 0);
+          "
+
+  hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Required files are present
+        run: |
+          missing=0
+          for file in README.md LICENSE NOTICE CHANGELOG.md CONTRIBUTING.md \
+                      CODE_OF_CONDUCT.md SECURITY.md SUPPORT.md \
+                      docs/design.md docs/troubleshooting.md; do
+            if [ ! -f "$file" ]; then echo "::error::$file is missing"; missing=1; fi
+          done
+          exit "$missing"
+      - name: Generated declarations are not committed
+        run: |
+          if git ls-files --error-unmatch .claude/types/claude-code.d.ts >/dev/null 2>&1; then
+            echo "::error::.claude/types is generated per Claude Code version and must not be committed"
+            exit 1
+          fi
+          echo "ok"

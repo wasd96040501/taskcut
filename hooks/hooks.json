@@ -1,0 +1,4 @@
+{
+  "description": "Registers close_task, the tool the model calls when a sub-task is finished. Each call appends the conclusion the model wrote to a per-session ledger; at the end of that turn, if the context window has filled past the configured floor, a session.compact hook replaces the transcript with the human turns plus the ledger, without asking a summarizer. The engine's own threshold compaction is left in place as the safety net for a sub-task too large to finish, with the ledger passed to it as instructions.",
+  "modules": ["./register.ts"]
+}
