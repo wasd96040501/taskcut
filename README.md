@@ -68,8 +68,19 @@ already settled.
 
 ## Quickstart
 
+One line, using the GitHub CLI you are already signed in with (the repository is
+private, so the fetch has to carry credentials):
+
 ```bash
-git clone https://github.com/wasd96040501/taskcut.git
+bash <(gh api repos/wasd96040501/taskcut/contents/scripts/bootstrap.sh \
+         -H "Accept: application/vnd.github.raw")
+```
+
+That keeps a checkout at `~/.claude/src/taskcut` and runs the installer. Or clone
+it yourself:
+
+```bash
+gh repo clone wasd96040501/taskcut
 cd taskcut
 ./scripts/install.sh
 ```
@@ -97,7 +108,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /path/to/taskcut
 To remove it:
 
 ```bash
-./scripts/uninstall.sh
+~/.claude/src/taskcut/scripts/uninstall.sh   # or ./scripts/uninstall.sh from a checkout
 ```
 
 ## Configuration
