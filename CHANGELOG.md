@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a private or air-gapped checkout, instead of copying files into the skills
   directory.
 
+### Removed
+
+- `scripts/bootstrap.sh`. It existed to fetch an installer through the GitHub
+  CLI's credentials, on the assumption that a private repository could not be
+  reached by name. `claude plugin marketplace add <owner>/<repo>` clones with the
+  user's git credentials and works on a private repository unchanged, so the
+  workaround was solving a problem that does not exist.
+
 ### Added
 
 - A unit test suite for the pure modules, run by `scripts/test.sh` and in CI.

@@ -77,7 +77,10 @@ claude plugin install taskcut@taskcut --scope user      # your machine
 ```
 
 Updating is `claude plugin update taskcut@taskcut`; removing is
-`claude plugin uninstall taskcut@taskcut`.
+`claude plugin uninstall taskcut@taskcut`. `--scope` takes `user`, `project`
+(recorded in `.claude/settings.json`, shared with the team) or `local`
+(`.claude/settings.local.json`, just you). A private repository works the same
+way: the clone uses your git credentials.
 
 From a checkout instead — for a private or air-gapped copy, where the
 marketplace has to come from a local path:
