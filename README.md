@@ -110,10 +110,13 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 ```
 
 `floorPercent=0` is the part that matters for a demo. The default is 40: below
-that, taskcut records the conclusion and leaves the transcript alone, because
-working context still small enough to carry is worth more than the room a cut
-would free. A five-minute trial never gets near 40% of the window, so without
-this you would see nothing happen and reasonably conclude it was broken.
+that, taskcut records the conclusion and leaves the transcript alone, because a
+cut costs more prompt cache than it saves until the window has actually filled.
+A five-minute trial never gets near 40%, so without this you would see nothing
+happen and reasonably conclude it was broken. It is also the setting under which
+taskcut measurably loses money — see
+[docs/measurement.md](docs/measurement.md). Use it to watch the mechanism work,
+not as a default.
 
 Then, in the session, one sub-task at a time:
 
@@ -212,7 +215,7 @@ Every setting has a working default. Change them under `/config`, in the
 
 | Setting | Default | What it controls |
 | --- | --- | --- |
-| `floorPercent` | `40` | Context fill, as a percentage, below which a closed sub-task is recorded but no cut is made. Below the floor the working context is still small enough to carry, and a cut would trade all of it for the ledger alone. Set to `0` to cut at every boundary. |
+| `floorPercent` | `40` | Context fill, as a percentage, below which a closed sub-task is recorded but no cut is made. A cut re-caches the kept set at full price, measured at 12k–15k tokens, so below the floor it costs more than it saves. Set to `0` to cut at every boundary. |
 | `recentHumanTurns` | `2` | How many of the most recent human turns are kept beside the first one. Human turns are unbounded on a long run, so keeping all of them only moves the growth. |
 | `ledgerVerbatim` | `12` | How many closed sub-tasks stay in the model's own words. Past this, the oldest are folded into one rolled-up entry. |
 | `foldModel` | `haiku` | The model that folds them. An alias or a full id, resolved the way a `--model` value is. |
@@ -247,6 +250,10 @@ everything that can be reasoned about as plain data lives beside it.
   flag are module state. Claude Code loads a hooks module once per session
   process, so this holds today, but it is an assumption the API does not
   guarantee.
+* **A boundary costs an extra round-trip.** `close_task` is a registered tool,
+  and the model spends a `ToolSearch` call loading its schema before each use —
+  at every boundary, because the cut discards the message that carried it. One
+  extra request per sub-task. See [docs/measurement.md](docs/measurement.md).
 * **Early access.** The function-hooks API may change between Claude Code
   releases without notice. Re-run `scripts/validate.sh` after upgrading; it
   reports anything the engine would refuse before a session loads the plugin.
@@ -256,6 +263,8 @@ everything that can be reasoned about as plain data lives beside it.
 
 * [docs/design.md](docs/design.md) — why the cut is shaped this way, what was
   measured, and the constraints that produced each rule.
+* [docs/measurement.md](docs/measurement.md) — how to A/B the plugin against
+  itself, what the numbers mean, and what the first run measured.
 * [docs/troubleshooting.md](docs/troubleshooting.md) — what to check when
   nothing is being compacted.
 * [docs/compatibility.md](docs/compatibility.md) — what taskcut depends on, what

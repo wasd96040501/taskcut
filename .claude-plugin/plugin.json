@@ -29,7 +29,7 @@
     "floorPercent": {
       "type": "number",
       "title": "Compact above this context fill",
-      "description": "A compaction invalidates the prompt cache, so a cut is only worth making once the window has actually filled. Below this percentage a closed sub-task is recorded but the transcript is left alone. Set to 0 to cut at every boundary.",
+      "description": "A compaction invalidates the prompt cache, so a cut is only worth making once the window has actually filled: the kept set is re-cached at full price, measured at 12k-15k tokens. Below this percentage a closed sub-task is recorded but the transcript is left alone. Set to 0 to cut at every boundary.",
       "required": false,
       "default": 40
     },

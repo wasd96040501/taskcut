@@ -61,9 +61,9 @@ Neither can compact. Use a terminal session or `claude --bg`. See
 ### 4. Is the context still below the floor?
 
 `floorPercent` defaults to 40. Below that, a closed sub-task is recorded in the
-ledger and the transcript is deliberately left alone: the working context is
-still small enough to be worth carrying, and a cut would trade all of it for the
-ledger. The status line's `ctx N%` is the figure being compared. To cut at every boundary, set `floorPercent` to `0` under `/config`.
+ledger and the transcript is deliberately left alone, because a cut re-caches
+the kept set at full price and that costs more than a small transcript saves.
+The status line's `ctx N%` is the figure being compared. To cut at every boundary, set `floorPercent` to `0` under `/config`.
 
 ### 5. Is the model calling the tool?
 

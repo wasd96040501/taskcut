@@ -73,35 +73,37 @@ moved. Keeping the first plus the most recent `recentHumanTurns` pins it.
 
 ## The floor
 
-The floor is not an economic threshold, and it is worth saying so plainly,
-because the obvious argument for one does not survive the arithmetic. That
-argument runs: a compaction invalidates the prompt cache, so the next turn
-re-reads everything at full price, so a small context is not worth cutting.
+A compaction invalidates the prompt cache prefix, so the next turn re-reads at
+full price what it would otherwise have read cached. Below the floor that costs
+more than it saves. The measurement in
+[measurement.md](measurement.md) puts numbers on every part of that sentence.
 
-Write `P` for the transcript before a cut and `K` for the kept set. A cache read
-costs about a tenth of a base input token; a cache write about 1.25 of one. The
-kept set opens with the first human turn, unchanged and in its original
-position, so the system block, the tool definitions and that turn all still
-match the cached prefix — divergence starts after it. The turn following a cut
-therefore pays roughly `1.25·K` where it would have paid `0.1·P`. That is
-cheaper on the very turn the cut happens whenever `K` is under about 8% of `P`,
-and cheaper again on every turn after.
+What survives a cut is the system block and the tool definitions, and nothing
+else: `cache_read_input_tokens` on the first request after a cut was 26,791 —
+the same figure after each of four consecutive cuts. Everything past that
+breakpoint is written again. Write `S` for what survives, `K` for the kept set
+and `P` for the transcript before the cut. A cache write costs about 1.25 of a
+base input token and a cache read about 0.1, so the turn after a cut pays
+`0.1·S + 1.25·(K−S)` where it would have paid `0.1·P`, and it is repaid at
+`0.1·(P−K)` per turn after that.
 
-At the default floor the ratio is not close: a 200k window at 40% is 80k, against
-a kept set of the first turn, two recent turns and a bounded ledger — roughly 3k,
-under 4%. Even at 4% context fill, where a cut saves almost nothing, it costs
-almost nothing: a few hundred tokens more on the next turn, repaid by the one
-after. Cutting early is not expensive. It is merely pointless.
+`K−S` is larger than the keep-set rule suggests, because the kept set also
+carries the preamble the engine puts in front of every conversation, and that is
+re-cached in full on every cut. Measured at 11,968 → 14,720 across the four
+cuts, against a ledger contributing only 500–900 of the growth. With `S` =
+26,791 and `K−S` ≈ 12,000 the turn after a cut cost 17,639 where it would have
+cost 5,074: three and a half times more, repaid over about eleven requests.
 
-What the floor actually buys is fidelity. A cut trades the whole working context
-for the ledger, which holds the conclusions the model chose to write down and
-nothing else — not the file it read and did not mention, not the command whose
-output shaped a decision it recorded in one line. Early in a session that is a
-bad trade at any price, because what is being discarded is still small enough to
-carry. The floor is the point past which carrying it stops being free.
+End to end on that workload — four sub-tasks, context never past 8% — cutting at
+every boundary cost 1.73× the baseline. Per sub-task the cutting arm was flat at
+49,358 while the baseline was 28,368 and growing by about 2,200 each time, so
+the lines cross near the fourteenth sub-task. taskcut is a bet on the run being
+longer than that, and the floor is what keeps the bet off the table when it is
+not.
 
-This also sets the direction of the error. Too high a floor wastes context; too
-low a floor loses work. The default leans high.
+This sets the direction of the error, too. A floor set too high wastes context
+the session could have shed; set too low it spends real money flattening a
+transcript that was not a problem yet. The default leans high.
 
 `floorPercent` gates on `$.session.usage()`, whose `context.percent` is the same
 figure the status line shows. Below the floor the conclusion is still recorded —
