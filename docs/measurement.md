@@ -1,114 +1,204 @@
-# Measuring taskcut
+# What the benchmark has found
 
-taskcut is a bet: that flattening the transcript at sub-task boundaries costs
-less, over a long run, than letting it grow. A bet is worth measuring, and the
-measurement is not the obvious one. This page describes how to run it, what the
-numbers mean, and what the first run found.
+taskcut makes a bet: that clearing a sub-task's working context at the boundary
+leaves the model in better shape than letting the transcript grow. This page
+records what happened when that was checked. [eval/README.md](../eval/README.md)
+describes the harness; `make eval-list` runs it.
 
-## What not to measure
+Read the caveats first, because they bound everything below. **One run per
+cell.** Model behaviour varies enough that these show the shape of a difference,
+not its size, and the tool-call counts especially are small numbers. All runs
+are Claude Code 2.1.278 on Sonnet. Every cutting arm had `floorPercent` forced
+to `0`, because an arm that respects the floor makes no cuts on a run this short
+and measures nothing -- so the cost columns are the cost of cutting when cutting
+is not worth it, which is the case the floor exists to avoid.
 
-Tokens saved. Cutting is trivially good at saving tokens — the limit case, a
-cut that keeps nothing, saves all of them and is useless. The quantity that
-matters is the cost of finishing the work, and the failure mode that matters is
-the model redoing a sub-task it already closed.
+Three things are measured and never collapsed into a score, because taskcut
+wins some and loses others:
 
-## Where the numbers are
+* **cost** -- what the session spent
+* **context health** -- how much it was carrying while it worked
+* **fidelity** -- whether it could still answer afterwards, and at what price
 
-Every session writes a transcript to
-`~/.claude/projects/<slugified-cwd>/<session-id>.jsonl`. Each assistant record
-carries the usage block the API returned:
+## The runs
 
-```json
-"usage":{"input_tokens":2,"cache_creation_input_tokens":11968,
-         "cache_read_input_tokens":26791,"output_tokens":88}
+`synthetic` is ten generated modules that differ only where the probes look, so
+answering means telling one apart from nine near-duplicates. `flask` is eight
+modules of a real framework at ordinary sizes. Each was read one per sub-task,
+then ten (or eight) probes were asked with no hint about whether to use a tool.
+
+| workload | arm | weighted input | requests | context, first to last | ledger | correct | probes needing disk | tool calls |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| synthetic | off | 322,873 | 28 | 37,270 → 107,857 | — | 8/8 | 0/8 | 0 |
+| synthetic | boundary | 433,308 | 38 | 38,102 → **44,743** | 1,860 | 8/8 | **0/8** | 0 |
+| synthetic | directed | 501,844 | 46 | 37,319 → 51,513 | 3,311 | 8/8 | 6/8 | 6 |
+| flask | off | **195,279** | 26 | 38,122 → 69,975 | — | 10/10 | 0/10 | 0 |
+| flask | boundary | 482,953 | 41 | 37,445 → 62,792 | 5,872 | 10/10 | 5/10 | 8 |
+| flask | directed | 424,574 | 47 | 38,171 → **55,313** | 3,090 | 10/10 | 10/10 | 20 |
+
+"Weighted input" is in base-input-token equivalents: `input + 1.25 × cache
+write + 0.1 × cache read`. "Context" is cache read plus cache write on the
+first request of a turn -- both, because a cut invalidates the cache and most
+of what a cutting arm carries arrives as a write. "Ledger" is the size the
+ledger had grown to by the end.
+
+## 1. Nothing ever lost a fact
+
+Every arm answered every probe correctly, on both workloads. No cut, however
+aggressive, produced a wrong answer. What changed was never accuracy; it was
+what the answer cost.
+
+This is worth stating plainly because it is the failure everyone expects from
+compaction and it did not happen. The risk a cut carries is not that the model
+is misinformed. It is that the model has to go and look again.
+
+## 2. Context health: the ledger is the whole story
+
+taskcut does what it claims. It also claims much less than it looks like it
+claims, and the difference is the ledger.
+
+    synthetic  off       37,270 → 45,309 → 52,221 → ... → 107,857
+    synthetic  boundary  38,102 → 38,511 → 39,216 → ... →  44,743
+
+The baseline climbs by roughly a file per sub-task and does not stop. The
+cutting arm climbs by a ledger entry. Over ten sub-tasks that is 107,857
+against 44,743: **59% less context** at the end, for identical answers.
+
+On real code the same mechanism produces almost nothing:
+
+| | ledger at the end | per entry | material per file | context saved |
+| --- | --- | --- | --- | --- |
+| synthetic | 1,860 | ~186 | ~6,900 | 59% |
+| flask | 5,872 | ~652 | ~4,000 | 10% |
+
+A cut replaces the working context with the ledger, so the saving is the
+difference between them. The synthetic modules are 140 near-identical functions
+and one planted fact: there is almost nothing to say about one, so the entry is
+tiny and the cut is nearly free. A Flask module has a great deal to say, the
+entry says it, and the cut buys 10%.
+
+**Whether taskcut helps is not a property of taskcut. It is a property of how
+compressible the work is.** Nothing in the design changes that, and a run whose
+sub-tasks each produce a page of genuine findings will see the ledger grow into
+the problem the cuts were meant to solve.
+
+## 3. The working model hoards, and the hoarding is load-bearing
+
+`close_task` tells the model that only what it writes will survive. It answers
+by writing down everything it noticed, including what nobody asked for:
+
+> The last function defined in mod00.py is `flush_pending(ctx)`. […] Other
+> things in the file: it imports `collections` and `itertools`; it defines the
+> constant `RETRY_BUDGET = 4011` between `handler_061` and `tenant_062`; and it
+> has a stray comment `# owner: ravi` between `tenant_093` and `buffer_094`.
+
+`RETRY_BUDGET` and the owner comment were never asked for during the work. They
+are two of the three incidental probes. The boundary arm answered them from the
+ledger without touching the disk, because the model had defensively written them
+down against exactly that possibility.
+
+That instinct is the reason the synthetic boundary arm needed zero disk trips
+while holding 59% less context. It is also why its entries are larger than a
+conclusion needs to be. The two are the same behaviour.
+
+## 4. Directed extraction: smaller ledger, more re-reading
+
+`ledgerMode: directed` throws away the working model's conclusion and has the
+fold model write the entry from the transcript being dropped. The hypothesis was
+that a writer who sees the work and knows the job would keep less and keep
+better.
+
+It keeps less. It does not keep better.
+
+| flask | ledger | context at the end | probes needing disk | tool calls |
+| --- | --- | --- | --- | --- |
+| boundary | 5,872 | 62,792 (−10%) | 5/10 | 8 |
+| directed | 3,090 (−47%) | 55,313 (−21%) | **10/10** | **20** |
+
+The ledger halves and the context saving doubles. Every probe then goes back to
+disk -- including all five **headline** facts, the ones the model was explicitly
+asked for while it worked. A smaller record bought more looking, and the
+accounting came out worse: 47 requests against 41, and 20 tool calls against 8.
+
+On the synthetic workload it loses on every axis at once: a *larger* ledger
+(3,311 against 1,860) because a small model given latitude fills it with
+`## Summary for Continuation` and `## Next Steps` headings, and six disk trips
+where the boundary arm needed none.
+
+Two things were ruled out as explanations.
+
+**It is not the prompt being too prescriptive.** The extractor's prompt states
+the situation and stops -- no list of what to keep or drop -- deliberately, so
+that the model's own judgement is what is being tested rather than a checklist.
+
+**It is not the misaimed standing task**, though that was a real bug found here
+and fixed. The first version told the extractor that the first human turn *was*
+the standing task; in a session that opens by asking for the first step it is
+that step, and the extractor duly wrote entries saying "The standing task is
+complete - no further action needed" and "Immediate Task: Sub-task 1. Action
+required: run `cat mod00.py`" -- an instruction to redo a sub-task the same
+ledger had marked closed. That is fixed, the extractor is now told it cannot
+know which it has, and re-running changed the outcome very little: flask went
+from 10 disk trips to 10, synthetic from 8 to 6.
+
+What is left is structural. Asked to write what a continuation needs, a model
+writes a summary: fluent, well organised, and about the work rather than made of
+it. Constants, paths and identifiers are exactly what a summary drops, and they
+are exactly what the next question asks for. The working model's inventory reads
+worse and holds more.
+
+`directed` ships, defaulting off, because a smaller ledger is a real trade for
+someone whose binding constraint is context and whose files are cheap to re-read.
+On this evidence that is a narrow case.
+
+## 5. What a cut costs
+
+A compaction invalidates the prompt cache past the tool definitions. Measured
+over four consecutive cuts, `cache_read_input_tokens` on the first request after
+a cut was **26,791 every time** -- what survives is the system block and the
+tool definitions, and nothing else.
+
+Everything past that is written again, and the kept set is bigger than the
+keep-set rule suggests: `cache_creation_input_tokens` on the same request ran
+11,968 → 14,720. The first human turn, two recent turns and the ledger are a
+small part of it; most is the preamble the engine puts in front of every
+conversation, re-cached on every cut.
+
+Writing a token costs about 1.25 of a base input token and reading a cached one
+about 0.1. So the turn after a cut pays `0.1·S + 1.25·(K−S)` where it would have
+paid `0.1·P`. With S = 26,791 and K−S ≈ 12,000 that is 17,639 against 5,074:
+three and a half times more, repaid at `0.1·(P−K)` per turn afterwards.
+
+End to end at `floorPercent=0`, cutting cost **1.34×** the baseline on synthetic
+and **2.47×** on flask. Both are the correct answer for runs whose context never
+passed 8% of the window. Per sub-task the earlier four-sub-task run measured the
+cutting arm flat at 49,358 against a baseline of 28,368 growing by about 2,200,
+which crosses near the fourteenth sub-task.
+
+**taskcut is a bet on the run being long. The floor is what keeps the bet off
+the table when it is not.**
+
+## 6. Two costs that are not in the table
+
+**A boundary costs an extra round-trip.** `close_task` is a registered tool and
+the model spends a `ToolSearch` call loading its schema before each use -- at
+every boundary, not just the first, because the cut discards the message that
+carried it. One extra request per sub-task, caused by taskcut and paid for by
+taskcut.
+
+**The model keeps closing tasks after the work is over.** After eight sub-tasks
+of being asked to call `close_task`, the flask boundary arm went on calling it
+during the probe phase, so cuts kept happening once there was nothing left to
+cut. This is what produced 17 ledger messages for 9 closed sub-tasks.
+
+## Reproducing
+
+```bash
+make eval-run WORKLOAD=flask ARM=off
+make eval-run WORKLOAD=flask ARM=boundary
+make eval-run WORKLOAD=flask ARM=directed
+make eval-report
 ```
 
-This is the only honest source. The status line rounds, and adding the three
-input counters together bills cached tokens at full price, which overstates a
-long session by four or five times.
-
-`scripts/measure.py` reads one or two transcripts and prints a per-request
-table plus a weighted total in base-input-token equivalents, using the
-published cache multipliers — a cache write costs about 1.25 of a base input
-token, a cache read about 0.1:
-
-```
-weighted = input_tokens + 1.25 * cache_creation + 0.1 * cache_read
-```
-
-It deduplicates by request id first, because a streamed assistant message is
-recorded several times and every copy carries the same usage block.
-
-## Running an A/B
-
-`TASKCUT=1` and `TASKCUT=0` switch the plugin on and off without changing
-anything else on the machine, which makes a clean pair of arms.
-
-1. Pick a task with several genuine sub-tasks, from a fixed starting commit.
-2. Run it in a terminal session with `TASKCUT=1`, asking the model to call
-   `close_task` at each boundary.
-3. Run the same task, in a different directory so it gets its own transcript,
-   with `TASKCUT=0` and no mention of `close_task` — that is what a session
-   without the plugin actually looks like.
-4. `scripts/measure.py <on>.jsonl <off>.jsonl`.
-
-Run each arm several times. Model behaviour varies enough that a single pair
-tells you the shape of the difference, not its size.
-
-## What to read off it
-
-| Signal | Where | What it says |
-| --- | --- | --- |
-| Weighted input per completed task | `measure.py` total | The headline. The denominator has to be *completed*, not turns spent. |
-| `cache_read` trend | the per-request table | Baseline climbs every turn; a cutting arm resets at each boundary. This is the whole mechanism, visible directly. |
-| `cache_creation` after a cut | first request following a ledger message | What the cut costs. It is larger than the kept set looks, because the per-session preamble is re-cached in full every time. |
-| Engine auto-compactions | summary records in the transcript | taskcut aims to drive these to zero. |
-| Rework | repeated `(tool, principal argument)` pairs after a cut | The failure that undoes every saving. A closed sub-task being read or run again is the signal. |
-| `close_task` density | `boundaries` count | Too dense and the model is amnesiac; too sparse and the plugin is inert. |
-
-## First run
-
-Four sub-tasks, each reading a 661-line file and reporting one fact from it.
-One arm with `floorPercent` forced to `0` so that every boundary cut; one
-baseline with the plugin off. Claude Code 2.1.278, Opus 5 (1M context).
-
-| | cut at every boundary | baseline |
-| --- | --- | --- |
-| Weighted input | **210,408** | **121,602** |
-| `cache_read` | 695,211 | 510,920 |
-| `cache_creation` | 112,682 | 56,394 |
-| Output | 3,552 | 1,086 |
-| Requests | 17 | 9 |
-| Peak context | 5% | 8% |
-
-The cutting arm cost **1.73×** the baseline. That is the right answer for that
-workload, and it is the case the floor exists to avoid: context fill never
-passed 8%, and the default floor of 40 would have made no cut at all.
-
-Three things the run established:
-
-**What survives a cut is the system block and the tool definitions, and nothing
-else.** `cache_read` on the first request after a cut was 26,791 — the identical
-figure after all four cuts. The kept set beyond that breakpoint is written
-again in full.
-
-**The kept set is bigger than it looks.** `cache_creation` on that request ran
-11,968 → 14,720 across the four cuts. The first human turn, two recent turns and
-the ledger are a small part of it; most of it is the preamble the engine puts in
-front of every conversation, which is re-cached on every cut. The ledger itself
-accounts for the growth of roughly 500–900 a cut.
-
-**The lines cross around the fourteenth sub-task.** Per sub-task the cutting arm
-cost 49,358 and did not grow; the baseline cost 28,368 and grew by about 2,200
-each time, as its `cache_read` climbed 26,791 → 36,690 → 49,451 → 60,609 →
-71,867 → 83,050. Flat beats climbing, but not immediately.
-
-## A cost the run exposed
-
-`close_task` is a registered tool, and in this build the model has to spend a
-`ToolSearch` round-trip to load its schema before it can call it. It did so at
-every one of the four boundaries, not just the first: the cut discards the
-assistant message that carried the schema, so the next boundary has to fetch it
-again. One extra request per sub-task, caused by taskcut and paid for by
-taskcut. This is a property of the current deferred-tool mechanism rather than
-of the design, but it is real and it is on the wrong side of the ledger.
+`eval/results/runs.json` holds the numbers above in machine-readable form.
+Transcripts are not committed: they are large and full of absolute paths.

@@ -46,6 +46,98 @@
    "requests": 41,
    "weighted_input": 482953
   },
+  "directed": {
+   "cache_read": 2060499,
+   "cache_write": 174717,
+   "context_first": 38171,
+   "context_last": 55313,
+   "context_peak": 55313,
+   "context_series": [
+    38171,
+    38743,
+    39694,
+    40577,
+    41614,
+    42615,
+    43776,
+    45215,
+    46602,
+    47669,
+    48493,
+    49318,
+    50230,
+    51072,
+    52226,
+    52935,
+    54087,
+    55313
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 13,
+     "went_to_disk": 5
+    },
+    "incidental": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 7,
+     "went_to_disk": 5
+    }
+   },
+   "ledger_messages": 15,
+   "ledger_tokens": 3090,
+   "output": 13053,
+   "requests": 47,
+   "weighted_input": 424574
+  },
+  "directed-misaimed": {
+   "cache_read": 1903809,
+   "cache_write": 173392,
+   "context_first": 38171,
+   "context_last": 54523,
+   "context_peak": 54523,
+   "context_series": [
+    38171,
+    38522,
+    39262,
+    40141,
+    41165,
+    42537,
+    44064,
+    45724,
+    47610,
+    48166,
+    48891,
+    49248,
+    50384,
+    50858,
+    51888,
+    52213,
+    53011,
+    54523
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 8,
+     "went_to_disk": 5
+    },
+    "incidental": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 5,
+     "went_to_disk": 5
+    }
+   },
+   "ledger_messages": 15,
+   "ledger_tokens": 3384,
+   "output": 11019,
+   "requests": 44,
+   "weighted_input": 407243
+  },
   "off": {
    "cache_read": 1449801,
    "cache_write": 40170,
@@ -141,6 +233,52 @@
    "weighted_input": 433308
   },
   "directed": {
+   "cache_read": 1961766,
+   "cache_write": 244435,
+   "context_first": 37319,
+   "context_last": 51513,
+   "context_peak": 51513,
+   "context_series": [
+    37319,
+    38606,
+    39238,
+    40034,
+    40999,
+    42130,
+    43312,
+    44589,
+    46023,
+    47541,
+    49182,
+    49688,
+    49906,
+    50295,
+    50525,
+    51150,
+    51368,
+    51513
+   ],
+   "fidelity": {
+    "headline": {
+     "asked": 5,
+     "correct": 5,
+     "tool_calls": 3,
+     "went_to_disk": 3
+    },
+    "incidental": {
+     "asked": 3,
+     "correct": 3,
+     "tool_calls": 3,
+     "went_to_disk": 3
+    }
+   },
+   "ledger_messages": 19,
+   "ledger_tokens": 3311,
+   "output": 6902,
+   "requests": 46,
+   "weighted_input": 501844
+  },
+  "directed-misaimed": {
    "cache_read": 2018017,
    "cache_write": 236617,
    "context_first": 37310,

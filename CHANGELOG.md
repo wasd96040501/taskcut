@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A benchmark, in `eval/`, and a `Makefile` to drive it. It is built along four
+  axes that do not know about each other -- workload, arm, transcript, metric --
+  so adding a workload is adding a JSON file and adding a metric is adding a
+  pure function. Two workloads ship: ten generated near-identical modules, which
+  isolate interference from window fill, and eight modules of Flask at ordinary
+  sizes. Probes are split into facts the work asked for and facts it did not,
+  because only the second kind is what a cut actually throws away.
+- `ledgerMode`. Under the default, `outcome`, a ledger entry is the conclusion
+  the working model wrote at `close_task`. Under `directed` that is discarded
+  and `foldModel` writes the entry from the transcript being dropped. What each
+  one costs is measured in [docs/measurement.md](docs/measurement.md); the
+  default is the default for a reason.
+
+### Fixed
+
+- The pending-boundary flag is read and cleared before anything that can throw.
+  A turn that failed after `close_task` had run left it set, and the next turn
+  to complete inherited a cut it had not earned -- discarding the transcript
+  that explained the failure.
+- The directed extractor is no longer told that the first human turn is the
+  standing task. In a session that opens by asking for the first step it is that
+  step, and a benchmark run produced a ledger entry instructing the model to
+  redo a sub-task the same ledger had marked closed.
+
+### Changed
+
+- The floor's justification in the documentation is now the measured one. It had
+  been corrected to a fidelity argument on the strength of arithmetic that
+  assumed a kept set of about 3k tokens; the measurement says the kept set
+  carries a per-session preamble of 12k-15k that is re-cached on every cut, so
+  the original prompt-cache argument was right after all.
+
+
 ## [0.2.0] - 2026-09-20
 
 ### Changed

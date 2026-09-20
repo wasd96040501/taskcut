@@ -28,9 +28,11 @@ that survives.
 At the end of that turn, if the context window has filled past a configurable
 floor, taskcut compacts the conversation itself. The replacement transcript is:
 
-* every human turn, kept **verbatim** by its engine handle — nothing the person
-  said is ever paraphrased, and the turn that set the standing task is always
-  among them;
+* the human turns it keeps, **verbatim** by their engine handles — nothing the
+  person said is ever paraphrased. The first one is always among them, because
+  nothing else records what the job is for, and so are the most recent
+  `recentHumanTurns`; the rest are dropped, because human turns are unbounded
+  on a long run and keeping all of them only moves the growth;
 * one message holding the ledger of closed sub-tasks and their conclusions.
 
 No summariser runs. The cut is a deterministic function of the transcript, so it
@@ -55,6 +57,26 @@ The engine's own threshold compaction stays in place as the safety net for a
 sub-task too large to reach a boundary. taskcut does not intercept it; it only
 hands the summariser the ledger, so the model is not asked to re-derive what is
 already settled.
+
+## What it is worth
+
+Measured against the same work with the plugin switched off
+([docs/measurement.md](docs/measurement.md)):
+
+* **Context stops climbing.** Ten sub-tasks of generated modules ended at 44,743
+  tokens of context instead of 107,857 — 59% less, with every probe still
+  answered correctly and without going back to disk once.
+* **How much less depends entirely on how compressible the work is.** The same
+  ten sub-tasks against real framework source saved 10%, because a real module
+  needs a great deal more said about it and the ledger grew accordingly. This is
+  not a property of taskcut; it is a property of the job.
+* **Accuracy never moved.** Across six runs and two workloads, no arm ever
+  answered a probe wrongly. What a cut costs is re-reading, not correctness.
+* **A cut is not free.** With the floor forced to zero it cost 1.34× to 2.47×
+  the baseline on runs whose context never passed 8% of the window — which is
+  exactly the case the floor exists to avoid.
+
+One run per cell, on Sonnet. These show the shape of a difference, not its size.
 
 ## Requirements
 
@@ -219,7 +241,7 @@ Every setting has a working default. Change them under `/config`, in the
 | `recentHumanTurns` | `2` | How many of the most recent human turns are kept beside the first one. Human turns are unbounded on a long run, so keeping all of them only moves the growth. |
 | `ledgerVerbatim` | `12` | How many closed sub-tasks stay in the model's own words. Past this, the oldest are folded into one rolled-up entry. |
 | `foldModel` | `haiku` | The model that folds them. An alias or a full id, resolved the way a `--model` value is. |
-| `ledgerMode` | `outcome` | Who writes a ledger entry. `outcome` keeps the conclusion the working model wrote at `close_task`. `directed` throws that away and has `foldModel` write the entry from the transcript the cut is dropping, aimed at the standing task: one small-model call per cut, out of band. See [docs/measurement.md](docs/measurement.md) for what each one keeps. |
+| `ledgerMode` | `outcome` | Who writes a ledger entry. `outcome` keeps the conclusion the working model wrote at `close_task`. `directed` throws that away and has `foldModel` write the entry from the transcript being dropped: one small-model call per cut, out of band. Measured, `directed` halves the ledger and doubles the re-reading — it is off by default for that reason. See [docs/measurement.md](docs/measurement.md). |
 
 ## How it is put together
 
