@@ -40,6 +40,8 @@
      "went_to_disk": 4
     }
    },
+   "ledger_messages": 17,
+   "ledger_tokens": 5872,
    "output": 18933,
    "requests": 41,
    "weighted_input": 482953
@@ -84,6 +86,8 @@
      "went_to_disk": 0
     }
    },
+   "ledger_messages": 0,
+   "ledger_tokens": 0,
    "output": 3341,
    "requests": 26,
    "weighted_input": 195279
@@ -130,6 +134,8 @@
      "went_to_disk": 0
     }
    },
+   "ledger_messages": 19,
+   "ledger_tokens": 1860,
    "output": 7394,
    "requests": 38,
    "weighted_input": 433308
@@ -174,6 +180,8 @@
      "went_to_disk": 0
     }
    },
+   "ledger_messages": 0,
+   "ledger_tokens": 0,
    "output": 2019,
    "requests": 28,
    "weighted_input": 322873

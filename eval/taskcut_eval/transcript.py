@@ -55,10 +55,15 @@ class Turn:
 class Transcript:
     path: Path
     turns: list[Turn] = field(default_factory=list)
-    #: Ledger messages seen. A cut rewrites the whole message list, so an earlier
-    #: cut's message is recorded again by the next one: this is an upper bound on
-    #: the number of cuts, not the number itself.
-    ledger_messages: int = 0
+    #: Every ledger message seen, in order. A cut rewrites the whole message
+    #: list, so an earlier cut's message is recorded again by the next one: the
+    #: count is an upper bound on the number of cuts, not the number itself.
+    #: The last one is the ledger as it finally stood.
+    ledgers: list[str] = field(default_factory=list)
+
+    @property
+    def ledger_messages(self) -> int:
+        return len(self.ledgers)
 
     @property
     def requests(self) -> list[Request]:
@@ -116,7 +121,7 @@ def load(path: str | Path) -> Transcript:
                 continue  # the answer half of a tool call, not a human turn
             text = text.strip()
             if text.startswith(LEDGER_OPENING):
-                out.ledger_messages += 1
+                out.ledgers.append(text)
                 continue
             current = Turn(prompt=text)
             out.turns.append(current)

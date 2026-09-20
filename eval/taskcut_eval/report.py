@@ -41,8 +41,9 @@ def context_table(runs: list[Run]) -> str:
             f"{run.peak_context:,}",
             f"{run.mean_context:,.0f}",
             f"{run.prefix[-1]:,}" if run.prefix else "-",
+            f"{run.ledger:,}" if run.ledger else "-",
         ])
-    return table(["arm", "first turn", "peak", "mean", "last turn"], rows)
+    return table(["arm", "first turn", "peak", "mean", "last turn", "ledger"], rows)
 
 
 def fidelity_table(runs: list[Run]) -> str:

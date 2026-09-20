@@ -118,6 +118,8 @@ def _numbers(run) -> dict:
         "context_peak": run.peak_context,
         "context_last": run.prefix[-1] if run.prefix else 0,
         "context_series": run.prefix,
+        "ledger_tokens": run.ledger,
+        "ledger_messages": run.ledger_messages,
         "fidelity": {
             kind: {
                 "asked": f.asked,

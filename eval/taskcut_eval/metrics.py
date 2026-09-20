@@ -68,6 +68,22 @@ def prefix_series(transcript: Transcript) -> list[int]:
     return [turn.requests[0].read + turn.requests[0].write for turn in transcript.turns if turn.requests]
 
 
+#: Characters per token, near enough for a ratio. The exact figure varies with
+#: the text; nothing here turns on the third digit.
+CHARS_PER_TOKEN = 4
+
+
+def ledger_tokens(transcript: Transcript) -> int:
+    """How big the ledger had grown by the end, in tokens.
+
+    This is the variable that decides whether a cut is worth anything. A cut
+    replaces the working context with the ledger, so the saving is the
+    difference between them: a ledger that approaches the size of the material
+    it stands for saves nothing, however faithfully it was written.
+    """
+    return len(transcript.ledgers[-1]) // CHARS_PER_TOKEN if transcript.ledgers else 0
+
+
 @dataclass(frozen=True)
 class ProbeResult:
     id: str
@@ -146,6 +162,10 @@ class Run:
     cost: Cost
     prefix: list[int]
     probes: list[ProbeResult]
+    #: Tokens the ledger had grown to by the end; zero for an arm that never cut.
+    ledger: int
+    #: Ledger messages recorded, an upper bound on the number of cuts.
+    ledger_messages: int
 
     @property
     def fidelity(self) -> dict[str, Fidelity]:
@@ -167,4 +187,6 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         cost=cost(transcript),
         prefix=prefix_series(transcript),
         probes=probe_results(transcript, workload),
+        ledger=ledger_tokens(transcript),
+        ledger_messages=transcript.ledger_messages,
     )
