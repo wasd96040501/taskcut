@@ -19,6 +19,8 @@ wins some and loses others:
 * **cost** -- what the session spent
 * **context health** -- how much it was carrying while it worked
 * **fidelity** -- whether it could still answer afterwards, and at what price
+* **work** -- whether what it built holds together, for the workloads that
+  build something
 
 ## The runs
 
@@ -151,7 +153,42 @@ worse and holds more.
 someone whose binding constraint is context and whose files are cheap to re-read.
 On this evidence that is a narrow case.
 
-## 5. What a cut costs
+## 5. On work, rather than on recall
+
+Everything above asks the model to read and then answer. That is the easiest
+thing it does, and scoring 100% at it says less than it looks like it says. The
+`build` workload asks for work instead: ten steps constructing a package, with
+a public contract changed at step seven -- `event_ts` becomes `occurred_at`,
+everywhere -- and three rules set once in an opening briefing and never
+repeated. Nothing the model says afterwards counts. The grade is ten assertions
+run against what it produced.
+
+| | off | boundary |
+| --- | --- | --- |
+| Acceptance checks | **10/10** | **10/10** |
+| Weighted input | 282,552 | 573,747 |
+| Requests | 38 | 54 |
+| Context, first to last | 38,337 → 82,155 | 38,381 → 59,475 |
+| Peak, as a share of the window | 41% | 30% |
+| Ledger | — | 6,978 |
+
+Both packages import, parse the fixture, aggregate exactly the four hundred
+good lines, pass their own tests and run from the command line. Both applied
+the step-seven rename completely. Both kept all three briefing rules: a
+docstring on every module, no bare exception raised anywhere, and exactly one
+definition of the shared record type. The work is indistinguishable. taskcut
+carried 28% less context to do it and spent 2.03× as much.
+
+One correction belongs here, because it nearly became a finding. The
+integration check first failed on both arms identically, at 401 lines instead
+of 400, with an unexpected `NOTALEVEL` bucket. Both arms were right: the
+briefing gives level checking to `validate` and tells `parse_line` only to
+reject a malformed line, and the reference implementation the check had been
+verified against had quietly encoded a stricter reading than the brief
+supports. A check verified against one implementation is verified against one
+opinion.
+
+## 6. What a cut costs
 
 A compaction invalidates the prompt cache past the tool definitions. Measured
 over four consecutive cuts, `cache_read_input_tokens` on the first request after
@@ -178,7 +215,7 @@ which crosses near the fourteenth sub-task.
 **taskcut is a bet on the run being long. The floor is what keeps the bet off
 the table when it is not.**
 
-## 6. Two costs that are not in the table
+## 7. Two costs that are not in the table
 
 **A boundary costs an extra round-trip.** `close_task` is a registered tool and
 the model spends a `ToolSearch` call loading its schema before each use -- at
