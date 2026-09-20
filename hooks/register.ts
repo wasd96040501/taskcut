@@ -19,7 +19,16 @@
 import type { EngineInterface, Register, SessionMessage } from 'claude-code'
 
 import { readConfig, type Config } from './config'
-import { boundedHumanTurns, foldPrompt, foldedEntry, planFold, renderLedger, type Entry } from './ledger'
+import {
+  LEDGER_PREFIX,
+  boundedHumanTurns,
+  foldPrompt,
+  foldedEntry,
+  planFold,
+  renderLedger,
+  staleLedgerKeys,
+  type Entry,
+} from './ledger'
 
 /** Set by the `close_task` handler, read and cleared at the end of the turn. */
 let boundaryReached = false
@@ -39,6 +48,24 @@ async function readLedger($: EngineInterface): Promise<Entry[]> {
 
 async function writeLedger($: EngineInterface, ledger: readonly Entry[]): Promise<void> {
   await $.store.set(await ledgerKey($), ledger)
+}
+
+/**
+ * Drops ledgers left behind by sessions that never ended cleanly. `session.end`
+ * handles the ordinary case; a killed session never reaches it, and the plugin
+ * store has a hard size limit, so the leftovers have to be swept from somewhere.
+ */
+async function sweepStaleLedgers($: EngineInterface): Promise<void> {
+  const keys = (await $.store.keys()).filter((key) => key.startsWith(LEDGER_PREFIX))
+  if (keys.length === 0) return
+  const entriesByKey = new Map<string, Entry[]>()
+  for (const key of keys) {
+    entriesByKey.set(key, ((await $.store.get(key)) as Entry[] | undefined) ?? [])
+  }
+  const current = await ledgerKey($)
+  for (const key of staleLedgerKeys(entriesByKey, current, await $.clock.now())) {
+    await $.store.delete(key)
+  }
 }
 
 /**
@@ -79,6 +106,7 @@ export const register: Register = (on, options) => {
         required: ['task', 'outcome'],
       },
     })
+    await sweepStaleLedgers($)
     return result
   })
 

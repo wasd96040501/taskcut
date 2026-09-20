@@ -14,7 +14,7 @@ jobs:
     name: Manifests, shell, TypeScript
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate JSON manifests
         run: |
@@ -45,7 +45,7 @@ jobs:
             test -x "$file" || { echo "::error::$file is not executable"; exit 1; }
           done
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
 
@@ -82,7 +82,7 @@ jobs:
     name: Repository hygiene
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Required files are present
         run: |
           missing=0

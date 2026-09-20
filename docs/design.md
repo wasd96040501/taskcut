@@ -101,6 +101,16 @@ Two details are load-bearing:
   An early version omitted it and the model reported the closed sub-task as
   outstanding.
 
+### Cleaning up after a session
+
+`session.end` deletes the session's ledger, which covers a session that exits
+cleanly. A session that is killed never reaches that hook — driving Claude Code
+over a pty and closing the pty leaves the ledger behind, which is how this was
+found — and the plugin store has a hard size limit, so leftovers cannot simply
+accumulate. `session.start` therefore sweeps ledgers whose newest entry is more
+than a week old. The current session's own key is never swept, however old its
+newest entry is.
+
 ## What is left to the engine
 
 The engine's own threshold compaction stays in place. A sub-task can be too large

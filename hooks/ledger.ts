@@ -66,6 +66,33 @@ export function renderLedger(ledger: readonly Entry[]): string {
   ].join('\n')
 }
 
+/** How long a ledger left behind by a session that never ended cleanly is kept. */
+export const STALE_LEDGER_MS = 7 * 24 * 60 * 60 * 1000
+
+/** The store key prefix every ledger is written under. */
+export const LEDGER_PREFIX = 'ledger:'
+
+/**
+ * Which stored ledgers to drop. `session.end` removes a ledger when a session
+ * exits cleanly, but a session that is killed never reaches it, and the plugin
+ * store has a hard size limit: without a sweep, a machine that loses sessions
+ * abruptly accumulates ledgers until writes start failing. The current session's
+ * own key is never swept, however old its newest entry is.
+ */
+export function staleLedgerKeys(
+  entriesByKey: ReadonlyMap<string, readonly Entry[]>,
+  currentKey: string,
+  now: number,
+): string[] {
+  const stale: string[] = []
+  for (const [key, entries] of entriesByKey) {
+    if (key === currentKey || !key.startsWith(LEDGER_PREFIX)) continue
+    const newest = entries.reduce((max, entry) => Math.max(max, entry.at), 0)
+    if (now - newest > STALE_LEDGER_MS) stale.push(key)
+  }
+  return stale
+}
+
 /**
  * A user message that carries tool_result blocks is the answer to the assistant
  * message that made the calls. Dropping one half of that pair leaves a
