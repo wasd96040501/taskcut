@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pass-through of the engine's own threshold compaction, with the ledger handed
   to the summariser as instructions, as the safety net for a sub-task too large
   to reach a boundary.
+- `scripts/install.sh --opt-in`, which installs taskcut switched off for every
+  session so that repositories enable it individually, and a "Controlling where
+  it runs" section documenting both switches.
 - Ledger cleanup on `session.end`, and a sweep at `session.start` for ledgers
   left behind by sessions that were killed before they could end cleanly. The
   plugin store has a hard size limit, so leftovers cannot be allowed to

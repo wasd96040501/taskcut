@@ -3,18 +3,27 @@
 # Installs taskcut into the Claude Code skills directory, where it is loaded
 # automatically from the next session on.
 #
-# Usage: ./scripts/install.sh [--dir <claude-config-dir>]
+# Usage: ./scripts/install.sh [--opt-in] [--dir <claude-config-dir>]
+#
+#   --opt-in  Install, then switch taskcut off for every session, so that it
+#             runs only in the repositories that enable it themselves. Leaves
+#             "taskcut@skills-dir": false in the user settings; a repository
+#             turns it on with `claude plugin enable taskcut@skills-dir
+#             --scope project` (shared with the team) or `--scope local`
+#             (just you).
 
 set -euo pipefail
 
 REQUIRED_VERSION="2.1.278"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+OPT_IN=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    --opt-in) OPT_IN=1; shift ;;
     --dir) CLAUDE_DIR="$2"; shift 2 ;;
-    -h|--help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "install.sh: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -64,6 +73,14 @@ else
   fail "validation failed; nothing will load"
 fi
 rm -f /tmp/taskcut-validate.$$
+
+if [ "$OPT_IN" -eq 1 ]; then
+  if claude plugin disable taskcut@skills-dir --scope user >/dev/null 2>&1; then
+    info "Switched off for every session; repositories opt in individually"
+  else
+    info "Could not switch it off automatically; see 'Controlling where it runs' in the README"
+  fi
+fi
 
 cat <<'NEXT'
 

@@ -25,6 +25,20 @@ You want `Status: ✔ loaded`. If the plugin is absent, check that
 plugin added to the skills directory is picked up from the **next** session, not
 the running one.
 
+### 2b. Is it enabled in *this* repository?
+
+```bash
+claude plugin list | grep -A5 taskcut
+```
+
+If it reads `Status: ✘ disabled`, taskcut was installed with `--opt-in` and this
+repository has not turned it on:
+
+```bash
+claude plugin enable taskcut@skills-dir --scope project   # shared with the team
+claude plugin enable taskcut@skills-dir --scope local     # just you
+```
+
 ### 3. Is the session interactive?
 
 ```

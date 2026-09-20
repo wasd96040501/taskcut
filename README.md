@@ -111,6 +111,84 @@ To remove it:
 ~/.claude/src/taskcut/scripts/uninstall.sh   # or ./scripts/uninstall.sh from a checkout
 ```
 
+## Controlling where it runs
+
+taskcut has two independent switches. Both have to be on for anything to happen,
+which makes the blast radius easy to reason about.
+
+### 1. The master switch
+
+Function hooks are early access and off by default. Without
+`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, taskcut still shows as installed in
+`claude plugin list`, but its hooks module is never loaded: the `close_task` tool
+does not exist and no hook runs.
+
+| | `mcp__taskcut__close_task` offered? |
+| --- | --- |
+| `claude` | no |
+| `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude` | yes |
+
+So the narrowest possible setup is to export nothing and keep an alias for the
+sessions where you want it:
+
+```bash
+alias cct='CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude'
+```
+
+Exporting the variable in your shell profile turns it on for every session. That
+is the widest setting, and it enables every hooks-module plugin you have
+installed, not only this one.
+
+### 2. Per-repository
+
+Install it switched off, and let each repository turn it on:
+
+```bash
+./scripts/install.sh --opt-in
+```
+
+That leaves `"taskcut@skills-dir": false` in `~/.claude/settings.json`. In a
+repository where you do want it:
+
+```bash
+cd ~/src/the-repo
+claude plugin enable taskcut@skills-dir --scope project   # .claude/settings.json, shared with the team
+claude plugin enable taskcut@skills-dir --scope local     # .claude/settings.local.json, just you
+```
+
+Project settings override user settings, and Claude Code says so:
+
+```
+Status: ✔ loaded
+Note: Disabled in ~/.claude/settings.json but still loads — project settings
+      enable it, which overrides your user setting
+```
+
+The reverse works too: leave it on for yourself and put
+`"taskcut@skills-dir": false` in the projects that should not have it.
+
+### 3. Neither — run it from a checkout
+
+Nothing installed, nothing in settings, one session only:
+
+```bash
+CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir ~/.claude/src/taskcut
+```
+
+### What it touches when it is on
+
+| | |
+| --- | --- |
+| Adds to the model's tools | `mcp__taskcut__close_task` |
+| Reads | the session id, the context-fill percentage, its own store |
+| Writes | its own plugin store, under `~/.claude/plugins/store/` |
+| Changes | the transcript, at a boundary, once the context is past `floorPercent` |
+| Never touches | your files, your settings, the network |
+
+`claude plugin validate ~/.claude/skills/taskcut` prints the complete list of
+engine calls this plugin can make. A hooks module has no filesystem, network or
+process access of its own; everything goes through that interface.
+
 ## Configuration
 
 Every setting has a working default. Change them under `/config`, in the
