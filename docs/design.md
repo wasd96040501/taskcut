@@ -73,8 +73,35 @@ moved. Keeping the first plus the most recent `recentHumanTurns` pins it.
 
 ## The floor
 
-Every compaction invalidates the prompt cache prefix, so the next turn re-reads
-everything at full price. Cutting a small context costs more than it saves.
+The floor is not an economic threshold, and it is worth saying so plainly,
+because the obvious argument for one does not survive the arithmetic. That
+argument runs: a compaction invalidates the prompt cache, so the next turn
+re-reads everything at full price, so a small context is not worth cutting.
+
+Write `P` for the transcript before a cut and `K` for the kept set. A cache read
+costs about a tenth of a base input token; a cache write about 1.25 of one. The
+kept set opens with the first human turn, unchanged and in its original
+position, so the system block, the tool definitions and that turn all still
+match the cached prefix — divergence starts after it. The turn following a cut
+therefore pays roughly `1.25·K` where it would have paid `0.1·P`. That is
+cheaper on the very turn the cut happens whenever `K` is under about 8% of `P`,
+and cheaper again on every turn after.
+
+At the default floor the ratio is not close: a 200k window at 40% is 80k, against
+a kept set of the first turn, two recent turns and a bounded ledger — roughly 3k,
+under 4%. Even at 4% context fill, where a cut saves almost nothing, it costs
+almost nothing: a few hundred tokens more on the next turn, repaid by the one
+after. Cutting early is not expensive. It is merely pointless.
+
+What the floor actually buys is fidelity. A cut trades the whole working context
+for the ledger, which holds the conclusions the model chose to write down and
+nothing else — not the file it read and did not mention, not the command whose
+output shaped a decision it recorded in one line. Early in a session that is a
+bad trade at any price, because what is being discarded is still small enough to
+carry. The floor is the point past which carrying it stops being free.
+
+This also sets the direction of the error. Too high a floor wastes context; too
+low a floor loses work. The default leans high.
 
 `floorPercent` gates on `$.session.usage()`, whose `context.percent` is the same
 figure the status line shows. Below the floor the conclusion is still recorded —

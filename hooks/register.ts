@@ -159,9 +159,19 @@ export const register: Register = (on, options) => {
   })
 
   on('turn.complete', async ($, e, next) => {
-    const result = await next(e)
-    if (!activation.active || !boundaryReached) return result
+    // Read and clear before anything that can throw. A turn that fails after
+    // `close_task` has run leaves the conclusion in the ledger but drops the
+    // boundary: if the flag survived, the next turn to complete would inherit a
+    // cut it did not earn, and the transcript that explains the failure is
+    // exactly what the cut would discard. The tool call has already happened by
+    // the time this dispatches, so nothing is missed by reading it here.
+    const reached = boundaryReached
     boundaryReached = false
+
+    // `next` first, so the engine has finished settling the turn before a
+    // compaction is raised against it.
+    const result = await next(e)
+    if (!activation.active || !reached) return result
 
     const { context } = await $.session.usage()
     if ((context.percent ?? 0) < config.floorPercent) return result
