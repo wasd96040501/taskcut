@@ -1,0 +1,108 @@
+{
+ "name": "drift",
+ "description": "Twelve crowded, confusable service modules. Tests a rule set once and a value later reversed, not retrieval.",
+ "source": {
+  "kind": "generated",
+  "generator": "drift.py"
+ },
+ "files": [
+  "svc_00.py",
+  "svc_01.py",
+  "svc_02.py",
+  "svc_03.py",
+  "svc_04.py",
+  "svc_05.py",
+  "svc_06.py",
+  "svc_07.py",
+  "svc_08.py",
+  "svc_09.py",
+  "svc_10.py",
+  "svc_11.py"
+ ],
+ "briefing": "I am auditing the ingest pipeline before a release. We will go through the services one at a time and I will tell you which. Three rules hold for every step of the whole audit: (1) always quote the service's SCHEMA_VERSION in your answer; (2) always refer to a service by its registry id, the SVC-#### in its header, never by filename; (3) if a value you find contradicts one established earlier, say so and state which one is current. Acknowledge these and wait for the first service.",
+ "step_template": "Sub-task {n} of {total}: read {file} and report its owner and its retry budget.",
+ "constraints": [
+  {
+   "id": "schema",
+   "description": "quotes SCHEMA_VERSION, as rule 1 requires",
+   "pattern": "v3\\.7\\.0"
+  },
+  {
+   "id": "registry",
+   "description": "names the service by its registry id, as rule 2 requires",
+   "pattern": "SVC-\\d{4}"
+  }
+ ],
+ "probes": [
+  {
+   "id": "S1",
+   "kind": "superseded",
+   "question": "State the pipeline-wide DEFAULT_TIMEOUT_MS. Answer with the number alone and nothing else.",
+   "expect": [
+    "7500"
+   ],
+   "reject": [
+    "3000"
+   ]
+  },
+  {
+   "id": "S2",
+   "kind": "superseded",
+   "question": "Which registry id declares the DEFAULT_TIMEOUT_MS that is currently in force? Answer with the id alone and nothing else.",
+   "expect": [
+    "SVC-1103"
+   ],
+   "reject": [
+    "SVC-1061"
+   ]
+  },
+  {
+   "id": "H1",
+   "kind": "headline",
+   "question": "Who owns SVC-1054?",
+   "expect": [
+    "tomas"
+   ]
+  },
+  {
+   "id": "H2",
+   "kind": "headline",
+   "question": "What is the retry budget of SVC-1096?",
+   "expect": [
+    "35"
+   ]
+  },
+  {
+   "id": "H3",
+   "kind": "headline",
+   "question": "Which service has the smallest retry budget? Answer with its registry id.",
+   "expect": [
+    "SVC-1040"
+   ]
+  },
+  {
+   "id": "H4",
+   "kind": "headline",
+   "question": "Who owns SVC-1110?",
+   "expect": [
+    "hana"
+   ]
+  },
+  {
+   "id": "I1",
+   "kind": "incidental",
+   "question": "Which word appears in the audit comment of SVC-1075?",
+   "expect": [
+    "tundra"
+   ]
+  },
+  {
+   "id": "I2",
+   "kind": "incidental",
+   "question": "Which word appears in the audit comment of SVC-1117?",
+   "expect": [
+    "cinder"
+   ]
+  }
+ ]
+}

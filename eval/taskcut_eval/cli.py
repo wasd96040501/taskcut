@@ -133,6 +133,11 @@ def _numbers(run) -> dict:
         "context_series": run.prefix,
         "ledger_tokens": run.ledger,
         "ledger_messages": run.ledger_messages,
+        "drift": {
+            d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,
+                   "per_step": list(d.per_step)}
+            for d in run.drift
+        },
         "fidelity": {
             kind: {
                 "asked": f.asked,

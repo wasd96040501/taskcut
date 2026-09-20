@@ -67,13 +67,28 @@ def fidelity_table(runs: list[Run]) -> str:
     return table(["arm", "fact", "correct", "accuracy", "went to disk", "tool calls"], rows)
 
 
+def drift_table(runs: list[Run]) -> str:
+    rows = []
+    for run in runs:
+        for d in run.drift:
+            lapse = d.first_lapse
+            rows.append([
+                run.arm,
+                d.id,
+                f"{d.held}/{d.steps}",
+                str(lapse) if lapse else "never",
+                "".join("+" if ok else "." for ok in d.per_step),
+            ])
+    return table(["arm", "rule", "steps held", "first lapse", "by step"], rows)
+
+
 def probe_detail(run: Run) -> str:
     rows = []
     for p in run.probes:
         rows.append([
             p.id,
             p.kind,
-            f"{p.matched}/{p.expected}",
+            f"{p.matched}/{p.expected}" + (f" REJECTED {','.join(p.rejected)}" if p.rejected else ""),
             str(p.tools),
             " ".join(p.answer.split())[:60] or "(empty)",
         ])
@@ -92,6 +107,11 @@ def render(title: str, runs: list[Run], model: Model | None = None) -> str:
             "means different things on different models.", "", context_table(runs, model), ""]
     for run in runs:
         out += [f"    {run.arm}: " + " -> ".join(f"{v:,}" for v in run.prefix)]
+    if any(run.drift for run in runs):
+        out += ["", "## Rules set in the briefing, checked step by step", "",
+                "`+` is a step that applied the rule, `.` one that did not. A rule",
+                "is set once, in the opening turn, and never repeated.", "",
+                drift_table(runs), ""]
     out += ["", "## Fidelity after the work", "",
             f"`{KIND_HEADLINE}` facts were asked for during the work, so a conclusion",
             f"written at a boundary should carry them. `{KIND_INCIDENTAL}` facts were in",

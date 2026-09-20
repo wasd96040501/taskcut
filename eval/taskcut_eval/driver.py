@@ -176,6 +176,12 @@ def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str,
             log("trusted the workspace")
         log(f"boot: {workload.name} / {arm.name}")
 
+        # The briefing is its own turn, before any work. It is the standing task
+        # and the place any global rule is set, and it is the turn taskcut keeps
+        # whatever else it drops -- so a rule set here is a test of that.
+        if workload.briefing:
+            log(f"  briefing settled={session.ask(workload.briefing)}")
+
         for index, step in enumerate(workload.steps(), 1):
             prompt = step
             if arm.closes_tasks:

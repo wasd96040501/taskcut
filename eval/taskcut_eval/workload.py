@@ -24,6 +24,12 @@ KIND_HEADLINE = "headline"
 KIND_INCIDENTAL = "incidental"
 
 
+#: A fact the work established and then replaced. Only the replacement is
+#: correct, and an answer that still offers the original is wrong however
+#: confidently it also mentions the new one.
+KIND_SUPERSEDED = "superseded"
+
+
 @dataclass(frozen=True)
 class Probe:
     """One question asked after the work, with the strings a correct answer contains."""
@@ -32,6 +38,10 @@ class Probe:
     kind: str
     question: str
     expect: tuple[str, ...]
+    #: Strings whose presence makes the answer wrong whatever else it contains.
+    #: Without this a superseded value cannot be graded: an answer naming both
+    #: the old value and the new one matches every expectation and is useless.
+    reject: tuple[str, ...] = ()
 
     def grade(self, answer: str) -> tuple[int, int]:
         """Returns (matched, expected). Case-insensitive substring matching keeps
@@ -39,6 +49,25 @@ class Probe:
         literal that a correct answer has to contain."""
         low = answer.lower()
         return sum(1 for e in self.expect if e.lower() in low), len(self.expect)
+
+    def rejected(self, answer: str) -> list[str]:
+        low = answer.lower()
+        return [r for r in self.reject if r.lower() in low]
+
+
+@dataclass(frozen=True)
+class Constraint:
+    """A rule set in the opening turn that every step's answer has to satisfy.
+
+    Probes ask what the model remembers once the work is over. A constraint is
+    checked against the work itself, step by step, which is where a rule set at
+    the start is actually forgotten.
+    """
+
+    id: str
+    description: str
+    #: A regular expression the step's answer must match.
+    pattern: str
 
 
 @dataclass(frozen=True)
@@ -59,6 +88,10 @@ class Workload:
     files: tuple[str, ...]
     step_template: str
     probes: tuple[Probe, ...]
+    #: Sent as its own turn before any step, when the workload has one. It is
+    #: the standing task, and it is the turn taskcut always keeps.
+    briefing: str = ""
+    constraints: tuple[Constraint, ...] = ()
 
     def steps(self) -> list[str]:
         """The prompt for each sub-task, in order.
@@ -87,8 +120,19 @@ def load(path: str | Path) -> Workload:
         files=tuple(raw["files"]),
         step_template=raw["step_template"],
         probes=tuple(
-            Probe(id=p["id"], kind=p["kind"], question=p["question"], expect=tuple(p["expect"]))
+            Probe(
+                id=p["id"],
+                kind=p["kind"],
+                question=p["question"],
+                expect=tuple(p["expect"]),
+                reject=tuple(p.get("reject", ())),
+            )
             for p in raw["probes"]
+        ),
+        briefing=raw.get("briefing", ""),
+        constraints=tuple(
+            Constraint(id=c["id"], description=c["description"], pattern=c["pattern"])
+            for c in raw.get("constraints", ())
         ),
     )
 
@@ -140,4 +184,11 @@ def check_ground_truth(workload: Workload, root: Path) -> list[str]:
         for expectation in probe.expect:
             if expectation.lower() not in haystack:
                 problems.append(f"{workload.name}/{probe.id}: {expectation!r} is not in the source files")
+        for rejected in probe.reject:
+            # A rejected string has to be in the material too. If it is not
+            # there, nothing could have produced it and the probe proves nothing.
+            if rejected.lower() not in haystack:
+                problems.append(f"{workload.name}/{probe.id}: rejects {rejected!r}, which is not in the source files")
+        if set(probe.expect) & set(probe.reject):
+            problems.append(f"{workload.name}/{probe.id}: expects and rejects the same string")
     return problems

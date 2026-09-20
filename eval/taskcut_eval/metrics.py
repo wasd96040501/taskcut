@@ -12,11 +12,12 @@ never collapsed into a score.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from statistics import mean
 
 from .transcript import Transcript, Turn
-from .workload import Probe, Workload
+from .workload import Constraint, Probe, Workload
 
 #: Published cache multipliers, in base-input-token equivalents. A cache write
 #: costs about 1.25 of a base input token and a cache read about 0.1, so adding
@@ -92,10 +93,13 @@ class ProbeResult:
     expected: int
     tools: int
     answer: str
+    #: Strings the probe rejects that the answer contained. A superseded value
+    #: offered as current is wrong even when the current one is named too.
+    rejected: tuple[str, ...] = ()
 
     @property
     def correct(self) -> bool:
-        return self.expected > 0 and self.matched == self.expected
+        return self.expected > 0 and self.matched == self.expected and not self.rejected
 
     @property
     def went_to_disk(self) -> bool:
@@ -111,7 +115,65 @@ def probe_results(transcript: Transcript, workload: Workload) -> list[ProbeResul
             out.append(ProbeResult(probe.id, probe.kind, 0, len(probe.expect), 0, "(not asked)"))
             continue
         matched, expected = probe.grade(turn.answer)
-        out.append(ProbeResult(probe.id, probe.kind, matched, expected, len(turn.tools), turn.answer))
+        out.append(
+            ProbeResult(
+                probe.id, probe.kind, matched, expected, len(turn.tools), turn.answer,
+                tuple(probe.rejected(turn.answer)),
+            )
+        )
+    return out
+
+
+@dataclass(frozen=True)
+class Drift:
+    """Whether a rule set in the opening turn was still being applied by the end.
+
+    A probe asks what the model remembers once the work is over, which is the
+    easiest thing for it to do. A constraint is checked against each step of the
+    work as it happened, which is where a rule set at the start is actually
+    dropped. The series is per step, in order: the shape is the finding, not the
+    total.
+    """
+
+    id: str
+    description: str
+    per_step: tuple[bool, ...]
+
+    @property
+    def held(self) -> int:
+        return sum(self.per_step)
+
+    @property
+    def steps(self) -> int:
+        return len(self.per_step)
+
+    @property
+    def first_lapse(self) -> int | None:
+        """The one-based step where the rule was first not applied."""
+        for index, ok in enumerate(self.per_step, 1):
+            if not ok:
+                return index
+        return None
+
+
+def constraint_drift(transcript: Transcript, workload: Workload) -> list[Drift]:
+    steps = workload.steps()
+    answers = []
+    for step in steps:
+        # An arm may append its own clause to a step, so match on the step text.
+        candidates = [t for t in transcript.turns if t.prompt.strip().startswith(step.strip()[:60])]
+        live = [t for t in candidates if t.requests] or candidates
+        answers.append(live[-1].answer if live else "")
+    out = []
+    for constraint in workload.constraints:
+        expression = re.compile(constraint.pattern, re.IGNORECASE)
+        out.append(
+            Drift(
+                id=constraint.id,
+                description=constraint.description,
+                per_step=tuple(bool(expression.search(a)) for a in answers),
+            )
+        )
     return out
 
 
@@ -166,6 +228,7 @@ class Run:
     ledger: int
     #: Ledger messages recorded, an upper bound on the number of cuts.
     ledger_messages: int
+    drift: list[Drift]
 
     @property
     def fidelity(self) -> dict[str, Fidelity]:
@@ -189,4 +252,5 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         probes=probe_results(transcript, workload),
         ledger=ledger_tokens(transcript),
         ledger_messages=transcript.ledger_messages,
+        drift=constraint_drift(transcript, workload),
     )
