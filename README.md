@@ -93,6 +93,50 @@ cd taskcut && ./scripts/install.sh
 Installing does not make taskcut do anything yet. It is inert until a session
 opts in.
 
+## Try it in five minutes
+
+In a scratch directory, so nothing on your machine changes outside it:
+
+```bash
+mkdir /tmp/taskcut-demo && cd /tmp/taskcut-demo
+printf 'alpha\nbeta\ngamma\n' > notes.txt
+printf 'one\ntwo\n' > data.txt
+
+claude plugin marketplace add wasd96040501/taskcut --scope local
+claude plugin install taskcut@taskcut --scope local --config floorPercent=0
+touch .taskcut
+
+CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
+```
+
+`floorPercent=0` is the part that matters for a demo. The default is 40, which
+means taskcut records conclusions but leaves a small transcript alone, because
+cutting one costs more prompt cache than it saves. A five-minute trial never gets
+near 40% of the window, so without this you would see nothing happen and
+reasonably conclude it was broken.
+
+Then, in the session, one sub-task at a time:
+
+```
+> Count the lines in notes.txt and cat it. Then call close_task.
+> Count the lines in data.txt and cat it. Then call close_task.
+> Without running any tool: what do you have about the earlier sub-tasks, and
+  can you still see the raw wc and cat output?
+```
+
+After each `close_task` the transcript is replaced and the status line shows
+`Conversation compacted`. By the third message the model has the conclusions and
+not the tool output it drew them from. `ctx` stays where it started instead of
+climbing.
+
+Undo it:
+
+```bash
+claude plugin uninstall taskcut@taskcut --scope local
+claude plugin marketplace remove taskcut --scope local
+rm -rf /tmp/taskcut-demo
+```
+
 ## Turning it on
 
 taskcut defaults to **opt-in**: installed but inert, in every session, until
