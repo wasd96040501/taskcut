@@ -100,6 +100,7 @@ jobs:
           import sys
           from pathlib import Path
           from taskcut_eval import arms, workload
+          KINDS = (workload.KIND_HEADLINE, workload.KIND_INCIDENTAL, workload.KIND_SUPERSEDED)
           loaded = workload.load_all(Path("eval/workloads"))
           if not loaded:
               print("::error::no workloads found"); sys.exit(1)
@@ -110,14 +111,18 @@ jobs:
               if not w.probes:
                   print(f"::error::{name} has no probes"); failed = True
               for probe in w.probes:
-                  if probe.kind not in (workload.KIND_HEADLINE, workload.KIND_INCIDENTAL):
+                  if probe.kind not in KINDS:
                       print(f"::error::{name}/{probe.id} has unknown kind {probe.kind!r}"); failed = True
                   if not probe.expect:
                       print(f"::error::{name}/{probe.id} expects nothing, so it can never fail"); failed = True
-              ids = [p.id for p in w.probes]
+                  if set(probe.expect) & set(probe.reject):
+                      print(f"::error::{name}/{probe.id} expects and rejects the same string"); failed = True
+              ids = [p.id for p in w.probes] + [c.id for c in w.checks]
               if len(set(ids)) != len(ids):
-                  print(f"::error::{name} has duplicate probe ids"); failed = True
-              print(f"ok  {name}: {len(w.files)} files, {len(w.probes)} probes")
+                  print(f"::error::{name} has duplicate probe or check ids"); failed = True
+              if w.checks and not w.briefing:
+                  print(f"::error::{name} has checks but no briefing to state the contract"); failed = True
+              print(f"ok  {name}: {len(w.files)} steps, {len(w.probes)} probes, {len(w.checks)} checks")
           for name, arm in arms.ARMS.items():
               print(f"ok  arm {name}")
           sys.exit(1 if failed else 0)
