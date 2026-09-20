@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .metrics import Run
+from .models import Model, fraction
 from .workload import KIND_HEADLINE, KIND_INCIDENTAL
 
 
@@ -32,18 +33,20 @@ def cost_table(runs: list[Run]) -> str:
     return table(["arm", "weighted input", "cache read", "cache write", "output", "requests"], rows)
 
 
-def context_table(runs: list[Run]) -> str:
+def context_table(runs: list[Run], model: Model | None = None) -> str:
     rows = []
     for run in runs:
+        share = fraction(run.peak_context, model) if model else None
         rows.append([
             run.arm,
             f"{run.prefix[0]:,}" if run.prefix else "-",
             f"{run.peak_context:,}",
+            f"{share:.0%}" if share is not None else "-",
             f"{run.mean_context:,.0f}",
             f"{run.prefix[-1]:,}" if run.prefix else "-",
             f"{run.ledger:,}" if run.ledger else "-",
         ])
-    return table(["arm", "first turn", "peak", "mean", "last turn", "ledger"], rows)
+    return table(["arm", "first turn", "peak", "of window", "mean", "last turn", "ledger"], rows)
 
 
 def fidelity_table(runs: list[Run]) -> str:
@@ -77,12 +80,16 @@ def probe_detail(run: Run) -> str:
     return table(["probe", "fact", "matched", "tools", "answer"], rows)
 
 
-def render(workload_name: str, runs: list[Run]) -> str:
-    out = [f"# {workload_name}", ""]
+def render(title: str, runs: list[Run], model: Model | None = None) -> str:
+    out = [f"# {title}", ""]
+    if model is not None and model.window:
+        out += [f"Window: {model.window:,} tokens. {model.description}", ""]
     out += ["## Cost", "", cost_table(runs), ""]
     out += ["## Context carried into each turn", "",
             "The first request of a turn sends the whole conversation, so its input",
-            "(cache read plus cache write) is the context the model is working in.", "", context_table(runs), ""]
+            "(cache read plus cache write) is the context the model is working in.",
+            "A share of the window is what dilution tracks; the token count alone",
+            "means different things on different models.", "", context_table(runs, model), ""]
     for run in runs:
         out += [f"    {run.arm}: " + " -> ".join(f"{v:,}" for v in run.prefix)]
     out += ["", "## Fidelity after the work", "",

@@ -1,374 +1,378 @@
 {
  "flask": {
-  "boundary": {
-   "cache_read": 1888168,
-   "cache_write": 235218,
-   "context_first": 37445,
-   "context_last": 62792,
-   "context_peak": 62792,
-   "context_series": [
-    37445,
-    39107,
-    40476,
-    41864,
-    43500,
-    45721,
-    48586,
-    51486,
-    54493,
-    56822,
-    57235,
-    57482,
-    59072,
-    59286,
-    60431,
-    60622,
-    61597,
-    62792
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 2,
-     "went_to_disk": 1
+  "sonnet": {
+   "boundary": {
+    "cache_read": 1888168,
+    "cache_write": 235218,
+    "context_first": 37445,
+    "context_last": 62792,
+    "context_peak": 62792,
+    "context_series": [
+     37445,
+     39107,
+     40476,
+     41864,
+     43500,
+     45721,
+     48586,
+     51486,
+     54493,
+     56822,
+     57235,
+     57482,
+     59072,
+     59286,
+     60431,
+     60622,
+     61597,
+     62792
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 2,
+      "went_to_disk": 1
+     },
+     "incidental": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 6,
+      "went_to_disk": 4
+     }
     },
-    "incidental": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 6,
-     "went_to_disk": 4
-    }
+    "ledger_messages": 17,
+    "ledger_tokens": 5872,
+    "output": 18933,
+    "requests": 41,
+    "weighted_input": 482953
    },
-   "ledger_messages": 17,
-   "ledger_tokens": 5872,
-   "output": 18933,
-   "requests": 41,
-   "weighted_input": 482953
-  },
-  "directed": {
-   "cache_read": 2060499,
-   "cache_write": 174717,
-   "context_first": 38171,
-   "context_last": 55313,
-   "context_peak": 55313,
-   "context_series": [
-    38171,
-    38743,
-    39694,
-    40577,
-    41614,
-    42615,
-    43776,
-    45215,
-    46602,
-    47669,
-    48493,
-    49318,
-    50230,
-    51072,
-    52226,
-    52935,
-    54087,
-    55313
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 13,
-     "went_to_disk": 5
+   "directed": {
+    "cache_read": 2060499,
+    "cache_write": 174717,
+    "context_first": 38171,
+    "context_last": 55313,
+    "context_peak": 55313,
+    "context_series": [
+     38171,
+     38743,
+     39694,
+     40577,
+     41614,
+     42615,
+     43776,
+     45215,
+     46602,
+     47669,
+     48493,
+     49318,
+     50230,
+     51072,
+     52226,
+     52935,
+     54087,
+     55313
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 13,
+      "went_to_disk": 5
+     },
+     "incidental": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 7,
+      "went_to_disk": 5
+     }
     },
-    "incidental": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 7,
-     "went_to_disk": 5
-    }
+    "ledger_messages": 15,
+    "ledger_tokens": 3090,
+    "output": 13053,
+    "requests": 47,
+    "weighted_input": 424574
    },
-   "ledger_messages": 15,
-   "ledger_tokens": 3090,
-   "output": 13053,
-   "requests": 47,
-   "weighted_input": 424574
-  },
-  "directed-misaimed": {
-   "cache_read": 1903809,
-   "cache_write": 173392,
-   "context_first": 38171,
-   "context_last": 54523,
-   "context_peak": 54523,
-   "context_series": [
-    38171,
-    38522,
-    39262,
-    40141,
-    41165,
-    42537,
-    44064,
-    45724,
-    47610,
-    48166,
-    48891,
-    49248,
-    50384,
-    50858,
-    51888,
-    52213,
-    53011,
-    54523
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 8,
-     "went_to_disk": 5
+   "directed-misaimed": {
+    "cache_read": 1903809,
+    "cache_write": 173392,
+    "context_first": 38171,
+    "context_last": 54523,
+    "context_peak": 54523,
+    "context_series": [
+     38171,
+     38522,
+     39262,
+     40141,
+     41165,
+     42537,
+     44064,
+     45724,
+     47610,
+     48166,
+     48891,
+     49248,
+     50384,
+     50858,
+     51888,
+     52213,
+     53011,
+     54523
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 8,
+      "went_to_disk": 5
+     },
+     "incidental": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 5,
+      "went_to_disk": 5
+     }
     },
-    "incidental": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 5,
-     "went_to_disk": 5
-    }
+    "ledger_messages": 15,
+    "ledger_tokens": 3384,
+    "output": 11019,
+    "requests": 44,
+    "weighted_input": 407243
    },
-   "ledger_messages": 15,
-   "ledger_tokens": 3384,
-   "output": 11019,
-   "requests": 44,
-   "weighted_input": 407243
-  },
-  "off": {
-   "cache_read": 1449801,
-   "cache_write": 40170,
-   "context_first": 38122,
-   "context_last": 69975,
-   "context_peak": 69975,
-   "context_series": [
-    38122,
-    39533,
-    41737,
-    44875,
-    48203,
-    52294,
-    56969,
-    62337,
-    68583,
-    68694,
-    68948,
-    69036,
-    69328,
-    69393,
-    69577,
-    69663,
-    69850,
-    69975
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 0,
-     "went_to_disk": 0
+   "off": {
+    "cache_read": 1449801,
+    "cache_write": 40170,
+    "context_first": 38122,
+    "context_last": 69975,
+    "context_peak": 69975,
+    "context_series": [
+     38122,
+     39533,
+     41737,
+     44875,
+     48203,
+     52294,
+     56969,
+     62337,
+     68583,
+     68694,
+     68948,
+     69036,
+     69328,
+     69393,
+     69577,
+     69663,
+     69850,
+     69975
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "incidental": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     }
     },
-    "incidental": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 0,
-     "went_to_disk": 0
-    }
-   },
-   "ledger_messages": 0,
-   "ledger_tokens": 0,
-   "output": 3341,
-   "requests": 26,
-   "weighted_input": 195279
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "output": 3341,
+    "requests": 26,
+    "weighted_input": 195279
+   }
   }
  },
  "synthetic": {
-  "boundary": {
-   "cache_read": 1496938,
-   "cache_write": 226803,
-   "context_first": 38102,
-   "context_last": 44743,
-   "context_peak": 44743,
-   "context_series": [
-    38102,
-    38511,
-    39216,
-    39809,
-    40400,
-    40988,
-    41576,
-    42172,
-    42768,
-    43354,
-    43910,
-    44162,
-    44255,
-    44357,
-    44453,
-    44546,
-    44635,
-    44743
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 0,
-     "went_to_disk": 0
+  "sonnet": {
+   "boundary": {
+    "cache_read": 1496938,
+    "cache_write": 226803,
+    "context_first": 38102,
+    "context_last": 44743,
+    "context_peak": 44743,
+    "context_series": [
+     38102,
+     38511,
+     39216,
+     39809,
+     40400,
+     40988,
+     41576,
+     42172,
+     42768,
+     43354,
+     43910,
+     44162,
+     44255,
+     44357,
+     44453,
+     44546,
+     44635,
+     44743
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "incidental": {
+      "asked": 3,
+      "correct": 3,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     }
     },
-    "incidental": {
-     "asked": 3,
-     "correct": 3,
-     "tool_calls": 0,
-     "went_to_disk": 0
-    }
+    "ledger_messages": 19,
+    "ledger_tokens": 1860,
+    "output": 7394,
+    "requests": 38,
+    "weighted_input": 433308
    },
-   "ledger_messages": 19,
-   "ledger_tokens": 1860,
-   "output": 7394,
-   "requests": 38,
-   "weighted_input": 433308
-  },
-  "directed": {
-   "cache_read": 1961766,
-   "cache_write": 244435,
-   "context_first": 37319,
-   "context_last": 51513,
-   "context_peak": 51513,
-   "context_series": [
-    37319,
-    38606,
-    39238,
-    40034,
-    40999,
-    42130,
-    43312,
-    44589,
-    46023,
-    47541,
-    49182,
-    49688,
-    49906,
-    50295,
-    50525,
-    51150,
-    51368,
-    51513
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 3,
-     "went_to_disk": 3
+   "directed": {
+    "cache_read": 1961766,
+    "cache_write": 244435,
+    "context_first": 37319,
+    "context_last": 51513,
+    "context_peak": 51513,
+    "context_series": [
+     37319,
+     38606,
+     39238,
+     40034,
+     40999,
+     42130,
+     43312,
+     44589,
+     46023,
+     47541,
+     49182,
+     49688,
+     49906,
+     50295,
+     50525,
+     51150,
+     51368,
+     51513
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 3,
+      "went_to_disk": 3
+     },
+     "incidental": {
+      "asked": 3,
+      "correct": 3,
+      "tool_calls": 3,
+      "went_to_disk": 3
+     }
     },
-    "incidental": {
-     "asked": 3,
-     "correct": 3,
-     "tool_calls": 3,
-     "went_to_disk": 3
-    }
+    "ledger_messages": 19,
+    "ledger_tokens": 3311,
+    "output": 6902,
+    "requests": 46,
+    "weighted_input": 501844
    },
-   "ledger_messages": 19,
-   "ledger_tokens": 3311,
-   "output": 6902,
-   "requests": 46,
-   "weighted_input": 501844
-  },
-  "directed-misaimed": {
-   "cache_read": 2018017,
-   "cache_write": 236617,
-   "context_first": 37310,
-   "context_last": 48960,
-   "context_peak": 48960,
-   "context_series": [
-    37310,
-    38664,
-    39282,
-    39967,
-    40881,
-    41773,
-    42575,
-    43487,
-    44432,
-    45437,
-    46484,
-    47203,
-    47438,
-    47784,
-    48016,
-    48422,
-    48656,
-    48960
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 6,
-     "went_to_disk": 5
+   "directed-misaimed": {
+    "cache_read": 2018017,
+    "cache_write": 236617,
+    "context_first": 37310,
+    "context_last": 48960,
+    "context_peak": 48960,
+    "context_series": [
+     37310,
+     38664,
+     39282,
+     39967,
+     40881,
+     41773,
+     42575,
+     43487,
+     44432,
+     45437,
+     46484,
+     47203,
+     47438,
+     47784,
+     48016,
+     48422,
+     48656,
+     48960
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 6,
+      "went_to_disk": 5
+     },
+     "incidental": {
+      "asked": 3,
+      "correct": 3,
+      "tool_calls": 3,
+      "went_to_disk": 3
+     }
     },
-    "incidental": {
-     "asked": 3,
-     "correct": 3,
-     "tool_calls": 3,
-     "went_to_disk": 3
-    }
+    "ledger_messages": 19,
+    "ledger_tokens": 2593,
+    "output": 7152,
+    "requests": 48,
+    "weighted_input": 497701
    },
-   "ledger_messages": 19,
-   "ledger_tokens": 2593,
-   "output": 7152,
-   "requests": 48,
-   "weighted_input": 497701
-  },
-  "off": {
-   "cache_read": 2236208,
-   "cache_write": 79330,
-   "context_first": 37270,
-   "context_last": 107857,
-   "context_peak": 107857,
-   "context_series": [
-    37270,
-    45309,
-    52221,
-    59082,
-    65963,
-    72819,
-    79706,
-    86635,
-    93537,
-    100440,
-    107274,
-    107394,
-    107463,
-    107556,
-    107632,
-    107693,
-    107760,
-    107857
-   ],
-   "fidelity": {
-    "headline": {
-     "asked": 5,
-     "correct": 5,
-     "tool_calls": 0,
-     "went_to_disk": 0
+   "off": {
+    "cache_read": 2236208,
+    "cache_write": 79330,
+    "context_first": 37270,
+    "context_last": 107857,
+    "context_peak": 107857,
+    "context_series": [
+     37270,
+     45309,
+     52221,
+     59082,
+     65963,
+     72819,
+     79706,
+     86635,
+     93537,
+     100440,
+     107274,
+     107394,
+     107463,
+     107556,
+     107632,
+     107693,
+     107760,
+     107857
+    ],
+    "fidelity": {
+     "headline": {
+      "asked": 5,
+      "correct": 5,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "incidental": {
+      "asked": 3,
+      "correct": 3,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     }
     },
-    "incidental": {
-     "asked": 3,
-     "correct": 3,
-     "tool_calls": 0,
-     "went_to_disk": 0
-    }
-   },
-   "ledger_messages": 0,
-   "ledger_tokens": 0,
-   "output": 2019,
-   "requests": 28,
-   "weighted_input": 322873
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "output": 2019,
+    "requests": 28,
+    "weighted_input": 322873
+   }
   }
  }
 }

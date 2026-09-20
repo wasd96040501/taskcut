@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import arms, driver, metrics, report, transcript, workload
+from . import arms, driver, metrics, models, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -19,10 +19,10 @@ DEFAULT_WORK = Path.home() / ".cache" / "taskcut-eval"
 PROJECTS = Path.home() / ".claude" / "projects"
 
 
-def _workspace(work: Path, name: str, arm: str) -> Path:
-    # Per arm, always: two arms sharing a directory share a transcript
-    # directory, and the runs can no longer be told apart.
-    return work / "workspaces" / f"{name}--{arm}"
+def _workspace(work: Path, name: str, arm: str, model: str) -> Path:
+    # Per arm and per model, always: two runs sharing a directory share a
+    # transcript directory, and can no longer be told apart afterwards.
+    return work / "workspaces" / f"{name}--{arm}--{model}"
 
 
 def cmd_list(args) -> int:
@@ -32,7 +32,11 @@ def cmd_list(args) -> int:
         print(f"  {name:<12} {len(w.files)} files, {len(w.probes)} probes  -- {w.description}")
     print("\narms:")
     for name, a in arms.ARMS.items():
-        print(f"  {name:<12} {a.description}")
+        mark = "" if a.default else "   [not in the default sweep]"
+        print(f"  {name:<12} {a.description}{mark}")
+    print("\nmodels:")
+    for name, m in models.MODELS.items():
+        print(f"  {name:<12} window {m.window:,} -- {m.description}")
     return 0
 
 
@@ -40,7 +44,7 @@ def cmd_verify(args) -> int:
     work = Path(args.work)
     problems = []
     for name, w in workload.load_all(WORKLOADS).items():
-        root = _workspace(work, name, "verify")
+        root = _workspace(work, name, "verify", "none")
         workload.materialise(w, root, GENERATORS)
         found = workload.check_ground_truth(w, root)
         problems += found
@@ -58,18 +62,19 @@ def cmd_run(args) -> int:
     arm = arms.get(args.arm)
     work = Path(args.work)
 
-    space = workload.materialise(w, _workspace(work, w.name, arm.name), GENERATORS)
+    model = models.get(args.model)
+    space = workload.materialise(w, _workspace(work, w.name, arm.name, model.alias), GENERATORS)
     problems = workload.check_ground_truth(w, space)
     if problems:
         raise SystemExit("workload is not answerable:\n  " + "\n  ".join(problems))
 
     plugin = driver.prepare_plugin(arm, REPO_ROOT, work / "plugins" / arm.name)
-    driver.run(w, arm, space, plugin, args.model)
+    driver.run(w, arm, space, plugin, model.alias)
 
     path = transcript.find(PROJECTS, space)
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    destination = results / f"{w.name}--{arm.name}.jsonl"
+    destination = results / f"{w.name}--{arm.name}--{model.alias}.jsonl"
     destination.write_bytes(path.read_bytes())
     print(f"transcript -> {destination}")
     return 0
@@ -78,22 +83,30 @@ def cmd_run(args) -> int:
 def cmd_report(args) -> int:
     loaded = workload.load_all(WORKLOADS)
     results = Path(args.results)
-    by_workload: dict[str, list] = {}
+    # A run is identified by all three axes. Grouping by workload and model
+    # keeps the comparison within a group like for like: an arm is only
+    # comparable to another arm the same model ran.
+    grouped: dict[tuple[str, str], list] = {}
     for path in sorted(results.glob("*.jsonl")):
-        name, _, arm = path.stem.partition("--")
+        parts = path.stem.split("--")
+        if len(parts) != 3:
+            print(f"skipping {path.name}: expected workload--arm--model", file=sys.stderr)
+            continue
+        name, arm, model = parts
         if name not in loaded:
             continue
-        run = metrics.summarise(transcript.load(path), loaded[name], arm)
-        by_workload.setdefault(name, []).append(run)
+        grouped.setdefault((name, model), []).append(
+            metrics.summarise(transcript.load(path), loaded[name], arm)
+        )
 
-    if not by_workload:
+    if not grouped:
         raise SystemExit(f"no results in {results}")
 
     chunks, summary = [], {}
-    for name, runs in by_workload.items():
+    for (name, model), runs in sorted(grouped.items()):
         runs.sort(key=lambda r: (r.arm != "off", r.arm))
-        chunks.append(report.render(name, runs))
-        summary[name] = {r.arm: _numbers(r) for r in runs}
+        chunks.append(report.render(f"{name} on {model}", runs, models.get(model)))
+        summary.setdefault(name, {})[model] = {r.arm: _numbers(r) for r in runs}
     text = "\n\n".join(chunks)
 
     # The transcripts are large and full of absolute paths, so they stay out of
@@ -144,7 +157,7 @@ def main(argv=None) -> int:
     run = sub.add_parser("run", help="run one workload under one arm")
     run.add_argument("--workload", required=True)
     run.add_argument("--arm", required=True)
-    run.add_argument("--model", default="sonnet")
+    run.add_argument("--model", default="sonnet", help=f"one of {', '.join(models.MODELS)}, or any --model alias")
     run.set_defaults(func=cmd_run)
 
     rep = sub.add_parser("report", help="render the collected results")

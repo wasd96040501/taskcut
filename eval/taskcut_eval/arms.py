@@ -17,6 +17,9 @@ class Arm:
     description: str
     #: Extra environment for the session. `TASKCUT` is the plugin's own switch.
     env: Mapping[str, str] = field(default_factory=dict)
+    #: Whether a sweep runs this arm. An arm whose question has been answered
+    #: stays here so the result can be reproduced, but costs nothing to leave in.
+    default: bool = True
     #: Overrides written into the plugin manifest's userConfig defaults. The
     #: harness loads taskcut with --plugin-dir, which takes no --config, so a
     #: setting has to be changed in a copy of the manifest.
@@ -50,12 +53,23 @@ ARMS: dict[str, Arm] = {
     ),
     "directed": Arm(
         name="directed",
-        description="The conclusion is written instead by a small model reading the dropped work, aimed at the standing task.",
+        description=(
+            "Falsified, kept for reproduction: the conclusion is written by a small model reading "
+            "the dropped work. It halves the ledger and doubles the re-reading. Not in the default sweep."
+        ),
         env={"TASKCUT": "1"},
         config={**_FORCE_EVERY_BOUNDARY, "ledgerMode": "directed"},
         closes_tasks=True,
+        default=False,
     ),
 }
+
+
+def sweep() -> list[Arm]:
+    """The arms a comparison runs unless one is named. An arm drops out of this
+    when its question has been settled; it stays in ARMS so the run that settled
+    it can be repeated."""
+    return [arm for arm in ARMS.values() if arm.default]
 
 
 def get(name: str) -> Arm:
