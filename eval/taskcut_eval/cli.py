@@ -74,9 +74,21 @@ def cmd_run(args) -> int:
     path = transcript.find(PROJECTS, space)
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    destination = results / f"{w.name}--{arm.name}--{model.alias}.jsonl"
+    stem = f"{w.name}--{arm.name}--{model.alias}"
+    destination = results / f"{stem}.jsonl"
     destination.write_bytes(path.read_bytes())
     print(f"transcript -> {destination}")
+
+    # While the workspace is still as the session left it. A check is the only
+    # honest grade for a task that produced something, and it cannot be
+    # recovered from the transcript afterwards.
+    if w.checks:
+        verdicts = metrics.run_checks(w, space)
+        (results / f"{stem}.checks.json").write_text(
+            json.dumps([vars(v) for v in verdicts], indent=1) + "\n"
+        )
+        for v in verdicts:
+            print(f"  {'PASS' if v.passed else 'FAIL'}  {v.id}: {v.description}")
     return 0
 
 
@@ -95,9 +107,11 @@ def cmd_report(args) -> int:
         name, arm, model = parts
         if name not in loaded:
             continue
-        grouped.setdefault((name, model), []).append(
-            metrics.summarise(transcript.load(path), loaded[name], arm)
-        )
+        run = metrics.summarise(transcript.load(path), loaded[name], arm)
+        sidecar = path.with_suffix("").with_suffix(".checks.json")
+        if sidecar.exists():
+            run.checks.extend(metrics.CheckResult(**v) for v in json.loads(sidecar.read_text()))
+        grouped.setdefault((name, model), []).append(run)
 
     if not grouped:
         raise SystemExit(f"no results in {results}")
@@ -133,6 +147,7 @@ def _numbers(run) -> dict:
         "context_series": run.prefix,
         "ledger_tokens": run.ledger,
         "ledger_messages": run.ledger_messages,
+        "checks": {c.id: c.passed for c in run.checks},
         "drift": {
             d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,
                    "per_step": list(d.per_step)}

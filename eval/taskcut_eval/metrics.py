@@ -13,7 +13,7 @@ never collapsed into a score.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from statistics import mean
 
 from .transcript import Transcript, Turn
@@ -229,6 +229,8 @@ class Run:
     #: Ledger messages recorded, an upper bound on the number of cuts.
     ledger_messages: int
     drift: list[Drift]
+    #: Filled in from the sidecar a run writes; empty for a workload with none.
+    checks: list = field(default_factory=list)
 
     @property
     def fidelity(self) -> dict[str, Fidelity]:
@@ -254,3 +256,37 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         ledger_messages=transcript.ledger_messages,
         drift=constraint_drift(transcript, workload),
     )
+
+
+@dataclass(frozen=True)
+class CheckResult:
+    id: str
+    description: str
+    kind: str
+    passed: bool
+    detail: str
+
+
+def run_checks(workload: Workload, workspace) -> list[CheckResult]:
+    """Runs each check in the finished workspace.
+
+    This is not pure, and it is the only thing here that is not: a check has to
+    execute the work to find out whether it holds together. It runs once, right
+    after the session, and its verdicts are stored beside the transcript so
+    every later report is reading a record rather than re-running anything.
+    """
+    import subprocess
+
+    out = []
+    for check in workload.checks:
+        try:
+            done = subprocess.run(
+                check.command, shell=True, cwd=str(workspace),
+                capture_output=True, text=True, timeout=300,
+            )
+            passed = done.returncode == 0
+            detail = (done.stdout + done.stderr).strip()[-400:]
+        except subprocess.TimeoutExpired:
+            passed, detail = False, "timed out after 300s"
+        out.append(CheckResult(check.id, check.description, check.kind, passed, detail))
+    return out

@@ -56,6 +56,26 @@ class Probe:
 
 
 @dataclass(frozen=True)
+class Check:
+    """A shell assertion run against the finished workspace.
+
+    A probe asks the model what it knows. A check asks the work whether it
+    holds together, which is the only honest grade for a task that produced
+    something. Exit status zero passes. It runs with the workspace as the
+    working directory, after the session has ended and before anything else
+    touches it.
+    """
+
+    id: str
+    description: str
+    command: str
+    #: What a failure means. A check that fails because the model never got
+    #: that far is a different finding from one that fails because the model
+    #: contradicted a decision it had made earlier, and the report says which.
+    kind: str = "consistency"
+
+
+@dataclass(frozen=True)
 class Constraint:
     """A rule set in the opening turn that every step's answer has to satisfy.
 
@@ -92,6 +112,10 @@ class Workload:
     #: the standing task, and it is the turn taskcut always keeps.
     briefing: str = ""
     constraints: tuple[Constraint, ...] = ()
+    checks: tuple[Check, ...] = ()
+    #: Files the generator lays down that the steps do not name -- a test
+    #: suite, a fixture -- so `materialise` can verify they arrived.
+    fixtures: tuple[str, ...] = ()
 
     def steps(self) -> list[str]:
         """The prompt for each sub-task, in order.
@@ -134,6 +158,11 @@ def load(path: str | Path) -> Workload:
             Constraint(id=c["id"], description=c["description"], pattern=c["pattern"])
             for c in raw.get("constraints", ())
         ),
+        checks=tuple(
+            Check(id=c["id"], description=c["description"], command=c["command"], kind=c.get("kind", "consistency"))
+            for c in raw.get("checks", ())
+        ),
+        fixtures=tuple(raw.get("fixtures", ())),
     )
 
 
@@ -165,7 +194,9 @@ def materialise(workload: Workload, root: Path, generators: Path) -> Path:
     else:
         raise ValueError(f"unknown source kind: {workload.source.kind}")
 
-    missing = [f for f in workload.files if not (root / f).exists()]
+    # A workload whose steps create the files cannot require them up front.
+    required = workload.fixtures if workload.checks else workload.files
+    missing = [f for f in required if not (root / f).exists()]
     if missing:
         raise FileNotFoundError(f"{workload.name}: workspace is missing {missing}")
     return root
@@ -178,7 +209,13 @@ def check_ground_truth(workload: Workload, root: Path) -> list[str]:
     silently removes itself from the comparison, so this runs before a workload
     is ever used.
     """
-    haystack = "\n".join((root / f).read_text(errors="replace") for f in workload.files).lower()
+    # A workload that builds its own material has nothing to check against yet:
+    # its files, and every answer about them, come into existence during the
+    # session. Such a workload is graded by its checks, which run afterwards.
+    if workload.checks:
+        return []
+    present = [root / f for f in workload.files if (root / f).exists()]
+    haystack = "\n".join(p.read_text(errors="replace") for p in present).lower()
     problems = []
     for probe in workload.probes:
         for expectation in probe.expect:

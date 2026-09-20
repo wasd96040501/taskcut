@@ -48,9 +48,13 @@ INHERITED = (
     "CLAUDE_EFFORT",
 )
 
+#: Reading is enough for a workload that only inspects. One that builds needs
+#: to write and to run what it wrote, so the set is wider and the workspace is
+#: per arm and per model, thrown away between runs.
 TOOLS = (
     "Bash(cat:*),Bash(grep:*),Bash(sed:*),Bash(head:*),Bash(tail:*),Bash(wc:*),"
-    "Bash(awk:*),Bash(find:*),Read,Grep,Glob,mcp__taskcut__close_task"
+    "Bash(awk:*),Bash(find:*),Bash(ls:*),Bash(mkdir:*),Bash(python3:*),Bash(pytest:*),"
+    "Read,Grep,Glob,Write,Edit,mcp__taskcut__close_task"
 )
 
 

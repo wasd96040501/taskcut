@@ -1,0 +1,126 @@
+{
+ "name": "build",
+ "description": "Ten steps building a package, with a public contract changed at step seven. Graded by whether the result runs.",
+ "source": {
+  "kind": "generated",
+  "generator": "build.py"
+ },
+ "fixtures": [
+  "fixtures/events.log",
+  "README.md"
+ ],
+ "files": [
+  "create pipeline/errors.py with the error hierarchy: PipelineError as the base, and ParseError and ValidationError beneath it.",
+  "create pipeline/schema.py defining the Event record with the four contract fields.",
+  "create pipeline/parse.py with parse_line(line) -> Event, raising ParseError on a line that does not match the format.",
+  "create pipeline/validate.py with validate(event), raising ValidationError when a field is empty or the level is not one of the four.",
+  "create pipeline/filters.py with by_service(events, name) and by_level_at_least(events, level), ordering levels DEBUG < INFO < WARN < ERROR.",
+  "create pipeline/aggregate.py with by_level(events) and by_service(events), each returning a dict of counts.",
+  "we have decided to rename the timestamp field from event_ts to occurred_at, everywhere in the package. Make that change; the old name must not remain anywhere.",
+  "create pipeline/report.py with render(events) -> str, a plain-text summary using the aggregates.",
+  "create pipeline/__main__.py so that `python3 -m pipeline <logfile>` parses the file, skips lines it cannot parse, and prints the report.",
+  "create tests/test_pipeline.py, a unittest suite covering parsing, a rejected line, validation and one aggregate."
+ ],
+ "briefing": "We are building a Python package called `pipeline` that reads event logs, validates them and summarises them. Standard library only, no third-party imports. I will give you one piece at a time.\n\nThree rules hold for the whole job:\n(1) every module you add opens with a one-line module docstring;\n(2) every error you raise is a subclass of PipelineError from pipeline/errors.py, never a bare Exception or ValueError;\n(3) the Event record lives in pipeline/schema.py and every other module imports it from there -- no module defines its own copy.\n\nThe public contract, which the acceptance tests use:\n  pipeline.schema.Event                 fields event_ts, level, service, message, all strings\n  pipeline.parse.parse_line(s) -> Event raises ParseError on a malformed line\n  pipeline.aggregate.by_level(events)   -> dict mapping level to count\n  python3 -m pipeline <logfile>         prints a summary\n\nA log line is `<ISO timestamp> <LEVEL> <service>: <message>`; event_ts is the timestamp exactly as it appears. fixtures/events.log is the input and contains some malformed lines. Acknowledge and wait.",
+ "step_template": "Step {n} of {total}: {file}",
+ "constraints": [],
+ "checks": [
+  {
+   "id": "imports",
+   "kind": "completeness",
+   "description": "every module of the package imports",
+   "command": "python3 -c 'import sys; sys.path.insert(0,\".\"); import pipeline.errors, pipeline.schema, pipeline.parse, pipeline.validate, pipeline.filters, pipeline.aggregate, pipeline.report; print(\"imports ok\")'"
+  },
+  {
+   "id": "contract",
+   "kind": "consistency",
+   "description": "parse_line returns the contracted fields, under the renamed timestamp",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from pipeline.parse import parse_line;r = parse_line('\\''2024-03-01T00:00:00Z INFO lease: accepted batch'\\'');g = (lambda o,k: getattr(o,k) if hasattr(o,k) else o[k]);assert str(g(r,'\\''occurred_at'\\'')).startswith('\\''2024-03-01T00:00:00'\\''), g(r,'\\''occurred_at'\\'');assert g(r,'\\''level'\\'')=='\\''INFO'\\''; assert g(r,'\\''service'\\'')=='\\''lease'\\'';assert '\\''accepted batch'\\'' in str(g(r,'\\''message'\\''));print('\\''contract ok'\\'')'"
+  },
+  {
+   "id": "renamed",
+   "kind": "supersession",
+   "description": "the superseded field name event_ts is gone from the package",
+   "command": "! grep -rn 'event_ts' pipeline tests 2>/dev/null"
+  },
+  {
+   "id": "errors",
+   "kind": "consistency",
+   "description": "a malformed line raises a PipelineError, and ParseError is one",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from pipeline.errors import PipelineError, ParseError;from pipeline.parse import parse_line;assert issubclass(ParseError, PipelineError);raised=False;\ntry:\n    parse_line('\\''this line has no timestamp at all'\\'')\nexcept PipelineError:\n    raised=True\nassert raised, '\\''a malformed line did not raise a PipelineError'\\''\nprint('\\''errors ok'\\'')'"
+  },
+  {
+   "id": "integration",
+   "kind": "consistency",
+   "description": "the whole pipeline parses the fixture and aggregates 400 good lines",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from pipeline.parse import parse_line;from pipeline.aggregate import by_level;from pipeline.errors import PipelineError;ev=[]\nfor line in open('\\''fixtures/events.log'\\''):\n    line=line.strip()\n    if not line: continue\n    try: ev.append(parse_line(line))\n    except PipelineError: pass\ncounts = by_level(ev)\nassert sum(counts.values())==400, (sum(counts.values()), counts)\nassert set(counts) <= {'\\''DEBUG'\\'','\\''INFO'\\'','\\''WARN'\\'','\\''ERROR'\\''}, counts\nprint('\\''integration ok'\\'', counts)'"
+  },
+  {
+   "id": "suite",
+   "kind": "completeness",
+   "description": "the package's own tests pass",
+   "command": "PYTHONPATH=. python3 -m unittest discover -s tests -q"
+  },
+  {
+   "id": "cli",
+   "kind": "completeness",
+   "description": "python3 -m pipeline runs against the fixture",
+   "command": "python3 -m pipeline fixtures/events.log > /dev/null"
+  },
+  {
+   "id": "rule1_docstrings",
+   "kind": "rule",
+   "description": "rule 1: every module opens with a docstring",
+   "command": "python3 -c 'import ast, pathlib, sys;bad=[str(p) for p in sorted(pathlib.Path('\\''pipeline'\\'').glob('\\''*.py'\\'')) if not ast.get_docstring(ast.parse(p.read_text()))];sys.exit('\\''modules without a docstring: '\\'' + '\\'', '\\''.join(bad)) if bad else print('\\''rule 1 ok'\\'')'"
+  },
+  {
+   "id": "rule2_no_bare_raise",
+   "kind": "rule",
+   "description": "rule 2: nothing raises a bare Exception, ValueError, TypeError or KeyError",
+   "command": "! grep -rnE 'raise +(Exception|ValueError|TypeError|KeyError)\\b' pipeline/"
+  },
+  {
+   "id": "rule3_one_event",
+   "kind": "rule",
+   "description": "rule 3: only pipeline/schema.py defines Event; every other module imports it",
+   "command": "! grep -rn 'class Event' pipeline/ --include='*.py' | grep -v '^pipeline/schema.py:'"
+  }
+ ],
+ "probes": [
+  {
+   "id": "S1",
+   "kind": "superseded",
+   "question": "What is the timestamp field on Event called? Answer with the field name alone.",
+   "expect": [
+    "occurred_at"
+   ],
+   "reject": [
+    "event_ts"
+   ]
+  },
+  {
+   "id": "H1",
+   "kind": "headline",
+   "question": "Which module defines the base error class? Answer with the path alone.",
+   "expect": [
+    "errors.py"
+   ]
+  },
+  {
+   "id": "H2",
+   "kind": "headline",
+   "question": "Which module defines by_level? Answer with the path alone.",
+   "expect": [
+    "aggregate.py"
+   ]
+  },
+  {
+   "id": "I1",
+   "kind": "incidental",
+   "question": "How many lines does fixtures/events.log contain?",
+   "expect": [
+    "403"
+   ]
+  }
+ ]
+}

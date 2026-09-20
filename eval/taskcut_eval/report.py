@@ -67,6 +67,14 @@ def fidelity_table(runs: list[Run]) -> str:
     return table(["arm", "fact", "correct", "accuracy", "went to disk", "tool calls"], rows)
 
 
+def check_table(runs: list[Run]) -> str:
+    rows = []
+    for run in runs:
+        for c in run.checks:
+            rows.append([run.arm, c.id, c.kind, "pass" if c.passed else "FAIL", c.description])
+    return table(["arm", "check", "kind", "result", "what it asserts"], rows)
+
+
 def drift_table(runs: list[Run]) -> str:
     rows = []
     for run in runs:
@@ -107,6 +115,11 @@ def render(title: str, runs: list[Run], model: Model | None = None) -> str:
             "means different things on different models.", "", context_table(runs, model), ""]
     for run in runs:
         out += [f"    {run.arm}: " + " -> ".join(f"{v:,}" for v in run.prefix)]
+    if any(run.checks for run in runs):
+        out += ["", "## What the work actually does", "",
+                "Assertions run against the finished workspace. A probe asks the",
+                "model what it knows; these ask the work whether it holds together.",
+                "", check_table(runs), ""]
     if any(run.drift for run in runs):
         out += ["", "## Rules set in the briefing, checked step by step", "",
                 "`+` is a step that applied the rule, `.` one that did not. A rule",

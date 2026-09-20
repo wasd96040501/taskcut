@@ -1,6 +1,6 @@
 {
  "name": "drift",
- "description": "Twelve crowded, confusable service modules. Tests a rule set once and a value later reversed, not retrieval.",
+ "description": "Twelve crowded, confusable service modules read end to end, filling about three quarters of a 200k window. Tests a rule set once and a value later reversed.",
  "source": {
   "kind": "generated",
   "generator": "drift.py"
@@ -20,7 +20,7 @@
   "svc_11.py"
  ],
  "briefing": "I am auditing the ingest pipeline before a release. We will go through the services one at a time and I will tell you which. Three rules hold for every step of the whole audit: (1) always quote the service's SCHEMA_VERSION in your answer; (2) always refer to a service by its registry id, the SVC-#### in its header, never by filename; (3) if a value you find contradicts one established earlier, say so and state which one is current. Acknowledge these and wait for the first service.",
- "step_template": "Sub-task {n} of {total}: read {file} and report its owner and its retry budget.",
+ "step_template": "Sub-task {n} of {total}: run `cat {file}` to read the whole file, then report its owner and its retry budget.",
  "constraints": [
   {
    "id": "schema",

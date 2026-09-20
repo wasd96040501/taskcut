@@ -4,6 +4,7 @@
    "boundary": {
     "cache_read": 1888168,
     "cache_write": 235218,
+    "checks": {},
     "context_first": 37445,
     "context_last": 62792,
     "context_peak": 62792,
@@ -51,6 +52,7 @@
    "directed": {
     "cache_read": 2060499,
     "cache_write": 174717,
+    "checks": {},
     "context_first": 38171,
     "context_last": 55313,
     "context_peak": 55313,
@@ -98,6 +100,7 @@
    "directed-misaimed": {
     "cache_read": 1903809,
     "cache_write": 173392,
+    "checks": {},
     "context_first": 38171,
     "context_last": 54523,
     "context_peak": 54523,
@@ -145,6 +148,7 @@
    "off": {
     "cache_read": 1449801,
     "cache_write": 40170,
+    "checks": {},
     "context_first": 38122,
     "context_last": 69975,
     "context_peak": 69975,
@@ -196,6 +200,7 @@
    "boundary": {
     "cache_read": 1496938,
     "cache_write": 226803,
+    "checks": {},
     "context_first": 38102,
     "context_last": 44743,
     "context_peak": 44743,
@@ -243,6 +248,7 @@
    "directed": {
     "cache_read": 1961766,
     "cache_write": 244435,
+    "checks": {},
     "context_first": 37319,
     "context_last": 51513,
     "context_peak": 51513,
@@ -290,6 +296,7 @@
    "directed-misaimed": {
     "cache_read": 2018017,
     "cache_write": 236617,
+    "checks": {},
     "context_first": 37310,
     "context_last": 48960,
     "context_peak": 48960,
@@ -337,6 +344,7 @@
    "off": {
     "cache_read": 2236208,
     "cache_write": 79330,
+    "checks": {},
     "context_first": 37270,
     "context_last": 107857,
     "context_peak": 107857,
