@@ -21,7 +21,15 @@ export const DEFAULTS: Config = {
 }
 
 function numberOr(value: unknown, fallback: number, min: number): number {
-  const parsed = typeof value === 'number' ? value : Number(value)
+  // Only a number, or a string that actually spells one. `Number(null)`,
+  // `Number('')` and `Number([])` are all 0, so a blank left in a settings file
+  // would otherwise read as a deliberate zero.
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim() !== ''
+        ? Number(value)
+        : Number.NaN
   if (!Number.isFinite(parsed) || parsed < min) return fallback
   return parsed
 }

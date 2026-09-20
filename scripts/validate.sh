@@ -42,6 +42,13 @@ else
   echo "  skipped: claude is not on PATH"
 fi
 
+step "Unit tests"
+if command -v node >/dev/null 2>&1; then
+  node --test "test/**/*.test.ts" || status=1
+else
+  echo "  skipped: node is not on PATH"
+fi
+
 step "TypeScript"
 if [ ! -f .claude/types/claude-code.d.ts ]; then
   echo "  skipped: no .claude/types/claude-code.d.ts"

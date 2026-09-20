@@ -48,9 +48,24 @@ So: anything that calls the engine belongs in `hooks/register.ts`. Anything that
 is a function of plain data belongs in `hooks/ledger.ts` or `hooks/config.ts`,
 where it can be read and reasoned about on its own.
 
+## Tests
+
+```bash
+./scripts/test.sh
+```
+
+Node 22.18 or newer runs the TypeScript sources directly, so there is nothing to
+install and no build step. The suite covers the three modules that do not touch
+the engine: the keep-set rule, the activation rule, and settings parsing. Those
+are the parts where a mistake is silent, so a change to any of them needs a test
+that would have caught the old behaviour.
+
+The hooks themselves are covered by `claude plugin validate`, which reads the
+module the way the engine will, and by running the plugin in a real session.
+
 ## Before opening a pull request
 
-1. `./scripts/validate.sh` passes with no errors.
+1. `./scripts/validate.sh` passes with no errors. It runs the tests too.
 2. `tsc -p tsconfig.json` passes, with the type declarations regenerated for your
    Claude Code version.
 3. You have run the change in a real interactive session. `claude -p` cannot

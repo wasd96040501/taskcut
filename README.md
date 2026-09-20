@@ -59,134 +59,103 @@ already settled.
 ## Requirements
 
 * Claude Code **2.1.278** or newer.
-* Function hooks enabled: `export CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.
-  The feature is early access and off by default.
 * An **interactive** session. `$.session.compact` is unavailable in a headless
-  one, which means `claude -p` and the stream-json SDK transport cannot compact.
-  A terminal session and a `claude --bg` session both qualify. See
+  one, so `claude -p` and the stream-json SDK transport cannot compact. A
+  terminal session and a `claude --bg` session both qualify. See
   [docs/design.md](docs/design.md#where-taskcut-can-run) for the measurements.
+* While function hooks are in early access, `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.
+  This is Claude Code's own flag, not taskcut's, and it will go away when the
+  feature graduates. taskcut's behaviour does not depend on it; see
+  [docs/compatibility.md](docs/compatibility.md).
 
-## Quickstart
-
-One line, using the GitHub CLI you are already signed in with (the repository is
-private, so the fetch has to carry credentials):
-
-```bash
-bash <(gh api repos/wasd96040501/taskcut/contents/scripts/bootstrap.sh \
-         -H "Accept: application/vnd.github.raw")
-```
-
-That keeps a checkout at `~/.claude/src/taskcut` and runs the installer. Or clone
-it yourself:
+## Install
 
 ```bash
-gh repo clone wasd96040501/taskcut
-cd taskcut
-./scripts/install.sh
+claude plugin marketplace add wasd96040501/taskcut
+claude plugin install taskcut@taskcut --scope project   # this repository
+claude plugin install taskcut@taskcut --scope user      # your machine
 ```
 
-The installer copies the plugin to `~/.claude/skills/taskcut`, where Claude Code
-loads it automatically as `taskcut@skills-dir` from the next session on. Confirm
-it with:
+Updating is `claude plugin update taskcut@taskcut`; removing is
+`claude plugin uninstall taskcut@taskcut`.
+
+From a checkout instead — for a private or air-gapped copy, where the
+marketplace has to come from a local path:
 
 ```bash
-claude plugin list | grep -A3 taskcut
+git clone https://github.com/wasd96040501/taskcut.git
+cd taskcut && ./scripts/install.sh
 ```
 
-Then start a session and use it:
+Installing does not make taskcut do anything yet. It is inert until a session
+opts in.
 
-```
-> Work through the plan in PLAN.md. Call close_task after each step.
-```
+## Turning it on
 
-To try it without installing anything:
+taskcut defaults to **opt-in**: installed but inert, in every session, until
+something says otherwise. Three things can say otherwise, in this order of
+precedence:
 
-```bash
-CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir /path/to/taskcut
-```
+| | Scope | |
+| --- | --- | --- |
+| `TASKCUT=0` | one session | Off, whatever else says. The kill switch. |
+| `TASKCUT=1` | one session | On, for that session only. |
+| `activation` = `always` | wherever installed | On in every session. |
+| `.taskcut` at the project root | one repository | On in that repository. |
 
-To remove it:
-
-```bash
-~/.claude/src/taskcut/scripts/uninstall.sh   # or ./scripts/uninstall.sh from a checkout
-```
-
-## Controlling where it runs
-
-taskcut has two independent switches. Both have to be on for anything to happen,
-which makes the blast radius easy to reason about.
-
-### 1. The master switch
-
-Function hooks are early access and off by default. Without
-`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, taskcut still shows as installed in
-`claude plugin list`, but its hooks module is never loaded: the `close_task` tool
-does not exist and no hook runs.
-
-| | `mcp__taskcut__close_task` offered? |
-| --- | --- |
-| `claude` | no |
-| `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude` | yes |
-
-So the narrowest possible setup is to export nothing and keep an alias for the
-sessions where you want it:
-
-```bash
-alias cct='CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude'
-```
-
-Exporting the variable in your shell profile turns it on for every session. That
-is the widest setting, and it enables every hooks-module plugin you have
-installed, not only this one.
-
-### 2. Per-repository
-
-Install it switched off, and let each repository turn it on:
-
-```bash
-./scripts/install.sh --opt-in
-```
-
-That leaves `"taskcut@skills-dir": false` in `~/.claude/settings.json`. In a
-repository where you do want it:
+The usual way is the marker file, because the repository then carries the
+decision and a reviewer can see it:
 
 ```bash
 cd ~/src/the-repo
-claude plugin enable taskcut@skills-dir --scope project   # .claude/settings.json, shared with the team
-claude plugin enable taskcut@skills-dir --scope local     # .claude/settings.local.json, just you
+touch .taskcut
+git add .taskcut && git commit -m "chore: enable taskcut"
 ```
 
-Project settings override user settings, and Claude Code says so:
-
-```
-Status: ✔ loaded
-Note: Disabled in ~/.claude/settings.json but still loads — project settings
-      enable it, which overrides your user setting
-```
-
-The reverse works too: leave it on for yourself and put
-`"taskcut@skills-dir": false` in the projects that should not have it.
-
-### 3. Neither — run it from a checkout
-
-Nothing installed, nothing in settings, one session only:
+For one session, without changing anything on disk:
 
 ```bash
-CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir ~/.claude/src/taskcut
+TASKCUT=1 claude
 ```
+
+And to run it everywhere, if that is what you want:
+
+```bash
+claude plugin install taskcut@taskcut --scope user --config activation=always
+```
+
+### Why taskcut owns this instead of leaving it to the platform
+
+Claude Code gates every hooks module behind `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`
+today, and that flag is off by default. It would be easy to treat it as taskcut's
+safety switch, and wrong: it is an early-access flag, so it will default to on or
+disappear when function hooks graduate. A plugin whose inertness rested on it
+would go from inert to active everywhere, silently, on an unrelated Claude Code
+release.
+
+So the decision is taskcut's own, and it is deny by default. The state before
+`session.start` has run is inert, which means a session where that hook never
+fires does nothing rather than everything. `TASKCUT=0` outranks every other
+input. Both are covered by tests in `test/activation.test.ts`.
 
 ### What it touches when it is on
 
 | | |
 | --- | --- |
 | Adds to the model's tools | `mcp__taskcut__close_task` |
-| Reads | the session id, the context-fill percentage, its own store |
+| Reads | the project root, `TASKCUT`, the session id, the context-fill percentage, its own store |
 | Writes | its own plugin store, under `~/.claude/plugins/store/` |
 | Changes | the transcript, at a boundary, once the context is past `floorPercent` |
 | Never touches | your files, your settings, the network |
 
-`claude plugin validate ~/.claude/skills/taskcut` prints the complete list of
-engine calls this plugin can make. A hooks module has no filesystem, network or
+That is not a promise, it is the output of a static scan. Check it yourself:
+
+```bash
+claude plugin validate .
+```
+
+It prints every engine call the module can make, including through helpers, and
+every environment variable it reads. A hooks module has no filesystem, network or
 process access of its own; everything goes through that interface.
 
 ## Configuration
@@ -207,7 +176,9 @@ Every setting has a working default. Change them under `/config`, in the
 | --- | --- |
 | `hooks/register.ts` | Every hook, and every call on the engine interface. |
 | `hooks/ledger.ts` | The ledger and the keep-set rule, as pure functions. |
+| `hooks/activation.ts` | Whether taskcut runs at all, as a pure rule. |
 | `hooks/config.ts` | Settings, with defaults for anything unset. |
+| `test/` | Unit tests for the three modules above. `./scripts/test.sh`. |
 
 The split is not stylistic. A hooks module may pass `$` only to a function
 declared in the same file; the loader refuses a module that passes it across an
@@ -221,8 +192,9 @@ everything that can be reasoned about as plain data lives beside it.
   `outcome` text exactly; it does not check that the text is sufficient. A thin
   conclusion produces a thin context.
 * **Early access.** The function-hooks API may change between Claude Code
-  releases without notice. Pin a release and re-run `scripts/validate.sh` after
-  upgrading.
+  releases without notice. Re-run `scripts/validate.sh` after upgrading; it
+  reports anything the engine would refuse before a session loads the plugin.
+  See [docs/compatibility.md](docs/compatibility.md).
 
 ## Documentation
 
@@ -230,6 +202,8 @@ everything that can be reasoned about as plain data lives beside it.
   measured, and the constraints that produced each rule.
 * [docs/troubleshooting.md](docs/troubleshooting.md) — what to check when
   nothing is being compacted.
+* [docs/compatibility.md](docs/compatibility.md) — what taskcut depends on, what
+  a Claude Code upgrade can break, and what semantic versioning covers here.
 
 ## Contributing
 

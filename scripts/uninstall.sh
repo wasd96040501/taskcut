@@ -1,29 +1,26 @@
 #!/usr/bin/env bash
 #
-# Removes taskcut from the Claude Code skills directory.
+# Removes taskcut and the marketplace entry that provided it.
 #
-# Usage: ./scripts/uninstall.sh [--dir <claude-config-dir>]
+# Usage: ./scripts/uninstall.sh [--scope user|project|local]
 
 set -euo pipefail
 
-CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-
+SCOPE="user"
 while [ $# -gt 0 ]; do
   case "$1" in
-    --dir) CLAUDE_DIR="$2"; shift 2 ;;
+    --scope) SCOPE="$2"; shift 2 ;;
     -h|--help) sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "uninstall.sh: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
 
-TARGET="$CLAUDE_DIR/skills/taskcut"
+claude plugin uninstall taskcut@taskcut --scope "$SCOPE" >/dev/null 2>&1 \
+  && echo "Uninstalled taskcut ($SCOPE)" || echo "No taskcut install at $SCOPE scope"
+claude plugin marketplace remove taskcut --scope "$SCOPE" >/dev/null 2>&1 \
+  && echo "Removed the taskcut marketplace ($SCOPE)" || true
 
-if [ -d "$TARGET" ]; then
-  rm -rf "${TARGET:?}"
-  echo "Removed $TARGET"
-else
-  echo "Nothing to remove at $TARGET"
-fi
-
-echo "Ledgers are stored per session and are deleted when a session ends."
-echo "To clear any left behind: $CLAUDE_DIR/plugins/store/taskcut*.json"
+echo
+echo "Ledgers are per session and are deleted when a session ends; any left by a"
+echo "killed session are swept after a week. To clear them now:"
+echo "  rm -f \"\${CLAUDE_CONFIG_DIR:-\$HOME/.claude}\"/plugins/store/taskcut*.json"

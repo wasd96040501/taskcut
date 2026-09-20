@@ -4,15 +4,29 @@
 
 Work down this list; the first four cover almost everything.
 
-### 1. Are function hooks enabled?
+### 1. Has this session opted in?
+
+taskcut is inert until something turns it on. Check, in order:
+
+```bash
+echo "$TASKCUT"          # 0 is a kill switch; 1 turns it on for this session
+ls -a . | grep taskcut   # .taskcut at the project root turns it on here
+```
+
+If neither is set and `activation` is left at its default `opt-in`, taskcut is
+loaded and doing nothing, which is what it is supposed to do. Turn it on with
+`touch .taskcut` in the repository, or `TASKCUT=1 claude` for one session.
+
+### 1b. Are function hooks enabled?
 
 ```bash
 echo "$CLAUDE_CODE_ENABLE_FUNCTION_HOOKS"
 ```
 
-It must print `1`. The feature is early access and off by default, and without it
-the hooks module is not loaded at all — the plugin still appears in
-`claude plugin list`, and none of its hooks run.
+While function hooks are in early access this must print `1`, or the hooks module
+is not loaded at all — the plugin still appears in `claude plugin list`, and none
+of its hooks run. This is Claude Code's flag, not taskcut's, and it will stop
+being needed when the feature graduates.
 
 ### 2. Is the plugin loaded?
 
@@ -20,24 +34,19 @@ the hooks module is not loaded at all — the plugin still appears in
 claude plugin list | grep -A3 taskcut
 ```
 
-You want `Status: ✔ loaded`. If the plugin is absent, check that
-`~/.claude/skills/taskcut/.claude-plugin/plugin.json` exists, and note that a
-plugin added to the skills directory is picked up from the **next** session, not
-the running one.
+You want `Status: ✔ loaded`. If the plugin is absent, check that the marketplace is still configured with
+`claude plugin marketplace list`, and note that a plugin change is picked up from
+the **next** session, not the running one.
 
-### 2b. Is it enabled in *this* repository?
+### 2b. Is it disabled in this scope?
 
 ```bash
 claude plugin list | grep -A5 taskcut
 ```
 
-If it reads `Status: ✘ disabled`, taskcut was installed with `--opt-in` and this
-repository has not turned it on:
-
-```bash
-claude plugin enable taskcut@skills-dir --scope project   # shared with the team
-claude plugin enable taskcut@skills-dir --scope local     # just you
-```
+`Status: ✘ disabled` means a settings file switched the plugin off, which is a
+different thing from taskcut being inert. Re-enable it with
+`claude plugin enable taskcut@taskcut --scope project`.
 
 ### 3. Is the session interactive?
 

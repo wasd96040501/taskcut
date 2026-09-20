@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "taskcut",
+  "description": "Compaction at sub-task boundaries for Claude Code",
+  "owner": {
+    "name": "Yangze Luo"
+  },
+  "plugins": [
+    {
+      "name": "taskcut",
+      "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. The model calls close_task when a piece of work is finished; taskcut then replaces that work's transcript with the conclusion the model wrote, keeping the human turns verbatim and spending no summarizer call.",
+      "author": {
+        "name": "Yangze Luo"
+      },
+      "category": "productivity",
+      "keywords": ["context", "compaction", "long-running", "function-hooks"],
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/wasd96040501/taskcut",
+      "source": "./"
+    }
+  ]
+}

@@ -1,34 +1,37 @@
 #!/usr/bin/env bash
 #
-# Installs taskcut into the Claude Code skills directory, where it is loaded
-# automatically from the next session on.
+# Installs taskcut through Claude Code's own plugin mechanism, from a checkout.
 #
-# Usage: ./scripts/install.sh [--opt-in] [--dir <claude-config-dir>]
+# For a repository you can reach by name, prefer the two native commands and
+# skip this script entirely:
 #
-#   --opt-in  Install, then switch taskcut off for every session, so that it
-#             runs only in the repositories that enable it themselves. Leaves
-#             "taskcut@skills-dir": false in the user settings; a repository
-#             turns it on with `claude plugin enable taskcut@skills-dir
-#             --scope project` (shared with the team) or `--scope local`
-#             (just you).
+#   claude plugin marketplace add wasd96040501/taskcut
+#   claude plugin install taskcut@taskcut --scope project
+#
+# This script is for a private or air-gapped checkout, where the marketplace has
+# to be added from a local path.
+#
+# Usage: ./scripts/install.sh [--scope user|project|local] [--everywhere]
+#
+#   --scope       Where to record the install. Default: user.
+#   --everywhere  Set activation to "always", so taskcut runs in every session
+#                 rather than only where a .taskcut marker or TASKCUT=1 says so.
 
 set -euo pipefail
 
 REQUIRED_VERSION="2.1.278"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-OPT_IN=0
+SCOPE="user"
+ACTIVATION="opt-in"
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --opt-in) OPT_IN=1; shift ;;
-    --dir) CLAUDE_DIR="$2"; shift 2 ;;
-    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --scope) SCOPE="$2"; shift 2 ;;
+    --everywhere) ACTIVATION="always"; shift ;;
+    -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "install.sh: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
-
-TARGET="$CLAUDE_DIR/skills/taskcut"
 
 info() { printf '  %s\n' "$*"; }
 fail() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -52,52 +55,36 @@ echo "Installing taskcut"
 command -v claude >/dev/null 2>&1 || fail "claude is not on PATH. See https://claude.com/claude-code"
 
 VERSION="$(claude --version 2>/dev/null | awk '{print $1}')"
-if version_at_least "$VERSION" "$REQUIRED_VERSION"; then
-  info "Claude Code $VERSION"
-else
-  fail "Claude Code $VERSION is older than the required $REQUIRED_VERSION. Run: claude update"
-fi
+version_at_least "$VERSION" "$REQUIRED_VERSION" \
+  || fail "Claude Code $VERSION is older than the required $REQUIRED_VERSION. Run: claude update"
+info "Claude Code $VERSION"
 
-[ -f "$REPO_ROOT/.claude-plugin/plugin.json" ] || fail "run this from a taskcut checkout"
+[ -f "$REPO_ROOT/.claude-plugin/marketplace.json" ] || fail "run this from a taskcut checkout"
 
-mkdir -p "$TARGET"
-rm -rf "${TARGET:?}/.claude-plugin" "${TARGET:?}/hooks"
-cp -R "$REPO_ROOT/.claude-plugin" "$REPO_ROOT/hooks" "$TARGET/"
-info "Installed to $TARGET"
+claude plugin validate "$REPO_ROOT" >/dev/null || fail "validation failed; nothing will load"
+info "Validated"
 
-if CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin validate "$TARGET" >/tmp/taskcut-validate.$$ 2>&1; then
-  info "Validated"
-else
-  cat /tmp/taskcut-validate.$$ >&2
-  rm -f /tmp/taskcut-validate.$$
-  fail "validation failed; nothing will load"
-fi
-rm -f /tmp/taskcut-validate.$$
+claude plugin marketplace remove taskcut --scope "$SCOPE" >/dev/null 2>&1 || true
+claude plugin marketplace add "$REPO_ROOT" --scope "$SCOPE" >/dev/null
+info "Marketplace added from $REPO_ROOT ($SCOPE)"
 
-if [ "$OPT_IN" -eq 1 ]; then
-  if claude plugin disable taskcut@skills-dir --scope user >/dev/null 2>&1; then
-    info "Switched off for every session; repositories opt in individually"
-  else
-    info "Could not switch it off automatically; see 'Controlling where it runs' in the README"
-  fi
-fi
+claude plugin uninstall taskcut@taskcut --scope "$SCOPE" >/dev/null 2>&1 || true
+claude plugin install taskcut@taskcut --scope "$SCOPE" --config "activation=$ACTIVATION" >/dev/null
+info "Installed ($SCOPE), activation=$ACTIVATION"
 
-cat <<'NEXT'
+cat <<NEXT
 
-Done. Two things remain:
+Done.
 
-  1. Function hooks are early access and off by default. Enable them:
+taskcut is inert until a session opts in. In a repository where you want it:
 
-       export CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1
+    touch .taskcut        # commit it, and the repository carries the decision
 
-     Add that line to your shell profile to make it permanent.
+or, for one session only:
 
-  2. Start a new session. taskcut loads as taskcut@skills-dir; confirm with:
+    TASKCUT=1 claude
 
-       claude plugin list | grep -A3 taskcut
+TASKCUT=0 switches it off wherever it would otherwise run.
 
-Compaction needs an interactive session: a terminal, or claude --bg. It is
-unavailable under claude -p and the stream-json SDK transport.
-
-Settings live under /config, in the taskcut section.
+Settings live under /config, or: claude plugin install ... --config KEY=VALUE
 NEXT

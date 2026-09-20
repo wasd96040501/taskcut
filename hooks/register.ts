@@ -18,6 +18,14 @@
 
 import type { EngineInterface, Register, SessionMessage } from 'claude-code'
 
+import {
+  ENV_VAR,
+  INERT,
+  MARKER_FILE,
+  decideActivation,
+  readActivationMode,
+  type Activation,
+} from './activation'
 import { readConfig, type Config } from './config'
 import {
   LEDGER_PREFIX,
@@ -30,8 +38,26 @@ import {
   type Entry,
 } from './ledger'
 
+/**
+ * The instructions taskcut passes to its own compaction. Another plugin can
+ * trigger a `plugin` compaction too, and this plugin's other hooks see it; the
+ * marker is how the boundary cut tells its own dispatch from someone else's,
+ * instead of hijacking every plugin compaction in the session.
+ */
+const COMPACTION_MARKER = 'taskcut: sub-task boundary'
+
 /** Set by the `close_task` handler, read and cleared at the end of the turn. */
 let boundaryReached = false
+
+/**
+ * Resolved once, at `session.start`. It starts inert so that a session in which
+ * that hook never runs does nothing at all, rather than everything.
+ */
+let activation: Activation = INERT
+
+/** Compile-time guard: the literal above must stay equal to the constant. */
+const ENV_VAR_LITERAL: typeof ENV_VAR = 'TASKCUT'
+void ENV_VAR_LITERAL
 
 /**
  * The plugin store is shared by every session on the machine, so the ledger is
@@ -86,9 +112,22 @@ async function foldLedger($: EngineInterface, ledger: readonly Entry[], config: 
 
 export const register: Register = (on, options) => {
   const config = readConfig(options)
+  const mode = readActivationMode(options['activation'])
 
   on('session.start', async ($, e, next) => {
     const result = await next(e)
+
+    const root = await $.session.root()
+    activation = decideActivation({
+      mode,
+      markerPresent: await $.fs.exists(`${root}/${MARKER_FILE}`),
+      // Spelled out: $.env.get takes a literal name so that the loader can list
+      // every variable a module reads. ENV_VAR_LITERAL fails the build if this
+      // string and the constant ever disagree.
+      env: await $.env.get('TASKCUT'),
+    })
+    if (!activation.active) return result
+
     await $.tool.register({
       name: 'close_task',
       description:
@@ -121,7 +160,7 @@ export const register: Register = (on, options) => {
 
   on('turn.complete', async ($, e, next) => {
     const result = await next(e)
-    if (!boundaryReached) return result
+    if (!activation.active || !boundaryReached) return result
     boundaryReached = false
 
     const { context } = await $.session.usage()
@@ -131,14 +170,17 @@ export const register: Register = (on, options) => {
     // it is unavailable altogether in a headless session (`-p` or the SDK
     // transport). A failure here must not take the turn down with it.
     try {
-      await $.session.compact({ instructions: 'taskcut: sub-task boundary' })
+      await $.session.compact({ instructions: COMPACTION_MARKER })
     } catch (error) {
       await $.ui.log(`taskcut: compaction skipped (${String(error)})`)
     }
     return result
   })
 
-  on('session.compact', { trigger: 'plugin' }, async ($, e) => {
+  on('session.compact', { trigger: 'plugin' }, async ($, e, next) => {
+    // Someone else's plugin compaction passes straight through: this hook only
+    // answers the dispatch taskcut itself raised.
+    if (!activation.active || e.instructions !== COMPACTION_MARKER) return next(e)
     const ledger = await readLedger($)
     const summary: SessionMessage = { role: 'user', text: renderLedger(ledger), toolUses: [] }
     // No `next(e)`: the cut is deterministic, so no summariser runs and the
@@ -150,6 +192,7 @@ export const register: Register = (on, options) => {
     // The engine's own threshold compaction stays in place for the sub-task too
     // large to reach a boundary. Core summarises, as it would without this
     // plugin, but it is told what the closed sub-tasks already settled.
+    if (!activation.active) return next(e)
     const ledger = await readLedger($)
     if (ledger.length === 0) return next(e)
     const instructions = [e.instructions ?? '', renderLedger(ledger)].filter(Boolean).join('\n\n')
@@ -158,6 +201,7 @@ export const register: Register = (on, options) => {
 
   on('session.end', async ($, e, next) => {
     const result = await next(e)
+    if (!activation.active) return result
     await $.store.delete(await ledgerKey($))
     return result
   })

@@ -1,0 +1,9 @@
+# Every change is reviewed by the maintainer.
+*                       @wasd96040501
+
+# The cut and the activation rule are the two places where a mistake is quiet
+# and expensive, so they are called out separately rather than left to the
+# catch-all above.
+/hooks/ledger.ts        @wasd96040501
+/hooks/activation.ts    @wasd96040501
+/test/                  @wasd96040501

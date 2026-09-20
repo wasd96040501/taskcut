@@ -113,5 +113,8 @@ export function humanTurnsOf(messages: readonly SessionMessage[]): SessionMessag
 export function boundedHumanTurns(messages: readonly SessionMessage[], recent: number): SessionMessage[] {
   const turns = humanTurnsOf(messages)
   if (turns.length <= recent + 1) return turns
-  return [turns[0]!, ...turns.slice(-recent)]
+  // `slice(-0)` is `slice(0)`, which is the whole array, so a bound of zero has
+  // to be spelled out rather than fall out of the arithmetic.
+  const tail = recent > 0 ? turns.slice(-recent) : []
+  return [turns[0]!, ...tail]
 }

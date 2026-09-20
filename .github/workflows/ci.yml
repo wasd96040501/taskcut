@@ -49,12 +49,11 @@ jobs:
         with:
           node-version: '22'
 
-      # The plugin API declarations are generated per Claude Code version by
-      # /plugin-types and are deliberately not committed, so CI type-checks the
-      # syntax and the pure modules and leaves the full build to
-      # scripts/validate.sh, which every pull request is expected to have run.
-      - name: TypeScript syntax
-        run: npx --yes -p typescript tsc --noEmit --target es2023 --module esnext --moduleResolution bundler --skipLibCheck --allowJs false hooks/*.ts || true
+      # Node 22.18+ runs the TypeScript sources directly, so the unit tests need
+      # no build step and no dependencies. They cover the pure modules: the
+      # keep-set rule, the activation rule, and settings parsing.
+      - name: Unit tests
+        run: node --test "test/**/*.test.ts"
 
       - name: Parse every hooks module
         run: |
@@ -88,7 +87,8 @@ jobs:
           missing=0
           for file in README.md LICENSE NOTICE CHANGELOG.md CONTRIBUTING.md \
                       CODE_OF_CONDUCT.md SECURITY.md SUPPORT.md \
-                      docs/design.md docs/troubleshooting.md; do
+                      .github/CODEOWNERS .claude-plugin/marketplace.json \
+                      docs/design.md docs/troubleshooting.md docs/compatibility.md; do
             if [ ! -f "$file" ]; then echo "::error::$file is missing"; missing=1; fi
           done
           exit "$missing"
