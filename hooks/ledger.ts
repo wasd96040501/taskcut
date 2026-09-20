@@ -66,6 +66,86 @@ export function renderLedger(ledger: readonly Entry[]): string {
   ].join('\n')
 }
 
+/**
+ * How much of a dropped transcript the directed extractor is shown. A tool
+ * result can be an entire file, and the extractor is paid for by the token, so
+ * the transcript is trimmed rather than sent whole. Trimming loses the tail of
+ * a long result, which is the trade the mode makes: a cheaper reader that saw
+ * most of the work, against an expensive one that saw all of it.
+ */
+export const DIRECTED_RESULT_LIMIT = 20_000
+export const DIRECTED_TOTAL_LIMIT = 120_000
+
+/** The messages a cut is about to drop: everything the keep-set rule did not take. */
+export function droppedMessages(
+  all: readonly SessionMessage[],
+  kept: readonly SessionMessage[],
+): SessionMessage[] {
+  const keptSet = new Set<SessionMessage>(kept)
+  return all.filter((message) => !keptSet.has(message))
+}
+
+/**
+ * The standing task: the first human turn, which is the only record of what the
+ * whole job is for. A directed extraction is directed at this and nothing else.
+ */
+export function standingTask(messages: readonly SessionMessage[]): string {
+  return humanTurnsOf(messages)[0]?.text?.trim() ?? ''
+}
+
+function clip(text: string, limit: number): string {
+  return text.length <= limit ? text : `${text.slice(0, limit)}\n[... ${text.length - limit} characters omitted]`
+}
+
+/** A dropped transcript as plain text, for a model that was not in the conversation. */
+export function renderDropped(messages: readonly SessionMessage[]): string {
+  const parts: string[] = []
+  for (const message of messages) {
+    if (message.text?.trim()) parts.push(`${message.role}: ${message.text.trim()}`)
+    for (const use of message.toolUses ?? []) {
+      const result = typeof use.text === 'string' ? use.text : ''
+      parts.push(`${message.role} ran ${use.tool}:\n${clip(result, DIRECTED_RESULT_LIMIT)}`)
+    }
+    for (const result of message.toolResults ?? []) {
+      if (result.text) parts.push(clip(result.text, DIRECTED_RESULT_LIMIT))
+    }
+  }
+  return clip(parts.join('\n\n'), DIRECTED_TOTAL_LIMIT)
+}
+
+/**
+ * The prompt that writes a ledger entry from the work itself rather than from
+ * the working model's own account of it.
+ *
+ * The difference is what the writer knows. A model closing its own sub-task is
+ * told that nothing else will survive, and answers that by writing down
+ * everything it noticed, which is a poor conclusion and a large one. This
+ * writer is not under that pressure and has something the other did not: the
+ * standing task, against which most of what happened is irrelevant.
+ *
+ * It says what the situation is and stops. A list of rules about what to keep
+ * and what to drop would decide in advance the very thing the mode exists to
+ * test -- whether a model given the job and the work can judge for itself what
+ * matters -- and a writer following a checklist produces an inventory, which is
+ * the failure the mode is meant to avoid.
+ */
+export function directedPrompt(task: string, subTask: string, dropped: string): string {
+  return [
+    'A long job is in progress. This is the standing task, in the words of the',
+    'person who set it:',
+    '',
+    task || '(the standing task was not recorded)',
+    '',
+    `A sub-task of it has just finished: ${subTask}`,
+    '',
+    'Below is everything that happened while it was worked on. It is about to be',
+    'deleted. Write what someone continuing the standing task will need.',
+    '',
+    '--- transcript ---',
+    dropped,
+  ].join('\n')
+}
+
 /** How long a ledger left behind by a session that never ended cleanly is kept. */
 export const STALE_LEDGER_MS = 7 * 24 * 60 * 60 * 1000
 

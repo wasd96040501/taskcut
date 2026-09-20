@@ -1,0 +1,109 @@
+{
+ "name": "flask",
+ "description": "Eight modules of a real web framework, read one per sub-task. Ordinary code, ordinary sizes.",
+ "source": {
+  "kind": "git",
+  "url": "https://github.com/pallets/flask",
+  "ref": ""
+ },
+ "files": [
+  "src/flask/logging.py",
+  "src/flask/blueprints.py",
+  "src/flask/views.py",
+  "src/flask/templating.py",
+  "src/flask/wrappers.py",
+  "src/flask/testing.py",
+  "src/flask/config.py",
+  "src/flask/sessions.py"
+ ],
+ "step_template": "Sub-task {n} of {total}: read {file} in full and tell me two things -- what the module is responsible for, in one sentence, and the name of the last function or class defined in it.",
+ "probes": [
+  {
+   "id": "H1",
+   "kind": "headline",
+   "question": "What is the name of the last function or class defined in src/flask/sessions.py?",
+   "expect": [
+    "SecureCookieSessionInterface"
+   ]
+  },
+  {
+   "id": "I1",
+   "kind": "incidental",
+   "question": "Which config key does a Flask request read to limit the number of parts in a multipart form?",
+   "expect": [
+    "MAX_FORM_PARTS"
+   ]
+  },
+  {
+   "id": "H2",
+   "kind": "headline",
+   "question": "What is the name of the last function or class defined in src/flask/testing.py?",
+   "expect": [
+    "FlaskCliRunner"
+   ]
+  },
+  {
+   "id": "I2",
+   "kind": "incidental",
+   "question": "In the from_envvar docstring example in src/flask/config.py, which environment variable name is used?",
+   "expect": [
+    "YOURAPPLICATION_SETTINGS"
+   ]
+  },
+  {
+   "id": "H3",
+   "kind": "headline",
+   "question": "What is the name of the last function or class defined in src/flask/templating.py?",
+   "expect": [
+    "stream_template_string"
+   ]
+  },
+  {
+   "id": "I3",
+   "kind": "incidental",
+   "question": "Which config key decides whether the session cookie is sent again on every request?",
+   "expect": [
+    "SESSION_REFRESH_EACH_REQUEST"
+   ]
+  },
+  {
+   "id": "H4",
+   "kind": "headline",
+   "question": "What is the name of the last function or class defined in src/flask/logging.py?",
+   "expect": [
+    "create_logger"
+   ]
+  },
+  {
+   "id": "I4",
+   "kind": "incidental",
+   "question": "Which config key switches on the explanation of template loading?",
+   "expect": [
+    "EXPLAIN_TEMPLATE_LOADING"
+   ]
+  },
+  {
+   "id": "I5",
+   "kind": "incidental",
+   "question": "When a request is active, which stream does Flask's default logging handler write to?",
+   "expect": [
+    "wsgi.errors"
+   ]
+  },
+  {
+   "id": "H5",
+   "kind": "headline",
+   "question": "For each file you read in this session, name the last function or class defined in it.",
+   "expect": [
+    "create_logger",
+    "Blueprint",
+    "MethodView",
+    "stream_template_string",
+    "Response",
+    "FlaskCliRunner",
+    "Config",
+    "SecureCookieSessionInterface"
+   ]
+  }
+ ]
+}

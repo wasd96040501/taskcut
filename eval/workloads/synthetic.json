@@ -1,0 +1,96 @@
+{
+ "name": "synthetic",
+ "description": "Ten near-identical generated modules. Controls for everything except interference.",
+ "source": {
+  "kind": "generated",
+  "generator": "synthetic.py"
+ },
+ "files": [
+  "mod00.py",
+  "mod01.py",
+  "mod02.py",
+  "mod03.py",
+  "mod04.py",
+  "mod05.py",
+  "mod06.py",
+  "mod07.py",
+  "mod08.py",
+  "mod09.py"
+ ],
+ "step_template": "Sub-task {n}: run `cat {file}` to read the whole file, then tell me the name of the last function defined in it.",
+ "probes": [
+  {
+   "id": "H1",
+   "kind": "headline",
+   "question": "What is the name of the last function defined in mod03.py?",
+   "expect": [
+    "reap_leases"
+   ]
+  },
+  {
+   "id": "I1",
+   "kind": "incidental",
+   "question": "What is the value of RETRY_BUDGET in mod03.py?",
+   "expect": [
+    "4422"
+   ]
+  },
+  {
+   "id": "H2",
+   "kind": "headline",
+   "question": "What is the name of the last function defined in mod08.py?",
+   "expect": [
+    "park_tenant"
+   ]
+  },
+  {
+   "id": "I2",
+   "kind": "incidental",
+   "question": "Which name appears in the owner comment in mod06.py?",
+   "expect": [
+    "yusuf"
+   ]
+  },
+  {
+   "id": "H3",
+   "kind": "headline",
+   "question": "Which module has rotate_shard as its last function?",
+   "expect": [
+    "mod05"
+   ]
+  },
+  {
+   "id": "I3",
+   "kind": "incidental",
+   "question": "What is the value of RETRY_BUDGET in mod09.py?",
+   "expect": [
+    "5244"
+   ]
+  },
+  {
+   "id": "H4",
+   "kind": "headline",
+   "question": "What is the name of the last function defined in mod01.py?",
+   "expect": [
+    "drain_backlog"
+   ]
+  },
+  {
+   "id": "H5",
+   "kind": "headline",
+   "question": "For mod00 through mod09, list the last function of each, one per line.",
+   "expect": [
+    "flush_pending",
+    "drain_backlog",
+    "seal_epoch",
+    "reap_leases",
+    "settle_quota",
+    "rotate_shard",
+    "purge_cursor",
+    "commit_digest",
+    "park_tenant",
+    "fence_window"
+   ]
+  }
+ ]
+}

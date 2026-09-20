@@ -53,6 +53,17 @@
       "description": "Alias or full id, resolved the way a --model value is. Only used when the ledger grows past the verbatim limit.",
       "required": false,
       "default": "haiku"
+    },
+    "ledgerMode": {
+      "type": "string",
+      "title": "Who writes a ledger entry",
+      "description": "\"outcome\" (default): the conclusion the working model writes when it calls close_task. \"directed\": that conclusion is replaced by one the fold model writes from the transcript the cut is dropping, aimed at the standing task. Directed costs one small-model call per cut and keeps less, on purpose.",
+      "required": false,
+      "default": "outcome",
+      "options": [
+        "outcome",
+        "directed"
+      ]
     }
   }
 }

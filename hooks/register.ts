@@ -30,10 +30,14 @@ import { readConfig, type Config } from './config'
 import {
   LEDGER_PREFIX,
   boundedHumanTurns,
+  directedPrompt,
+  droppedMessages,
   foldPrompt,
   foldedEntry,
   planFold,
+  renderDropped,
   renderLedger,
+  standingTask,
   staleLedgerKeys,
   type Entry,
 } from './ledger'
@@ -110,6 +114,45 @@ async function foldLedger($: EngineInterface, ledger: readonly Entry[], config: 
   return [foldedEntry(plan.fold, rolled), ...plan.keep]
 }
 
+/**
+ * Rewrites the entry just closed from the work itself, rather than from the
+ * working model's account of it.
+ *
+ * A model closing its own sub-task is told nothing else will survive, and
+ * answers that by writing down everything it noticed: a large record and a poor
+ * conclusion. This writer is under no such pressure and knows something the
+ * other did not -- the standing task, against which most of what happened does
+ * not matter. It costs one small-model call per cut, out of band.
+ *
+ * Any failure falls back to the written outcome. A cut that cannot reach a
+ * model must still cut.
+ */
+async function directLastEntry(
+  $: EngineInterface,
+  all: readonly SessionMessage[],
+  kept: readonly SessionMessage[],
+  config: Config,
+): Promise<Entry[]> {
+  const ledger = await readLedger($)
+  const last = ledger[ledger.length - 1]
+  const dropped = droppedMessages(all, kept)
+  if (last === undefined || dropped.length === 0) return ledger
+  try {
+    const written = await $.model.complete({
+      model: config.foldModel,
+      prompt: directedPrompt(standingTask(all), last.task, renderDropped(dropped)),
+      maxTokens: 1024,
+    })
+    if (!written.trim()) return ledger
+    const directed = [...ledger.slice(0, -1), { ...last, outcome: written.trim() }]
+    await writeLedger($, directed)
+    return directed
+  } catch (error) {
+    await $.ui.log(`taskcut: directed entry skipped (${String(error)})`)
+    return ledger
+  }
+}
+
 export const register: Register = (on, options) => {
   const config = readConfig(options)
   const mode = readActivationMode(options['activation'])
@@ -130,12 +173,21 @@ export const register: Register = (on, options) => {
 
     await $.tool.register({
       name: 'close_task',
+      // The two modes need different descriptions, and not for tidiness: under
+      // `outcome` the warning that nothing else survives is what makes the
+      // model write a usable conclusion, and under `directed` it would be a
+      // lie that buys an inventory nobody reads.
       description:
-        'Call this the moment a sub-task is finished and you are moving on to the next one. ' +
-        'Everything you did for it — the files you read, the commands you ran, the dead ends — ' +
-        'is dropped from your context. Only the text you write in `outcome` survives, so write ' +
-        'what the next sub-task will need: the decisions you made, the paths and names and ' +
-        'numbers, and what is now known to be true.',
+        config.ledgerMode === 'directed'
+          ? 'Call this the moment a sub-task is finished and you are moving on to the next one. ' +
+            'Name what you finished and give the result in a line or two. The working context of ' +
+            'the sub-task is dropped afterwards; what is kept in its place is written from the ' +
+            'work itself, so you do not have to inventory it here.'
+          : 'Call this the moment a sub-task is finished and you are moving on to the next one. ' +
+            'Everything you did for it — the files you read, the commands you ran, the dead ends — ' +
+            'is dropped from your context. Only the text you write in `outcome` survives, so write ' +
+            'what the next sub-task will need: the decisions you made, the paths and names and ' +
+            'numbers, and what is now known to be true.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -191,11 +243,15 @@ export const register: Register = (on, options) => {
     // Someone else's plugin compaction passes straight through: this hook only
     // answers the dispatch taskcut itself raised.
     if (!activation.active || e.instructions !== COMPACTION_MARKER) return next(e)
-    const ledger = await readLedger($)
+    const kept = boundedHumanTurns(e.messages, config.recentHumanTurns)
+    const ledger =
+      config.ledgerMode === 'directed'
+        ? await directLastEntry($, e.messages, kept, config)
+        : await readLedger($)
     const summary: SessionMessage = { role: 'user', text: renderLedger(ledger), toolUses: [] }
     // No `next(e)`: the cut is deterministic, so no summariser runs and the
     // messages kept carry their engine handles, standing exactly as recorded.
-    return { messages: [...boundedHumanTurns(e.messages, config.recentHumanTurns), summary] }
+    return { messages: [...kept, summary] }
   })
 
   on('session.compact', { trigger: 'auto' }, async ($, e, next) => {

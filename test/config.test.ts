@@ -9,8 +9,8 @@ describe('readConfig', () => {
   })
 
   test('reads values that are in range', () => {
-    const config = readConfig({ floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, foldModel: 'sonnet' })
-    assert.deepEqual(config, { floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, foldModel: 'sonnet' })
+    const config = readConfig({ floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, foldModel: 'sonnet', ledgerMode: 'outcome' })
+    assert.deepEqual(config, { floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, foldModel: 'sonnet', ledgerMode: 'outcome' })
   })
 
   test('accepts a numeric string, as a settings file may hold one', () => {
@@ -41,5 +41,17 @@ describe('readConfig', () => {
     assert.ok(DEFAULTS.floorPercent > 0)
     assert.ok(DEFAULTS.recentHumanTurns >= 1)
     assert.ok(DEFAULTS.ledgerVerbatim >= 2)
+  })
+})
+
+describe('ledgerMode', () => {
+  test('takes the directed mode when it is asked for by name', () => {
+    assert.equal(readConfig({ ledgerMode: 'directed' }).ledgerMode, 'directed')
+  })
+
+  test('falls back to outcome for anything it does not recognise', () => {
+    for (const value of ['DIRECTED', 'smart', '', null, undefined, 1, {}]) {
+      assert.equal(readConfig({ ledgerMode: value } as never).ledgerMode, 'outcome')
+    }
   })
 })

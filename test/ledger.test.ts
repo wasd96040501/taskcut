@@ -2,9 +2,14 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 
 import {
+  DIRECTED_RESULT_LIMIT,
   LEDGER_PREFIX,
   STALE_LEDGER_MS,
   boundedHumanTurns,
+  directedPrompt,
+  droppedMessages,
+  renderDropped,
+  standingTask,
   foldPrompt,
   foldedEntry,
   humanTurnsOf,
@@ -175,5 +180,82 @@ describe('staleLedgerKeys', () => {
   test('ignores keys that are not ledgers', () => {
     const map = new Map([['somethingElse', [entry(1, 0)]]])
     assert.deepEqual(staleLedgerKeys(map, current, now), [])
+  })
+})
+
+describe('droppedMessages', () => {
+  const a = { role: 'user', text: 'a', toolUses: [] } as SessionMessage
+  const b = { role: 'assistant', text: 'b', toolUses: [] } as SessionMessage
+  const c = { role: 'user', text: 'c', toolUses: [] } as SessionMessage
+
+  test('is everything the keep-set rule did not take', () => {
+    assert.deepEqual(droppedMessages([a, b, c], [a, c]), [b])
+  })
+
+  test('drops nothing when everything was kept', () => {
+    assert.deepEqual(droppedMessages([a, b], [a, b]), [])
+  })
+
+  test('compares by identity, not by content', () => {
+    const twin = { role: 'user', text: 'a', toolUses: [] } as SessionMessage
+    assert.deepEqual(droppedMessages([a, twin], [a]), [twin])
+  })
+})
+
+describe('standingTask', () => {
+  test('is the first human turn, which is the only record of the goal', () => {
+    const messages = [
+      { role: 'user', text: '  audit every module  ', toolUses: [] },
+      { role: 'assistant', text: 'on it', toolUses: [] },
+      { role: 'user', text: 'next one', toolUses: [] },
+    ] as SessionMessage[]
+    assert.equal(standingTask(messages), 'audit every module')
+  })
+
+  test('ignores a user message that is only a tool result', () => {
+    const messages = [
+      { role: 'user', text: 'output', toolUses: [], toolResults: [{ tool_use_id: 'x', text: 'output' }] },
+      { role: 'user', text: 'the real task', toolUses: [] },
+    ] as unknown as SessionMessage[]
+    assert.equal(standingTask(messages), 'the real task')
+  })
+
+  test('is empty when there is no human turn at all', () => {
+    assert.equal(standingTask([]), '')
+  })
+})
+
+describe('renderDropped', () => {
+  test('carries what a tool produced, not just what was said', () => {
+    const messages = [
+      { role: 'assistant', text: 'reading it', toolUses: [{ tool_use_id: '1', tool: 'Bash', input: {}, text: 'RETRY_BUDGET = 4011' }] },
+    ] as unknown as SessionMessage[]
+    const rendered = renderDropped(messages)
+    assert.match(rendered, /reading it/)
+    assert.match(rendered, /ran Bash/)
+    assert.match(rendered, /RETRY_BUDGET = 4011/)
+  })
+
+  test('clips a tool result rather than sending a whole file', () => {
+    const huge = 'x'.repeat(DIRECTED_RESULT_LIMIT + 5000)
+    const messages = [
+      { role: 'assistant', text: '', toolUses: [{ tool_use_id: '1', tool: 'Bash', input: {}, text: huge }] },
+    ] as unknown as SessionMessage[]
+    const rendered = renderDropped(messages)
+    assert.ok(rendered.length < huge.length)
+    assert.match(rendered, /characters omitted/)
+  })
+})
+
+describe('directedPrompt', () => {
+  test('aims the extractor at the standing task and names the sub-task', () => {
+    const prompt = directedPrompt('audit every module', 'read config.py', 'transcript here')
+    assert.match(prompt, /audit every module/)
+    assert.match(prompt, /read config.py/)
+    assert.match(prompt, /transcript here/)
+  })
+
+  test('says so when the standing task was never recorded', () => {
+    assert.match(directedPrompt('', 'a sub-task', ''), /was not recorded/)
   })
 })

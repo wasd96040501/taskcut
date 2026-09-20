@@ -219,6 +219,7 @@ Every setting has a working default. Change them under `/config`, in the
 | `recentHumanTurns` | `2` | How many of the most recent human turns are kept beside the first one. Human turns are unbounded on a long run, so keeping all of them only moves the growth. |
 | `ledgerVerbatim` | `12` | How many closed sub-tasks stay in the model's own words. Past this, the oldest are folded into one rolled-up entry. |
 | `foldModel` | `haiku` | The model that folds them. An alias or a full id, resolved the way a `--model` value is. |
+| `ledgerMode` | `outcome` | Who writes a ledger entry. `outcome` keeps the conclusion the working model wrote at `close_task`. `directed` throws that away and has `foldModel` write the entry from the transcript the cut is dropping, aimed at the standing task: one small-model call per cut, out of band. See [docs/measurement.md](docs/measurement.md) for what each one keeps. |
 
 ## How it is put together
 
@@ -263,8 +264,9 @@ everything that can be reasoned about as plain data lives beside it.
 
 * [docs/design.md](docs/design.md) — why the cut is shaped this way, what was
   measured, and the constraints that produced each rule.
-* [docs/measurement.md](docs/measurement.md) — how to A/B the plugin against
-  itself, what the numbers mean, and what the first run measured.
+* [docs/measurement.md](docs/measurement.md) — what the benchmark has found:
+  what a cut costs, what it keeps, and where it starts paying.
+* [eval/README.md](eval/README.md) — the benchmark itself. `make eval-list`.
 * [docs/troubleshooting.md](docs/troubleshooting.md) — what to check when
   nothing is being compacted.
 * [docs/compatibility.md](docs/compatibility.md) — what taskcut depends on, what

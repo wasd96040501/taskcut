@@ -11,13 +11,22 @@ export type Config = {
   ledgerVerbatim: number
   /** The model that folds them, as a `--model` value. */
   foldModel: string
+  /**
+   * Who writes a ledger entry. `outcome` keeps what the working model wrote at
+   * `close_task`. `directed` discards it and has `foldModel` write the entry
+   * from the transcript the cut is dropping, aimed at the standing task.
+   */
+  ledgerMode: LedgerMode
 }
+
+export type LedgerMode = 'outcome' | 'directed'
 
 export const DEFAULTS: Config = {
   floorPercent: 40,
   recentHumanTurns: 2,
   ledgerVerbatim: 12,
   foldModel: 'haiku',
+  ledgerMode: 'outcome',
 }
 
 function numberOr(value: unknown, fallback: number, min: number): number {
@@ -41,5 +50,6 @@ export function readConfig(options: PluginOptions): Config {
     recentHumanTurns: numberOr(options['recentHumanTurns'], DEFAULTS.recentHumanTurns, 0),
     ledgerVerbatim: numberOr(options['ledgerVerbatim'], DEFAULTS.ledgerVerbatim, 2),
     foldModel: typeof options['foldModel'] === 'string' && options['foldModel'] ? options['foldModel'] : DEFAULTS.foldModel,
+    ledgerMode: options['ledgerMode'] === 'directed' ? 'directed' : DEFAULTS.ledgerMode,
   }
 }
