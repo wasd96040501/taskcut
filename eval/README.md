@@ -70,6 +70,9 @@ the shape of a difference, not its size.
 
 ## Workloads
 
+The first two ask the model to read and then to recall. The last two ask it to
+do something, and grade what it produced.
+
 **`synthetic`** -- ten generated modules that differ only where the probes
 look. Answering a question about one of them means telling it apart from nine
 near-duplicates. This is interference, which is what a crowded context actually
@@ -79,6 +82,42 @@ everything else: same length, same vocabulary, same shape.
 **`flask`** -- eight modules of a real web framework, one per sub-task. Ordinary
 code at ordinary sizes, where a conclusion written at a boundary cannot possibly
 hold everything the file contained.
+
+**`drift`** -- twelve crowded, confusable service modules read end to end. Three
+rules are set once in an opening briefing and never repeated, and a value
+established at step four is overridden at step ten. It exists because the first
+two workloads scored every arm at 100%: retrieval is the last thing a crowded
+context breaks, and a probe asked after the work cannot see a rule that stopped
+being applied during it.
+
+**`build`** -- ten steps constructing a package. A public contract changes at
+step seven, and three rules run through the whole job. Nothing is asked of the
+model afterwards that matters: the grade is whether the package imports, parses
+the fixture, aggregates it correctly, passes its own tests and runs from the
+command line.
+
+**`audit`** -- five steps researching a real Flask checkout, then five building
+a standard-library tool that finds configuration key reads, run against that
+same checkout. The answer is exact and computable -- 30 keys, 42 reads, under a
+counting rule the briefing fixes -- so the tool either agrees with the source or
+it does not. The output format changes at step nine, invalidating what step
+seven built.
+
+## Checks
+
+A probe asks the model what it remembers, which is the easiest thing it does. A
+**check** is a shell assertion run against the finished workspace: exit zero
+passes, and it asks the work whether it holds together. Checks run once, right
+after the session while the workspace is still as the session left it, and
+their verdicts are stored beside the transcript so every later report reads a
+record rather than re-running anything.
+
+Every check ships verified in both directions -- against a reference
+implementation that should pass it, and against a deliberately broken one that
+should fail it. This is not ceremony. Writing those controls is what found that
+`build` passed a version in which a module redefined the shared record type,
+and that `audit` had put its tests in `tests/`, which in a Flask checkout is
+Flask's own suite. A check nobody has watched fail is not evidence.
 
 ## Probes
 
