@@ -1,4 +1,132 @@
 {
+ "build": {
+  "sonnet": {
+   "boundary": {
+    "cache_read": 2409946,
+    "cache_write": 266093,
+    "checks": {
+     "cli": true,
+     "contract": true,
+     "errors": true,
+     "imports": true,
+     "integration": true,
+     "renamed": true,
+     "rule1_docstrings": true,
+     "rule2_no_bare_raise": true,
+     "rule3_one_event": true,
+     "suite": true
+    },
+    "context_first": 38381,
+    "context_last": 59475,
+    "context_peak": 59475,
+    "context_series": [
+     38381,
+     38885,
+     39279,
+     40739,
+     42714,
+     45092,
+     47310,
+     49447,
+     51755,
+     54236,
+     56777,
+     59228,
+     59409,
+     59442,
+     59475
+    ],
+    "drift": {},
+    "fidelity": {
+     "headline": {
+      "asked": 2,
+      "correct": 2,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "incidental": {
+      "asked": 1,
+      "correct": 1,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "superseded": {
+      "asked": 1,
+      "correct": 1,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     }
+    },
+    "ledger_messages": 19,
+    "ledger_tokens": 6978,
+    "output": 36219,
+    "requests": 54,
+    "weighted_input": 573747
+   },
+   "off": {
+    "cache_read": 2159776,
+    "cache_write": 53176,
+    "checks": {
+     "cli": true,
+     "contract": true,
+     "errors": true,
+     "imports": true,
+     "integration": true,
+     "renamed": true,
+     "rule1_docstrings": true,
+     "rule2_no_bare_raise": true,
+     "rule3_one_event": true,
+     "suite": true
+    },
+    "context_first": 38337,
+    "context_last": 82155,
+    "context_peak": 82155,
+    "context_series": [
+     38337,
+     38805,
+     40263,
+     41163,
+     47445,
+     50166,
+     54062,
+     56142,
+     59751,
+     64642,
+     71773,
+     82059,
+     82089,
+     82122,
+     82155
+    ],
+    "drift": {},
+    "fidelity": {
+     "headline": {
+      "asked": 2,
+      "correct": 2,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "incidental": {
+      "asked": 1,
+      "correct": 1,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     },
+     "superseded": {
+      "asked": 1,
+      "correct": 1,
+      "tool_calls": 0,
+      "went_to_disk": 0
+     }
+    },
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "output": 36632,
+    "requests": 38,
+    "weighted_input": 282552
+   }
+  }
+ },
  "flask": {
   "sonnet": {
    "boundary": {

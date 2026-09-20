@@ -52,8 +52,8 @@
   {
    "id": "integration",
    "kind": "consistency",
-   "description": "the whole pipeline parses the fixture and aggregates 400 good lines",
-   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from pipeline.parse import parse_line;from pipeline.aggregate import by_level;from pipeline.errors import PipelineError;ev=[]\nfor line in open('\\''fixtures/events.log'\\''):\n    line=line.strip()\n    if not line: continue\n    try: ev.append(parse_line(line))\n    except PipelineError: pass\ncounts = by_level(ev)\nassert sum(counts.values())==400, (sum(counts.values()), counts)\nassert set(counts) <= {'\\''DEBUG'\\'','\\''INFO'\\'','\\''WARN'\\'','\\''ERROR'\\''}, counts\nprint('\\''integration ok'\\'', counts)'"
+   "description": "parse then validate over the fixture aggregates exactly the 400 good lines",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from pipeline.parse import parse_line;from pipeline.validate import validate;from pipeline.aggregate import by_level;from pipeline.errors import PipelineError;ev=[]\nfor line in open('\\''fixtures/events.log'\\''):\n    line=line.strip()\n    if not line: continue\n    try: ev.append(validate(parse_line(line)) or parse_line(line))\n    except PipelineError: pass\ncounts = by_level(ev)\nassert sum(counts.values())==400, (sum(counts.values()), counts)\nassert set(counts) == {'\\''DEBUG'\\'','\\''INFO'\\'','\\''WARN'\\'','\\''ERROR'\\''}, counts\nprint('\\''integration ok'\\'', counts)'"
   },
   {
    "id": "suite",

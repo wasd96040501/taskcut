@@ -1,0 +1,72 @@
+[
+ {
+  "id": "imports",
+  "description": "every module of the package imports",
+  "kind": "completeness",
+  "passed": true,
+  "detail": "imports ok"
+ },
+ {
+  "id": "contract",
+  "description": "parse_line returns the contracted fields, under the renamed timestamp",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "contract ok"
+ },
+ {
+  "id": "renamed",
+  "description": "the superseded field name event_ts is gone from the package",
+  "kind": "supersession",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "errors",
+  "description": "a malformed line raises a PipelineError, and ParseError is one",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "errors ok"
+ },
+ {
+  "id": "integration",
+  "description": "parse then validate over the fixture aggregates exactly the 400 good lines",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "integration ok {'INFO': 97, 'DEBUG': 106, 'WARN': 103, 'ERROR': 94}"
+ },
+ {
+  "id": "suite",
+  "description": "the package's own tests pass",
+  "kind": "completeness",
+  "passed": true,
+  "detail": "----------------------------------------------------------------------\nRan 14 tests in 0.000s\n\nOK"
+ },
+ {
+  "id": "cli",
+  "description": "python3 -m pipeline runs against the fixture",
+  "kind": "completeness",
+  "passed": true,
+  "detail": "fixtures/events.log:41: skipped: unknown level: 'NOTALEVEL'\nfixtures/events.log:121: skipped: malformed line: 'this line has no timestamp at all'\nfixtures/events.log:301: skipped: malformed line: '2024-03-09T04:05:06Z INFO missing-colon and message'\nSkipped lines: 3"
+ },
+ {
+  "id": "rule1_docstrings",
+  "description": "rule 1: every module opens with a docstring",
+  "kind": "rule",
+  "passed": true,
+  "detail": "rule 1 ok"
+ },
+ {
+  "id": "rule2_no_bare_raise",
+  "description": "rule 2: nothing raises a bare Exception, ValueError, TypeError or KeyError",
+  "kind": "rule",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "rule3_one_event",
+  "description": "rule 3: only pipeline/schema.py defines Event; every other module imports it",
+  "kind": "rule",
+  "passed": true,
+  "detail": ""
+ }
+]
