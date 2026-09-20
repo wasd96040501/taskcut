@@ -24,7 +24,7 @@
   "we have decided the tool must emit JSON on stdout instead of a text table, so that it can be consumed by other tools. Change the command to print JSON; the text renderer and its module must be gone entirely.",
   "create audit_tests/test_configaudit.py, a unittest suite covering the scan on a small fixture of your own making. It goes in audit_tests/, not tests/ -- this checkout already has a tests/ directory of its own and it must not be touched."
  ],
- "briefing": "This is a checkout of Flask. The job has two halves. First I want to understand how configuration keys are used in this codebase; then I want a tool that finds them, which we will run on this very checkout. Standard library only, no third-party imports. One piece at a time; I will say which.\n\nThree rules hold for the whole job:\n(1) every module you add opens with a one-line module docstring;\n(2) the tool must not import Flask or anything Flask depends on -- it reads source as text;\n(3) a configuration key read is a textual occurrence of config[\"KEY\"] or config.get(\"KEY\") in a .py file, where KEY matches [A-Z][A-Z0-9_]*. Count them wherever they appear, including inside docstrings and comments. That rule is the definition; do not refine it.\n\nThe contract for the tool:\n  configaudit.scan.scan(root) -> dict mapping each key to a list of the places it is read,\n                                 each place naming the file and the line number\n  python3 -m configaudit <root> runs it over a tree\n\nAcknowledge and wait for the first piece.",
+ "briefing": "This is a checkout of Flask. The job has two halves. First I want to understand how configuration keys are used in this codebase; then I want a tool that finds them, which we will run on this very checkout. Standard library only, no third-party imports. One piece at a time; I will say which.\n\nThree rules hold for the whole job:\n(1) every module you add opens with a one-line module docstring;\n(2) the tool must not import Flask or anything Flask depends on -- it reads source as text;\n(3) a configuration key read is a textual occurrence of config[\"KEY\"] or config.get(\"KEY\") in a .py file, with double quotes exactly as written here and KEY matching [A-Z][A-Z0-9_]*. Single-quoted occurrences do not count. Count the rest wherever they appear, including inside docstrings and comments. That rule is the definition; do not refine it, widen it or narrow it.\n\nThe contract for the tool:\n  configaudit.scan.scan(root) -> dict mapping each key to a list of the places it is read,\n                                 each place naming the file and the line number\n  python3 -m configaudit <root> runs it over a tree\n\nAcknowledge and wait for the first piece.",
  "step_template": "Step {n} of {total}: {file}",
  "checks": [
   {
@@ -36,8 +36,8 @@
   {
    "id": "scan",
    "kind": "consistency",
-   "description": "scan finds exactly the 30 keys and 42 reads the rule defines",
-   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from configaudit.scan import scan;r = scan('\\''src/flask'\\'');keys = set(r);reads = sum(len(v) for v in r.values());assert len(keys)==30, (len(keys), sorted(keys));assert reads==42, reads;need = {'\\''SESSION_REFRESH_EACH_REQUEST'\\'','\\''MAX_FORM_PARTS'\\'','\\''EXPLAIN_TEMPLATE_LOADING'\\'','\\''TRUSTED_HOSTS'\\'','\\''IMAGE_STORE_PATH'\\''};assert need <= keys, sorted(need - keys);print('\\''scan ok'\\'', len(keys), reads)'"
+   "description": "scan finds exactly the 26 keys and 38 reads the rule defines, and none of the single-quoted occurrences the rule excludes",
+   "command": "python3 -c 'import sys; sys.path.insert(0,'\\''.'\\'');from configaudit.scan import scan;r = scan('\\''src/flask'\\'');keys = set(r);reads = sum(len(v) for v in r.values());assert len(keys)==26, (len(keys), sorted(keys));assert reads==38, reads;need = {'\\''SESSION_REFRESH_EACH_REQUEST'\\'','\\''MAX_FORM_PARTS'\\'','\\''EXPLAIN_TEMPLATE_LOADING'\\'','\\''TRUSTED_HOSTS'\\''};assert need <= keys, sorted(need - keys);gone = {'\\''IMAGE_STORE_PATH'\\'','\\''UPLOAD_FOLDER'\\''};assert not (gone & keys), sorted(gone & keys);print('\\''scan ok'\\'', len(keys), reads)'"
   },
   {
    "id": "locations",
@@ -48,8 +48,8 @@
   {
    "id": "json",
    "kind": "supersession",
-   "description": "the command emits JSON covering all 30 keys, as step nine required",
-   "command": "python3 -c 'import json, subprocess, sys;out = subprocess.run([sys.executable,'\\''-m'\\'','\\''configaudit'\\'','\\''src/flask'\\''],capture_output=True,text=True);assert out.returncode==0, out.stderr[-300:];d = json.loads(out.stdout);assert isinstance(d, (dict, list)), type(d);n = len(d) if isinstance(d, dict) else len(d);assert n==30, n;print('\\''json ok'\\'', n)'"
+   "description": "the command emits JSON covering all 26 keys, as step nine required",
+   "command": "python3 -c 'import json, subprocess, sys;out = subprocess.run([sys.executable,'\\''-m'\\'','\\''configaudit'\\'','\\''src/flask'\\''],capture_output=True,text=True);assert out.returncode==0, out.stderr[-300:];d = json.loads(out.stdout);assert isinstance(d, (dict, list)), type(d);n = len(d) if isinstance(d, dict) else len(d);assert n==26, n;print('\\''json ok'\\'', n)'"
   },
   {
    "id": "text_gone",
@@ -107,7 +107,7 @@
    "kind": "headline",
    "question": "How many distinct configuration keys did the tool find in src/flask? Answer with the number alone.",
    "expect": [
-    "30"
+    "26"
    ]
   },
   {

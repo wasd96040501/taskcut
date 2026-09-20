@@ -179,16 +179,86 @@ docstring on every module, no bare exception raised anywhere, and exactly one
 definition of the shared record type. The work is indistinguishable. taskcut
 carried 28% less context to do it and spent 2.03× as much.
 
-One correction belongs here, because it nearly became a finding. The
-integration check first failed on both arms identically, at 401 lines instead
+`audit` is the same shape and larger: five steps reading a real Flask checkout
+to work out how configuration keys are used, then five building a
+standard-library tool that finds them, run against that same checkout. The
+answer is exact -- 26 keys and 38 reads, under a counting rule the briefing
+fixes -- so the tool either agrees with the source or it does not. The output
+format changes at step nine, invalidating what step seven built.
+
+| | off | boundary |
+| --- | --- | --- |
+| Acceptance checks | **9/9** | **9/9** |
+| Weighted input | 467,723 | 1,007,906 |
+| Peak context | 128,133 | 76,749 |
+| Peak, as a share of the window | **64%** | 38% |
+| Ledger | — | 12,081 |
+
+This is the most context any run here has carried, and the result is the same:
+both tools scan correctly, both emit the JSON step nine demanded, both deleted
+the module step nine superseded, neither imported Flask, neither touched the
+checkout. taskcut halved the peak context and spent 2.16× as much to do it.
+
+### Two corrections, both the same mistake
+
+Each of these failed correct work, and each was mine.
+
+The `build` integration check failed both arms identically at 401 lines instead
 of 400, with an unexpected `NOTALEVEL` bucket. Both arms were right: the
 briefing gives level checking to `validate` and tells `parse_line` only to
-reject a malformed line, and the reference implementation the check had been
-verified against had quietly encoded a stricter reading than the brief
-supports. A check verified against one implementation is verified against one
-opinion.
+reject a malformed line.
 
-## 6. What a cut costs
+The `audit` scan check expected 30 keys. Both arms found 26, and both were
+right: the briefing spells the rule `config["KEY"]`, with double quotes, and
+the four missing keys are single-quoted in the Flask source.
+
+In both cases the expected answer had been computed by a reference
+implementation written alongside the brief rather than derived from the
+brief's literal text, and in both cases the reference had quietly taken a
+different reading. **An acceptance check should be derived from the
+specification, not from a second implementation of it** -- otherwise it tests
+agreement between two of the author's opinions, and grades the model against
+the one that was not written down.
+
+## 6. What has not been shown
+
+Five workloads, two of which produce something that is graded by running it.
+Peak context from 44,743 to 128,133 tokens, up to 64% of the window. Ten
+interdependent steps, a public contract reversed mid-way, three standing rules
+never repeated after the briefing.
+
+**Not one measurement found the baseline doing worse work.** Every probe
+answered correctly by both arms on the recall workloads; every acceptance
+check passed by both arms on the build workloads; every standing rule still
+being applied at the last step by both arms; the superseded value correctly
+replaced by both arms. Effort per sub-task in the baseline is flat: over ten
+sub-tasks it ran 2 requests, 1 tool call and about 140 output tokens each
+time, with no drift at all.
+
+The premise taskcut rests on -- that a crowded context degrades the work -- has
+not been demonstrated here, at these sizes, on this model. What has been
+demonstrated is the mechanism: context stops climbing, by 10% to 59% depending
+entirely on how compressible the work is, and it costs 1.34× to 2.47× to do
+that.
+
+Two honest explanations, and only one experiment separates them.
+
+**Either the effect needs a fuller window.** 64% is the most this reached.
+Reports of context degradation concentrate well above that, and the engine's
+own auto-compaction fires higher still. The comparison that has not been run
+is one long enough for the *baseline* to hit auto-compaction: at that point it
+loses its transcript to a summariser, which is the thing taskcut replaces with
+a deterministic cut. Every run here stopped short of the only point where
+taskcut's central claim is testable.
+
+**Or the effect needs a longer run than a benchmark can afford.** The job
+taskcut was written for runs for days. Twelve sub-tasks is not a scale model of
+that; it is a different thing that finishes before the problem starts.
+
+Until one of those is run, the honest summary is that taskcut reliably does
+what it says to the context and has not yet been shown to buy anything with it.
+
+## 7. What a cut costs
 
 A compaction invalidates the prompt cache past the tool definitions. Measured
 over four consecutive cuts, `cache_read_input_tokens` on the first request after
@@ -215,7 +285,7 @@ which crosses near the fourteenth sub-task.
 **taskcut is a bet on the run being long. The floor is what keeps the bet off
 the table when it is not.**
 
-## 7. Two costs that are not in the table
+## 8. Two costs that are not in the table
 
 **A boundary costs an extra round-trip.** `close_task` is a registered tool and
 the model spends a `ToolSearch` call loading its schema before each use -- at

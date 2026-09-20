@@ -73,8 +73,15 @@ Measured against the same work with the plugin switched off
 * **Accuracy never moved.** Across six runs and two workloads, no arm ever
   answered a probe wrongly. What a cut costs is re-reading, not correctness.
 * **A cut is not free.** With the floor forced to zero it cost 1.34× to 2.47×
-  the baseline on runs whose context never passed 8% of the window — which is
-  exactly the case the floor exists to avoid.
+  the baseline — which is exactly the case the floor exists to avoid.
+* **The benefit has not been demonstrated.** Across five workloads, including
+  two that build something and are graded by running it, no measurement found
+  the baseline doing worse work: every acceptance check, every standing rule,
+  every superseded value came out the same on both arms, at up to 64% of the
+  window. taskcut reliably does what it says to the context. Whether that buys
+  anything is still open, and
+  [docs/measurement.md](docs/measurement.md#6-what-has-not-been-shown) says
+  what would settle it.
 
 One run per cell, on Sonnet. These show the shape of a difference, not its size.
 

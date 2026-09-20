@@ -1,0 +1,65 @@
+[
+ {
+  "id": "imports",
+  "description": "the tool imports",
+  "kind": "completeness",
+  "passed": true,
+  "detail": "ok"
+ },
+ {
+  "id": "scan",
+  "description": "scan finds exactly the 26 keys and 38 reads the rule defines, and none of the single-quoted occurrences the rule excludes",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "scan ok 26 38"
+ },
+ {
+  "id": "locations",
+  "description": "a key's location names the right file and line",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "locations ok Place(file='templating.py', line=60)"
+ },
+ {
+  "id": "json",
+  "description": "the command emits JSON covering all 26 keys, as step nine required",
+  "kind": "supersession",
+  "passed": true,
+  "detail": "json ok 26"
+ },
+ {
+  "id": "text_gone",
+  "description": "the superseded text renderer is gone",
+  "kind": "supersession",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "no_flask_import",
+  "description": "rule 2: the tool imports neither Flask nor its dependencies",
+  "kind": "rule",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "rule1_docstrings",
+  "description": "rule 1: every module opens with a docstring",
+  "kind": "rule",
+  "passed": true,
+  "detail": "rule 1 ok"
+ },
+ {
+  "id": "suite",
+  "description": "the tool's own tests pass, in their own directory",
+  "kind": "completeness",
+  "passed": true,
+  "detail": "----------------------------------------------------------------------\nRan 25 tests in 0.347s\n\nOK"
+ },
+ {
+  "id": "flask_untouched",
+  "description": "the checkout's own files are unmodified: the tool was added, nothing was edited",
+  "kind": "rule",
+  "passed": true,
+  "detail": ""
+ }
+]
