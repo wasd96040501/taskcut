@@ -45,9 +45,16 @@ ARMS: dict[str, Arm] = {
     ),
     "on": Arm(
         name="on",
-        description="taskcut as shipped: past the floor, a turn judged finished is compacted.",
+        description="taskcut at a floor of 30: past it, a piece of work judged finished is compacted.",
         env={"TASKCUT": "1"},
         config=_REALISTIC_FLOOR,
+    ),
+    # Nothing overridden: what someone who installs taskcut and changes nothing
+    # gets. For a workload long enough to pass the shipped floor of forty.
+    "default": Arm(
+        name="default",
+        description="taskcut exactly as installed, with its shipped settings: a floor of 40, judged by sonnet.",
+        env={"TASKCUT": "1"},
     ),
 }
 
