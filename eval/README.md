@@ -105,6 +105,13 @@ regressions, and `git diff` to confirm no test was touched. This is the one
 that looks like real work -- exploration, dead ends, re-running the suite --
 and so the one whose context actually fills with what taskcut exists to clear.
 
+**`issues-long`** -- the same, twenty changes long: the nine bugs above and
+eleven larger ones, bugs and features handed out alternately, five in the words
+of their upstream issue. Seven land in `core.py`. Twenty real changes are what
+it takes for one session on Sonnet 5 to reach 30% of its 1M window, which is the
+lowest floor anyone would run -- so this is the workload where a cutting arm at
+a realistic setting cuts at all. About forty minutes and $10 to $12 an arm.
+
 **`audit`** -- five steps researching a real Flask checkout, then five building
 a standard-library tool that finds configuration key reads, run against that
 same checkout. The answer is exact and computable -- 30 keys, 42 reads, under a

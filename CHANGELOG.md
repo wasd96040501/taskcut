@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `issues-long`, a benchmark workload of twenty real click changes, bugs and
+  features, long enough for one Sonnet 5 session to reach a floor of 30%.
+  Measured in docs/measurement.md: every arm got all twenty right; the session
+  peaked at 29% of the window; each `close_task` costs one more request, about
+  10% over the run whether or not anything is cut.
+
 ## [0.4.0] - 2026-09-21
 
 ### Removed

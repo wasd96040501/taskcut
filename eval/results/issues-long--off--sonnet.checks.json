@@ -1,0 +1,156 @@
+[
+ {
+  "id": "issue01",
+  "description": "bug 1: handle empty bytes in echo",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.02s"
+ },
+ {
+  "id": "issue02",
+  "description": "bug 2: Fix race condition on `KeyboardInterrupt` arriving in `Command.main()`",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".......                                                                  [100%]\n7 passed in 0.01s"
+ },
+ {
+  "id": "issue03",
+  "description": "bug 3: Fix double-bracketing of choices in synopsis",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "..                                                                       [100%]\n2 passed in 0.03s"
+ },
+ {
+  "id": "issue04",
+  "description": "feature 4: Add support of `pathlib.Path` to `edit`",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "..                                                                       [100%]\n2 passed in 0.07s"
+ },
+ {
+  "id": "issue05",
+  "description": "bug 5: Warn when an argument name collide with other parameters",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "..........                                                               [100%]\n10 passed in 0.04s"
+ },
+ {
+  "id": "issue06",
+  "description": "bug 6: Implement Unix line endings for shell completion output to ensure compat",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.02s"
+ },
+ {
+  "id": "issue07",
+  "description": "feature 7: Add `@custom_version_option`, freeze `@version_option`",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "...                                                                      [100%]\n3 passed in 0.01s"
+ },
+ {
+  "id": "issue08",
+  "description": "bug 8: Temporarily provide a fake context to the callback to hide `UNSET` value",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.01s"
+ },
+ {
+  "id": "issue09",
+  "description": "bug 9: Land the progress bar on its final position",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "............                                                             [100%]\n12 passed in 0.03s"
+ },
+ {
+  "id": "issue10",
+  "description": "bug 10: remove suffixes from generated command name",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "......................                                                   [100%]\n22 passed in 0.03s"
+ },
+ {
+  "id": "issue11",
+  "description": "bug 11: Mark commands as optional in the synopsis",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "....                                                                     [100%]\n4 passed in 0.01s"
+ },
+ {
+  "id": "issue12",
+  "description": "bug 12: Forwards all user's parameters set in `PAGER`",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "..................                                                       [100%]\n18 passed in 1.96s"
+ },
+ {
+  "id": "issue13",
+  "description": "bug 13: Ensure that 'type_cast_value' never gets 'UNSET'",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "...........                                                              [100%]\n11 passed in 0.05s"
+ },
+ {
+  "id": "issue14",
+  "description": "feature 14: Support incremental output in the pager",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.02s"
+ },
+ {
+  "id": "issue15",
+  "description": "bug 15: Preserve declaration order of help option names",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".............                                                            [100%]\n13 passed in 0.02s"
+ },
+ {
+  "id": "issue16",
+  "description": "feature 16: Deprecate `isolated_filesystem` and document its limits",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.04s"
+ },
+ {
+  "id": "issue17",
+  "description": "feature 17: progress bar shows current item",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.05s"
+ },
+ {
+  "id": "issue18",
+  "description": "bug 18: Fix deprecated label formatting",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "........                                                                 [100%]\n8 passed in 0.04s"
+ },
+ {
+  "id": "issue19",
+  "description": "feature 19: Make `prompt`/`ParamType` typing work without runtime `typing_extensions",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ".                                                                        [100%]\n1 passed in 0.08s"
+ },
+ {
+  "id": "issue20",
+  "description": "bug 20: Fix `HelpFormatter.write_usage` producing spurious characters",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "........                                                                 [100%]\n8 passed in 0.01s"
+ },
+ {
+  "id": "no_regressions",
+  "description": "the whole suite passes -- nothing else was broken on the way",
+  "kind": "completeness",
+  "passed": true,
+  "detail": "........... [ 86%]\n....................s................................................... [ 89%]\n........................................................................ [ 93%]\n........................................................................ [ 96%]\n....................................................................     [100%]\n2058 passed, 25 skipped, 31000 deselected, 1 xfailed in 3.88s"
+ },
+ {
+  "id": "tests_untouched",
+  "description": "no test was modified, skipped or deleted to make it pass",
+  "kind": "rule",
+  "passed": true,
+  "detail": ""
+ }
+]

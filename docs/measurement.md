@@ -8,10 +8,11 @@ describes the harness; `make eval-list` runs it.
 Read the caveats first, because they bound everything below. **One run per
 cell.** Model behaviour varies enough that these show the shape of a difference,
 not its size, and the tool-call counts especially are small numbers. All runs
-are Claude Code 2.1.278 on Sonnet. Every cutting arm had `floorPercent` forced
-to `0`, because an arm that respects the floor makes no cuts on a run this short
-and measures nothing -- so the cost columns are the cost of cutting when cutting
-is not worth it, which is the case the floor exists to avoid.
+are Claude Code 2.1.278 on Sonnet. In sections 1 to 6 every cutting arm had
+`floorPercent` forced to `0`, because an arm that respects the floor makes no
+cuts on a run this short and measures nothing -- so the cost columns there are
+the cost of cutting when cutting is not worth it, which is the case the floor
+exists to avoid. Sections 7 and 8 run at a floor of 30, on real work.
 
 Three things are measured and never collapsed into a score, because taskcut
 wins some and loses others:
@@ -305,10 +306,58 @@ five times the context before anything happens.
 It also turned the run into an A/A/A comparison, which is useful in its own
 right. Three runs of identical work cost $3.31, $2.90 and $3.14 -- about ±7% --
 so a single run cannot resolve a difference in cost smaller than roughly ten
-percent. And calling `close_task` without cutting cost nothing measurable: the
-two arms that called it nine times were the two cheapest.
+percent. Over nine short changes, calling `close_task` without cutting cost
+nothing measurable: the two arms that called it nine times were the two
+cheapest. Over twenty it does -- see the next section.
 
-## 8. What a cut costs
+## 8. Twenty real changes: the floor, reached once
+
+`issues` never came near the floor, so `issues-long` makes the session longer
+rather than the floor lower: twenty changes click shipped -- the nine bugs above
+and eleven larger ones -- handed out alternately as bug reports and feature
+requests. Five are handed out in the words of their upstream issue (#3802,
+#2869, #2819, #3136, #3700), and seven land in `core.py`. Same pin, same
+grading: each change's own tests, the whole suite, and no test touched. Sonnet
+5, `floorPercent` 30.
+
+| | off | boundary | reply |
+| --- | --- | --- | --- |
+| Acceptance checks | **22/22** | **22/22** | **22/22** |
+| Cost at Sonnet list price | $10.37 | $11.50 | $11.01 |
+| Requests | 143 | 165 | 160 |
+| Wall clock | 44 min | 37 min | 37 min |
+| Context carried into the last change | 294,690 | 292,546 | **40,294** |
+| Peak, as a share of the 1M window | 29.5% | 29.3% | 27.2% |
+| `close_task` calls | — | 20 | 20 |
+| **Cuts** | — | 1, after the last change | **1, before the last change** |
+
+Twenty changes and forty minutes of uninterrupted work end a session just under
+300,000 tokens. Both cutting arms crossed the floor inside a final turn -- at
+303,164 and 301,827 tokens -- and cut in 12 and 23 milliseconds, down to 11,173
+and 7,903. Where the crossing fell was luck. `reply` crossed at the end of
+change 19 and did change 20 carrying 40,294 tokens; `boundary` crossed at the
+end of change 20, with nothing left to do.
+
+Change 20 is the only work in this document done after a cut at a realistic
+floor. It passed, and it cost $0.26, against $0.64 and $0.74 in the two arms
+that carried 290,000 tokens into it. That is one sample: it shows a cut at 30%
+does not break the next change, and nothing about how often.
+
+**Closing a task costs a round-trip, and over twenty it shows.** A tool call
+ends the model's response, so every `close_task` takes one more request to
+finish the turn, and that request reads the whole context again from the cache.
+In `boundary`, which never cut before the work was over, the twenty requests
+after `close_task` read 3,645,518 cached tokens -- $1.09. The whole difference
+from `off` was $1.13. So at a floor the session never reaches, taskcut costs
+about ten percent and does nothing for it. In `reply` the one cut won back
+about $0.40 of that.
+
+Nothing here was diluted. At 29% of the window every arm fixed every change,
+broke nothing and touched no test, so there was no damage for a cut to prevent.
+**At the shipped default of 40%, none of these sessions would have cut at
+all.**
+
+## 9. What a cut costs
 
 A compaction invalidates the prompt cache past the tool definitions. Measured
 over four consecutive cuts, `cache_read_input_tokens` on the first request after
@@ -335,13 +384,14 @@ which crosses near the fourteenth sub-task.
 **taskcut is a bet on the run being long. The floor is what keeps the bet off
 the table when it is not.**
 
-## 9. Two costs that are not in the table
+## 10. Two costs that are not in the table
 
-**A boundary costs an extra round-trip.** `close_task` is a registered tool and
-the model spends a `ToolSearch` call loading its schema before each use -- at
-every boundary, not just the first, because the cut discards the message that
-carried it. One extra request per sub-task, caused by taskcut and paid for by
-taskcut.
+**A cut costs a second round-trip.** Every `close_task` already costs one
+request (section 8). On top of that the tool is deferred, so the model spends a
+`ToolSearch` call loading its schema before using it -- once per session, and
+again after every cut, because the cut discards the message that carried it.
+Where the cut was forced at every boundary that meant one more request per
+sub-task; in `issues-long`, which cut once, it was one or two in the whole run.
 
 **The model keeps closing tasks after the work is over.** After eight sub-tasks
 of being asked to call `close_task`, the flask boundary arm went on calling it
@@ -351,11 +401,13 @@ cut. This is what produced 17 ledger messages for 9 closed sub-tasks.
 ## Reproducing
 
 ```bash
-make eval-run WORKLOAD=flask ARM=off
-make eval-run WORKLOAD=flask ARM=boundary
-make eval-run WORKLOAD=flask ARM=directed
+make eval-run WORKLOAD=issues-long ARM=off MODEL=sonnet
+make eval-run WORKLOAD=issues-long ARM=boundary MODEL=sonnet
+make eval-run WORKLOAD=issues-long ARM=reply MODEL=sonnet
 make eval-report
 ```
+
+Each of those is about forty minutes and $10 to $12. The three can run at once.
 
 `eval/results/runs.json` holds the numbers above in machine-readable form.
 Transcripts are not committed: they are large and full of absolute paths.

@@ -119,10 +119,11 @@ including two that build something and are graded by running it
 | --- | --- |
 | **Context stops climbing** | ten sub-tasks ended at 44,743 tokens of context instead of 107,857 — **59% less**, every probe still answered, without going back to disk once |
 | **How much less varies** | the same ten sub-tasks against real framework source saved **10%**, because a real module needs far more said about it and the ledger grew accordingly |
-| **Accuracy never moved** | across ten runs, no arm ever answered wrongly or failed an acceptance check. What a cut costs is re-reading, not correctness |
+| **Accuracy never moved** | across sixteen runs, no arm ever answered wrongly or failed an acceptance check. What a cut costs is re-reading, not correctness |
 | **A cut is not free** | with the floor forced to zero, **$0.41 to $2.04** more per run, 1.4× to 2.7× — which is exactly what the floor exists to avoid |
 | **Still unproven** | nothing yet shows the *baseline* doing worse work. taskcut reliably does what it says to the context; whether that buys anything is open. [What would settle it](docs/measurement.md#6-what-has-not-been-shown) |
-| **On a 1M window it waits a long time** | nine real bugs fixed in one session peaked at 155,702 tokens, 15.6% of Sonnet 5's window. At the default floor of 40% taskcut does not act until 400,000. It is for sessions that genuinely get that long |
+| **On a 1M window it waits a long time** | twenty real changes to click — bugs and features, forty minutes of work in one session — peaked at 294,690 tokens, 29% of Sonnet 5's window, with every change correct. At the default floor of 40% taskcut does not act until 400,000. It is for sessions that genuinely get that long |
+| **Closing a task costs a round-trip** | each `close_task` is one more request, which re-reads the context from the cache: **about +10%** over those twenty changes ($11.50 against $10.37), paid whether or not anything is cut |
 
 One run per cell, on Sonnet. These show the shape of a difference, not its size.
 
@@ -180,9 +181,11 @@ everything that can be reasoned about as plain data lives beside it.
   it said in the turn that just ended, so a follow-up phrased as *the approach
   you just described* has nothing to resolve against. On a long autonomous run
   this is the point; in a conversation it is a cost.
-* **A boundary costs an extra round-trip.** The model spends a `ToolSearch` call
-  loading `close_task`'s schema before each use — at every boundary, because the
-  cut discards the message that carried it.
+* **Every boundary costs a round-trip.** Calling `close_task` ends the model's
+  response, so finishing the turn takes one more request that re-reads the
+  context from the cache — about 10% over a twenty-change session, whether or
+  not anything is cut. After a cut the model also reloads the tool's schema
+  with a `ToolSearch` call.
 * **One session per process.** Module state assumes Claude Code loads a hooks
   module once per session, which holds today but the API does not guarantee.
 * **Early access.** The function-hooks API may change between Claude Code
