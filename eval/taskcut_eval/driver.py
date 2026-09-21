@@ -27,7 +27,9 @@ import termios
 import time
 from pathlib import Path
 
+from . import transcript
 from .arms import Arm
+from .transcript import PROJECTS
 from .workload import Workload
 
 ANSI = re.compile(rb"\x1b\[[0-9;?]*[a-zA-Z]|\x1b\][^\x07]*\x07|\x1b[=>()][A-Za-z0-9]?|\r")
@@ -80,7 +82,12 @@ def prepare_plugin(arm: Arm, source: Path, destination: Path) -> Path:
 
 
 class Session:
-    def __init__(self, cwd: Path, plugin: Path, env: dict, model: str, cols: int = 120, rows: int = 40):
+    def __init__(self, cwd: Path, plugin: Path | None, env: dict, model: str, cols: int = 120, rows: int = 40):
+        # A workspace reused across runs keeps the transcripts of the earlier
+        # ones, under the same project directory. This session's is the one
+        # that was not there before it started.
+        self.transcripts = transcript.directory(PROJECTS, cwd)
+        self.earlier = set(self.transcripts.glob("*.jsonl"))
         self.master, slave = pty.openpty()
         fcntl.ioctl(self.master, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
         environment = dict(os.environ)
@@ -92,7 +99,9 @@ class Session:
         environment["COLUMNS"], environment["LINES"] = str(cols), str(rows)
         environment.update(env)
         self.process = subprocess.Popen(
-            [_binary(), "--plugin-dir", str(plugin), "--model", model, "--allowedTools", TOOLS],
+            # No plugin directory is a session with whatever is installed, the way
+            # a person would start one.
+            [_binary(), *(["--plugin-dir", str(plugin)] if plugin else []), "--model", model, "--allowedTools", TOOLS],
             cwd=str(cwd),
             env=environment,
             stdin=slave,
@@ -136,13 +145,37 @@ class Session:
         self.read_until_quiet(quiet=3.0, timeout=90)
         return True
 
-    def ask(self, text: str, quiet: float = 7.0, timeout: float = 480) -> bool:
+    def turns_done(self) -> int:
+        """How many turns the session has finished, as its transcript records
+        them: Claude Code writes one `turn_duration` line as each turn ends."""
+        mine = [p for p in self.transcripts.glob("*.jsonl") if p not in self.earlier]
+        return sum(p.read_text(errors="replace").count('"subtype":"turn_duration"') for p in mine)
+
+    def ask(self, text: str, timeout: float = 1800, settle: float = 5.0) -> bool:
+        """Sends one prompt and waits for its turn to end.
+
+        The end of a turn is read from the transcript, not the screen. A model
+        can think, or wait on a long tool, for longer than any quiet period is
+        safe to assume, and a prompt typed into a turn that is still running is
+        queued behind it: every later step then lands in the wrong turn, and
+        closing the session kills the one still working.
+
+        After the turn ends the screen is let settle, so that whatever runs at
+        the end of a turn -- a plugin's own work included -- finishes before the
+        next prompt starts another.
+        """
+        before = self.turns_done()
         for character in text:
             os.write(self.master, character.encode())
             time.sleep(0.004)
         time.sleep(0.4)
         os.write(self.master, b"\r")
-        return self.read_until_quiet(quiet=quiet, timeout=timeout)
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            self.read_until_quiet(quiet=1.0, timeout=2.0)
+            if self.turns_done() > before:
+                return self.read_until_quiet(quiet=settle, timeout=120)
+        return False
 
     def close(self) -> None:
         try:
@@ -187,11 +220,10 @@ def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str,
         if workload.briefing:
             log(f"  briefing settled={session.ask(workload.briefing)}")
 
+        # Every arm gets the same words. Nothing in a prompt may tell the model
+        # taskcut is there: whatever it needs from the model, it asks for itself.
         for index, step in enumerate(workload.steps(), 1):
-            prompt = step
-            if arm.closes_tasks:
-                prompt += " Then call close_task."
-            log(f"  step {index}/{len(workload.files)} settled={session.ask(prompt)}")
+            log(f"  step {index}/{len(workload.files)} settled={session.ask(step)}")
 
         # Nothing here says whether to use a tool. Whether the model goes back to
         # the source is the measurement, so the prompt must not push it either way.

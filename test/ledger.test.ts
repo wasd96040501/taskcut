@@ -2,18 +2,24 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 
 import {
-  DIRECTED_RESULT_LIMIT,
+  CLOSE_TOOL,
+  FINISHED,
+  HEADLINE_LIMIT,
+  JUDGE_ANSWER_LIMIT,
+  JUDGE_REQUEST_LIMIT,
+  LEDGER_HEADER,
   LEDGER_PREFIX,
   STALE_LEDGER_MS,
+  TOOL_SEARCH,
+  UNFINISHED,
   boundedHumanTurns,
-  directedPrompt,
-  droppedMessages,
-  subtaskReply,
-  renderDropped,
-  openingRequest,
+  finishedWork,
   foldPrompt,
   foldedEntry,
+  headline,
   humanTurnsOf,
+  isLedgerMessage,
+  judgeText,
   planFold,
   renderLedger,
   staleLedgerKeys,
@@ -38,6 +44,18 @@ function toolResult(id: string): Message {
   return { role: 'user', text: '', toolUses: [], toolResults: [{ tool_use_id: id, text: 'out', isError: false }] }
 }
 
+function said(text: string, ...calls: Array<{ id: string; tool: string; input?: Record<string, unknown> }>): Message {
+  return {
+    role: 'assistant',
+    text,
+    toolUses: calls.map((call) => ({ tool_use_id: call.id, tool: call.tool, input: call.input ?? {} })),
+  }
+}
+
+function ledgerMessage(entries: Entry[]): Message {
+  return { role: 'user', text: renderLedger(entries), toolUses: [] }
+}
+
 describe('humanTurnsOf', () => {
   test('keeps user turns that carry no tool result', () => {
     const kept = humanTurnsOf([human('a'), assistantWithCall('t1'), toolResult('t1'), human('b')])
@@ -57,6 +75,13 @@ describe('humanTurnsOf', () => {
 
   test('keeps nothing from an empty transcript', () => {
     assert.deepEqual(humanTurnsOf([]), [])
+  })
+
+  test('does not mistake an earlier ledger for something the person typed', () => {
+    // Kept as a human turn, an old ledger would sit beside the new one and
+    // say everything twice.
+    const kept = humanTurnsOf([human('a'), ledgerMessage([entry(1)]), human('b')])
+    assert.deepEqual(kept.map((m) => m.text), ['a', 'b'])
   })
 })
 
@@ -118,7 +143,7 @@ describe('foldedEntry', () => {
     const folded = foldedEntry([entry(1, 100), entry(2, 300)], '  rolled up  ')
     assert.equal(folded.at, 300)
     assert.equal(folded.outcome, 'rolled up')
-    assert.match(folded.task, /2 earlier sub-tasks/)
+    assert.match(folded.task, /2 earlier pieces of work/)
   })
 })
 
@@ -131,8 +156,8 @@ describe('foldPrompt', () => {
 })
 
 describe('renderLedger', () => {
-  test('says so when nothing has been closed', () => {
-    assert.match(renderLedger([]), /No sub-tasks/)
+  test('says so when nothing has been recorded', () => {
+    assert.match(renderLedger([]), /Nothing earlier/)
   })
 
   test('marks entries closed and says not to redo them', () => {
@@ -140,12 +165,31 @@ describe('renderLedger', () => {
     // open to-do list, and the model redoes the work.
     const text = renderLedger([entry(1)])
     assert.match(text, /\[CLOSED\]/)
-    assert.match(text, /Do not redo them/)
+    assert.match(text, /Do not redo it/)
   })
 
   test('carries every conclusion', () => {
     const text = renderLedger([entry(1), entry(2), entry(3)])
     for (const n of [1, 2, 3]) assert.match(text, new RegExp(`outcome ${n}`))
+  })
+
+  test('never mentions close_task', () => {
+    // A cut must not tell the model to cut again: the ledger is the one thing
+    // taskcut leaves in the context.
+    assert.doesNotMatch(renderLedger([entry(1)]), /close_task/)
+  })
+})
+
+describe('isLedgerMessage', () => {
+  test('recognises a ledger, empty or not', () => {
+    assert.ok(isLedgerMessage(ledgerMessage([])))
+    assert.ok(isLedgerMessage(ledgerMessage([entry(1)])))
+    assert.ok(renderLedger([entry(1)]).startsWith(LEDGER_HEADER))
+  })
+
+  test('a person quoting the header mid-message is still a person', () => {
+    assert.equal(isLedgerMessage(human(`what does ${LEDGER_HEADER} mean?`)), false)
+    assert.equal(isLedgerMessage(said(LEDGER_HEADER)), false)
   })
 })
 
@@ -184,110 +228,115 @@ describe('staleLedgerKeys', () => {
   })
 })
 
-describe('droppedMessages', () => {
-  const a = { role: 'user', text: 'a', toolUses: [] } as SessionMessage
-  const b = { role: 'assistant', text: 'b', toolUses: [] } as SessionMessage
-  const c = { role: 'user', text: 'c', toolUses: [] } as SessionMessage
-
-  test('is everything the keep-set rule did not take', () => {
-    assert.deepEqual(droppedMessages([a, b, c], [a, c]), [b])
+describe('headline', () => {
+  test('is the first line that says anything', () => {
+    assert.equal(headline('\n\n  Issue 3 of 20. Bug report.\n\nThe details.'), 'Issue 3 of 20. Bug report.')
   })
 
-  test('drops nothing when everything was kept', () => {
-    assert.deepEqual(droppedMessages([a, b], [a, b]), [])
+  test('is clipped when a single line runs long', () => {
+    assert.equal(headline('x'.repeat(HEADLINE_LIMIT + 50)).length, HEADLINE_LIMIT + 3)
   })
 
-  test('compares by identity, not by content', () => {
-    const twin = { role: 'user', text: 'a', toolUses: [] } as SessionMessage
-    assert.deepEqual(droppedMessages([a, twin], [a]), [twin])
+  test('is empty for an empty request', () => {
+    assert.equal(headline(''), '')
   })
 })
 
-describe('openingRequest', () => {
-  test('is the first human turn, whatever that turn turned out to be', () => {
-    const messages = [
-      { role: 'user', text: '  audit every module  ', toolUses: [] },
-      { role: 'assistant', text: 'on it', toolUses: [] },
-      { role: 'user', text: 'next one', toolUses: [] },
-    ] as SessionMessage[]
-    assert.equal(openingRequest(messages), 'audit every module')
+describe('finishedWork', () => {
+  test('pairs a request with what was said after its last piece of work', () => {
+    // The narration on the way was about the working context being dropped.
+    const got = finishedWork(
+      [human('fix issue 3'), said('reading the parser', { id: 't1', tool: 'Read' }), toolResult('t1'), said('fixed: off-by-one')],
+      7,
+    )
+    assert.deepEqual(got, [{ task: 'fix issue 3', outcome: 'fixed: off-by-one', at: 7 }])
   })
 
-  test('ignores a user message that is only a tool result', () => {
-    const messages = [
-      { role: 'user', text: 'output', toolUses: [], toolResults: [{ tool_use_id: 'x', text: 'output' }] },
-      { role: 'user', text: 'the real task', toolUses: [] },
-    ] as unknown as SessionMessage[]
-    assert.equal(openingRequest(messages), 'the real task')
+  test('covers every answered request since the last cut, in order', () => {
+    // close_task is only offered past the floor, so most work was never closed;
+    // without an entry the first cut would erase any record of it.
+    const got = finishedWork([human('one'), said('a1'), human('two'), said('a2'), human('three'), said('a3')], 0)
+    assert.deepEqual(got.map((e) => [e.task, e.outcome]), [['one', 'a1'], ['two', 'a2'], ['three', 'a3']])
   })
 
-  test('is empty when there is no human turn at all', () => {
-    assert.equal(openingRequest([]), '')
+  test('skips a request nobody answered', () => {
+    assert.deepEqual(finishedWork([human('one'), human('two'), said('a2')], 0).map((e) => e.task), ['two'])
+  })
+
+  test('adds nothing for requests an earlier cut kept', () => {
+    // After a cut the transcript reads: kept requests, their answers gone into
+    // the ledger, then the ledger. They must not be recorded twice.
+    const afterCut = [human('goal'), human('recent'), ledgerMessage([entry(1)]), human('next'), said('done next')]
+    assert.deepEqual(finishedWork(afterCut, 0).map((e) => e.task), ['next'])
+  })
+
+  test('never takes an answer from inside a ledger', () => {
+    assert.deepEqual(finishedWork([ledgerMessage([entry(1)]), said('stray')], 0), [])
+  })
+
+  test('loading a tool and closing the task are not work', () => {
+    // A conclusion given before either is still the conclusion.
+    const got = finishedWork(
+      [
+        human('fix it'),
+        said('the cause was X; fixed', { id: 's', tool: TOOL_SEARCH }),
+        toolResult('s'),
+        said('', { id: 'c', tool: CLOSE_TOOL }),
+        toolResult('c'),
+        said('Done.'),
+      ],
+      0,
+    )
+    assert.equal(got[0]?.outcome, 'the cause was X; fixed\n\nDone.')
+  })
+
+  test('keeps a written outcome in place of the answer', () => {
+    const got = finishedWork(
+      [
+        human('fix issues 1 and 2'),
+        said('', { id: 'c1', tool: CLOSE_TOOL, input: { task: 'issue 1', outcome: 'X was wrong' } }),
+        toolResult('c1'),
+        said('', { id: 'c2', tool: CLOSE_TOOL, input: { task: 'issue 2', outcome: 'Y was wrong' } }),
+        toolResult('c2'),
+        said('both fixed'),
+      ],
+      0,
+    )
+    assert.deepEqual(got.map((e) => [e.task, e.outcome]), [['issue 1', 'X was wrong'], ['issue 2', 'Y was wrong']])
+  })
+
+  test('names an outcome by the request when the model gave no name', () => {
+    const got = finishedWork([human('fix it'), said('', { id: 'c', tool: CLOSE_TOOL, input: { outcome: 'done' } })], 0)
+    assert.equal(got[0]?.task, 'fix it')
+  })
+
+  test('is empty for an empty transcript', () => {
+    assert.deepEqual(finishedWork([], 0), [])
   })
 })
 
-describe('renderDropped', () => {
-  test('carries what a tool produced, not just what was said', () => {
-    const messages = [
-      { role: 'assistant', text: 'reading it', toolUses: [{ tool_use_id: '1', tool: 'Bash', input: {}, text: 'RETRY_BUDGET = 4011' }] },
-    ] as unknown as SessionMessage[]
-    const rendered = renderDropped(messages)
-    assert.match(rendered, /reading it/)
-    assert.match(rendered, /ran Bash/)
-    assert.match(rendered, /RETRY_BUDGET = 4011/)
+describe('judgeText', () => {
+  test('carries the request, the answer and both labels', () => {
+    const text = judgeText('fix issue 3', 'fixed; tests pass')
+    assert.match(text, /fix issue 3/)
+    assert.match(text, /fixed; tests pass/)
+    assert.match(text, new RegExp(`"${FINISHED}"`))
+    assert.match(text, new RegExp(`"${UNFINISHED}"`))
   })
 
-  test('clips a tool result rather than sending a whole file', () => {
-    const huge = 'x'.repeat(DIRECTED_RESULT_LIMIT + 5000)
-    const messages = [
-      { role: 'assistant', text: '', toolUses: [{ tool_use_id: '1', tool: 'Bash', input: {}, text: huge }] },
-    ] as unknown as SessionMessage[]
-    const rendered = renderDropped(messages)
-    assert.ok(rendered.length < huge.length)
-    assert.match(rendered, /characters omitted/)
-  })
-})
-
-describe('directedPrompt', () => {
-  test('aims the extractor at the standing task and names the sub-task', () => {
-    const prompt = directedPrompt('audit every module', 'read config.py', 'transcript here')
-    assert.match(prompt, /audit every module/)
-    assert.match(prompt, /may be the whole job, or only its first step/)
-    assert.match(prompt, /read config.py/)
-    assert.match(prompt, /transcript here/)
+  test('keeps the end of a long answer, where a model says whether it is done', () => {
+    const text = judgeText('go', 'x'.repeat(JUDGE_ANSWER_LIMIT * 2) + 'Should I continue?')
+    assert.match(text, /Should I continue\?/)
+    assert.ok(text.length < JUDGE_ANSWER_LIMIT + JUDGE_REQUEST_LIMIT + 1000)
   })
 
-  test('says so when the standing task was never recorded', () => {
-    assert.match(directedPrompt('', 'a sub-task', ''), /nothing was recorded/)
-  })
-})
-
-describe('subtaskReply', () => {
-  const said = (text: string) => ({ role: 'assistant', text, toolUses: [] }) as SessionMessage
-  const asked = (text: string) => ({ role: 'user', text, toolUses: [] }) as SessionMessage
-  const result = { role: 'user', text: 'output', toolUses: [], toolResults: [{ tool_use_id: 'x', text: 'output' }] } as unknown as SessionMessage
-
-  test('is everything the assistant said since the last human turn', () => {
-    const got = subtaskReply([said('old'), asked('fix issue 3'), said('the bug is X'), result, said('fixed: Y')])
-    assert.equal(got, 'the bug is X\n\nfixed: Y')
+  test('keeps the start of a long request, where the ask is', () => {
+    const text = judgeText('Fix the parser. ' + 'y'.repeat(JUDGE_REQUEST_LIMIT * 2), 'done')
+    assert.match(text, /Fix the parser\./)
+    assert.ok(text.length < JUDGE_ANSWER_LIMIT + JUDGE_REQUEST_LIMIT + 1000)
   })
 
-  test('keeps the answer when the last message is only "Done."', () => {
-    // Answer, then close_task, then a closing line: the last message alone
-    // would keep "Done." and lose the answer.
-    const got = subtaskReply([asked('fix it'), said('the cause was an off-by-one in render'), said(''), said('Done.')])
-    assert.match(got, /off-by-one/)
-  })
-
-  test('a tool result is not a human turn, so it does not end the sub-task', () => {
-    assert.equal(subtaskReply([asked('go'), said('a'), result, said('b')]), 'a\n\nb')
-  })
-
-  test('never takes what the person said', () => {
-    assert.equal(subtaskReply([asked('please fix it')]), '')
-  })
-
-  test('is empty when there is nothing to take', () => {
-    assert.equal(subtaskReply([]), '')
+  test('says so when there is nothing to judge', () => {
+    assert.match(judgeText('', ''), /\(empty\)/)
   })
 })

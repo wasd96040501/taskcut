@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import arms, driver, metrics, models, report, transcript, workload
+from . import arms, driver, mechanism, metrics, models, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -16,7 +16,7 @@ WORKLOADS = EVAL_ROOT / "workloads"
 GENERATORS = EVAL_ROOT / "generators"
 DEFAULT_RESULTS = EVAL_ROOT / "results"
 DEFAULT_WORK = Path.home() / ".cache" / "taskcut-eval"
-PROJECTS = Path.home() / ".claude" / "projects"
+PROJECTS = transcript.PROJECTS
 
 
 def _workspace(work: Path, name: str, arm: str, model: str) -> Path:
@@ -32,8 +32,7 @@ def cmd_list(args) -> int:
         print(f"  {name:<12} {len(w.files)} files, {len(w.probes)} probes  -- {w.description}")
     print("\narms:")
     for name, a in arms.ARMS.items():
-        mark = "" if a.default else "   [not in the default sweep]"
-        print(f"  {name:<12} {a.description}{mark}")
+        print(f"  {name:<12} {a.description}")
     print("\nmodels:")
     for name, m in models.MODELS.items():
         print(f"  {name:<12} window {m.window:,} -- {m.description}")
@@ -165,6 +164,29 @@ def _numbers(run) -> dict:
     }
 
 
+def cmd_mechanism(args) -> int:
+    """One short real session at a low floor, and every property it must show."""
+    arm = mechanism.VARIANTS[args.variant]
+    work = Path(args.work)
+    model = models.get(args.model)
+    space = mechanism.materialise(_workspace(work, "mechanism", arm.name, model.alias))
+    plugin = driver.prepare_plugin(arm, REPO_ROOT, work / "plugins" / arm.name)
+    mechanism.drive(space, plugin, arm, model.alias)
+
+    results = Path(args.results)
+    results.mkdir(parents=True, exist_ok=True)
+    stem = f"mechanism--{args.variant}--{model.alias}"
+    destination = results / f"{stem}.jsonl"
+    destination.write_bytes(transcript.find(PROJECTS, space).read_bytes())
+    print(f"transcript -> {destination}")
+
+    verdicts = mechanism.check(destination, args.variant, model.window)
+    (results / f"{stem}.checks.json").write_text(json.dumps([vars(v) for v in verdicts], indent=1) + "\n")
+    for v in verdicts:
+        print(f"  {'PASS' if v.passed else 'FAIL'}  {v.name}: {v.detail}")
+    return 0 if all(v.passed for v in verdicts) else 1
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -179,6 +201,11 @@ def main(argv=None) -> int:
     run.add_argument("--arm", required=True)
     run.add_argument("--model", default="sonnet", help=f"one of {', '.join(models.MODELS)}, or any --model alias")
     run.set_defaults(func=cmd_run)
+
+    mech = sub.add_parser("mechanism", help="check the mechanism end to end in one short real session")
+    mech.add_argument("--variant", choices=sorted(mechanism.VARIANTS), default="plain")
+    mech.add_argument("--model", default="sonnet", help=f"one of {', '.join(models.MODELS)}, or any --model alias")
+    mech.set_defaults(func=cmd_mechanism)
 
     rep = sub.add_parser("report", help="render the collected results")
     rep.add_argument("--out", default="")

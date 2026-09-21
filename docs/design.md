@@ -11,23 +11,43 @@ summariser looking at a flat transcript has no way to tell which is which.
 The end of a sub-task is the one moment where "what still matters" has a clean
 answer. taskcut moves the decision there.
 
-## Why the model declares the boundary
+## Who decides that a sub-task is finished
 
-Three things could mark a boundary:
+Four things could mark a boundary:
 
 1. **A todo transition.** Hooking `TodoWrite` and watching for an item flipping
-   to `completed` needs nothing new from the model. But a todo item is a one-line
-   title with no conclusion in it, so a second round trip is needed to ask what
-   the sub-task established — at exactly the moment the context is about to be
-   thrown away.
+   to `completed` needs nothing new from the model, but only works for a model
+   that keeps a todo list, and a one-line title says nothing about what the
+   sub-task established.
 2. **A slash command the person types.** Reliable, and useless for a job running
    unattended for days.
-3. **A tool the model calls.** The boundary and the conclusion arrive in the same
-   event, because the conclusion is the argument.
+3. **A tool the working model calls.** What versions up to 0.4 did: the model
+   called `close_task` and the argument was the conclusion. It has two costs
+   that do not go away. A tool call ends the model's response, so every
+   boundary is one more request that reads the whole context again -- measured
+   at about ten percent of a twenty-change session, paid below the floor as
+   much as above it. And a tool cannot be unregistered, so once the model has
+   been told about it, it is there for the rest of the session.
+4. **A judge at the end of the turn.** What taskcut does. Once the context is
+   past the floor, at the end of each turn the model finished, one
+   `$.model.classify` call on a small model reads the request and the answer
+   and says `finished` or `unfinished` -- the same shape as auto mode's
+   permission classifier, reading a few thousand characters rather than the
+   transcript. Below the floor it never runs, and the working model is never
+   told taskcut exists, so there is nothing for a cut to leave behind.
 
-The third is what taskcut does. The tool description states the consequence
-plainly — *everything you did for it is dropped; only what you write here
-survives* — because the quality of the cut is the quality of that text.
+The judge decides only whether to cut. A reply that asks a question, waits for
+a decision or reports partial progress is `unfinished`, and the context is kept.
+Anything but a clear `finished` -- an unrecognised label, a failed request --
+keeps it too: a missed cut waits for the next turn, while a wrong one costs
+re-reading.
+
+What a cut keeps of the work is the answer the model gave for each request,
+which it wrote while it still had the full context. The `outcome` setting asks
+for more: past the floor it offers the working model the old `close_task`, whose
+argument is a conclusion written for the purpose, kept in place of the answer.
+That brings back the round-trip and the tool that stays, which is why it is off
+by default.
 
 ## Why the cut does not call a summariser
 
@@ -35,7 +55,7 @@ A `session.compact` hook can call `next(e)` and let core summarise, or answer
 `{ messages }` of its own. taskcut answers, and never calls `next` on a boundary
 cut.
 
-The reason is that the keep-set is already known. The conclusion was written by
+The reason is that the keep-set is already known. The answers were written by
 the model when it still had the full context, which is a better summary than one
 produced later from a transcript. The human turns are worth keeping exactly as
 they were said. Nothing in the keep-set benefits from being paraphrased, and
@@ -106,9 +126,10 @@ the session could have shed; set too low it spends real money flattening a
 transcript that was not a problem yet. The default leans high.
 
 `floorPercent` gates on `$.session.usage()`, whose `context.percent` is the same
-figure the status line shows. Below the floor the conclusion is still recorded —
-the ledger is the durable artefact — and the transcript is left alone. The cut
-happens at the first boundary after the window has actually filled.
+figure the status line shows, read off the last response for nothing. Below the
+floor nothing runs at all -- no judge, no ledger write. Nothing is lost by
+waiting: the ledger is built at the cut, from the transcript being replaced, and
+records every request answered since the last one.
 
 ## The ledger
 
@@ -125,7 +146,7 @@ Two details are load-bearing:
   done. It re-ran the work and wrote *"this re-run matches the previously closed
   sub-task B result exactly"* — a quiet, expensive failure.
 * **Entries carry state, not just findings.** The rendering marks each entry
-  `[CLOSED]` and ends with *"Those sub-tasks are finished. Do not redo them."*
+  `[CLOSED]` and ends with *"That work is finished. Do not redo it."*
   Without that, a ledger that lists what was learned reads as an open to-do list.
   An early version omitted it and the model reported the closed sub-task as
   outstanding.
@@ -142,9 +163,9 @@ newest entry is.
 
 ## What is left to the engine
 
-The engine's own threshold compaction stays in place. A sub-task can be too large
-to reach a boundary, and when that happens the right behaviour is the existing
-one: core summarises. taskcut hooks `session.compact` on `trigger: 'auto'` only
+The engine's own threshold compaction stays in place. A single turn can be too
+large to end below the limit, and when that happens the right behaviour is the
+existing one: core summarises. taskcut hooks `session.compact` on `trigger: 'auto'` only
 to pass the ledger down as `instructions`, so the summariser is not asked to
 re-derive what is already settled.
 
@@ -177,8 +198,11 @@ so an unattended job does not need a terminal held open for it.
 
 ## Where the compaction is triggered from
 
-`$.session.compact` rejects while a turn is running, so the call cannot be made
-from the `close_task` handler. The handler sets a flag; `turn.complete` reads it.
+`$.session.compact` rejects while a turn is running, so both the judgement and
+the cut happen in `turn.complete`, after `next(e)` has settled the turn. Only a
+main-loop turn that ended with `reason: 'answer'` is judged: a subagent's run is
+not the person's conversation, and an interrupted or failed turn stopped in the
+middle of its work, which is the transcript that explains what went wrong.
 
 Two other candidates were tried. `classic.Stop` never reached the hooks module.
 Deferring the call with `$.clock.after(0, ...)` was unnecessary: in an

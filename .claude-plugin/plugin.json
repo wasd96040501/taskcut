@@ -1,7 +1,7 @@
 {
   "name": "taskcut",
-  "version": "0.4.0",
-  "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. The model calls close_task when a piece of work is finished; taskcut then replaces that work's transcript with the conclusion the model wrote, keeping the human turns verbatim and spending no summarizer call.",
+  "version": "0.5.0",
+  "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished; if it is, taskcut replaces its working context with a ledger of what was asked and answered, keeping the human turns verbatim and spending no summarizer call. Below the floor it does nothing and costs nothing.",
   "author": {
     "name": "Yangze Luo"
   },
@@ -18,7 +18,7 @@
     "floorPercent": {
       "type": "number",
       "title": "Compact above this context fill",
-      "description": "A compaction invalidates the prompt cache, so a cut is only worth making once the window has actually filled: the kept set is re-cached at full price, measured at 12k-15k tokens. Below this percentage a closed sub-task is recorded but the transcript is left alone. Set to 0 to cut at every boundary.",
+      "description": "Below this context fill taskcut does nothing at all: no model is asked and nothing is cut. A cut invalidates the prompt cache, and the kept set is re-cached at full price, measured at 12k-15k tokens, so it is only worth making once the window has actually filled. Set to 0 to judge every turn.",
       "required": false,
       "default": 40
     },
@@ -32,28 +32,23 @@
     "ledgerVerbatim": {
       "type": "number",
       "title": "Ledger entries kept verbatim",
-      "description": "The ledger is the one thing a cut never shrinks. Past this many closed sub-tasks the oldest are folded into a single rolled-up entry by one small-model call.",
+      "description": "The ledger is the one thing a cut never shrinks. Past this many finished pieces of work the oldest are folded into a single rolled-up entry by one small-model call, made only when a cut happens.",
       "required": false,
       "default": 12
     },
-    "foldModel": {
+    "model": {
       "type": "string",
-      "title": "Model that folds the ledger",
-      "description": "Alias or full id, resolved the way a --model value is. Only used when the ledger grows past the verbatim limit.",
+      "title": "Small model taskcut asks",
+      "description": "Judges, at the end of a turn past the floor, whether the work asked for is finished, from the request and the answer alone; and folds the ledger. Alias or full id, resolved the way a --model value is.",
       "required": false,
       "default": "haiku"
     },
-    "ledgerMode": {
-      "type": "string",
-      "title": "Who writes a ledger entry",
-      "description": "\"outcome\" (default): the conclusion the working model writes when it calls close_task. \"reply\": close_task only marks the boundary, and the model's own last reply for the sub-task is kept instead, which costs no extra output. \"directed\": a small model writes the entry from the dropped transcript; measured, it halves the ledger and doubles the re-reading.",
+    "outcome": {
+      "type": "boolean",
+      "title": "Ask for a written conclusion",
+      "description": "Off (default): the model's own answer for each piece of work is what the ledger keeps, and taskcut costs the working model nothing. On: once the context is past the floor, the model is offered a close_task tool and asked to write what the next sub-task needs; that costs output tokens and one request per call, and the tool stays available for the rest of the session.",
       "required": false,
-      "default": "outcome",
-      "options": [
-        "outcome",
-        "directed",
-        "reply"
-      ]
+      "default": false
     }
   }
 }

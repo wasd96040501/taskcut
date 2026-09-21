@@ -64,7 +64,7 @@ class Segmentation(unittest.TestCase):
     def test_a_ledger_message_is_counted_not_segmented(self):
         loaded = transcript.load(write([
             user("first"),
-            user(f"{transcript.LEDGER_OPENING} 2 closed sub-task(s) was dropped"),
+            user(f"{transcript.LEDGER_OPENINGS[0]} The working context of 2 earlier piece(s) of work was dropped"),
             user("second"),
         ]))
         self.assertEqual([t.prompt for t in loaded.turns], ["first", "second"])

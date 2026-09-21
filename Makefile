@@ -9,6 +9,7 @@ WORKLOAD ?= synthetic
 ARM      ?= off
 MODEL    ?= sonnet
 RESULTS  ?= eval/results
+VARIANT  ?= plain
 
 export PYTHONPATH := eval
 
@@ -46,8 +47,12 @@ eval-run: ## Run one workload under one arm (WORKLOAD=, ARM=, MODEL=)
 .PHONY: eval-ab
 eval-ab: ## Run both arms of one workload and print the comparison (WORKLOAD=, MODEL=)
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm off --model $(MODEL)
-	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm boundary --model $(MODEL)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm on --model $(MODEL)
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report
+
+.PHONY: eval-mechanism
+eval-mechanism: ## Check the mechanism end to end in one short real session (VARIANT=plain|outcome, MODEL=)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) mechanism --variant $(VARIANT) --model $(MODEL)
 
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts

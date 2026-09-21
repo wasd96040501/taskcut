@@ -54,11 +54,15 @@ none anywhere else.
 ```bash
 make eval-list            # the workloads and the arms
 make eval-verify          # every probe is answerable from the material
-make eval-run WORKLOAD=flask ARM=off
-make eval-run WORKLOAD=flask ARM=boundary
+make eval-mechanism       # the mechanism, end to end, in one short session
+make eval-run WORKLOAD=issues-long ARM=off
+make eval-run WORKLOAD=issues-long ARM=on
 make eval-report
 make eval-test            # the harness's own tests
 ```
+
+There are three arms: `off`, `on` (taskcut as shipped) and `outcome` (with the
+`outcome` setting), all at a floor of 30%.
 
 `make eval-run` materialises the workspace, bakes the arm's settings into a
 copy of the plugin, drives the session, and copies the transcript into
@@ -67,6 +71,25 @@ absolute paths.
 
 Run each pair several times. Model behaviour varies enough that one pair shows
 the shape of a difference, not its size.
+
+## The mechanism check
+
+A benchmark run at a realistic floor crosses it once, if at all, so it cannot
+show that the mechanism behaves every time. `make eval-mechanism` drives one
+short session with the floor at 5%, reading files large enough to cross it
+twice, and asserts from the transcript:
+
+* below the floor, nothing -- no judgement, no tool, no reminder;
+* past it, every finished turn is judged, a turn that ends in a question is
+  kept, and a finished one is cut;
+* nothing is cut below the floor, and crossing again cuts again;
+* what was cut can be recalled from the ledger, value for value;
+* without `outcome`, the working model is never asked for anything; with it
+  (`VARIANT=outcome`), `close_task` appears only past the floor and what it
+  writes is what the ledger keeps.
+
+It exits non-zero if any fails. Each assertion was also run against a 0.4.0
+transcript, where the ones that should fail do.
 
 ## Workloads
 

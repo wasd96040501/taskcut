@@ -7,13 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-21
+
+### Changed
+
+- **Below the floor taskcut now does nothing and costs nothing.** The working
+  model no longer declares boundaries with `close_task`. A tool call ends the
+  model's response, so every boundary was one more request reading the whole
+  context -- about 10% of a twenty-change session, measured, paid whether or
+  not anything was ever cut -- and a tool, once registered, cannot be taken
+  back. Instead, once the context is past `floorPercent`, one small-model call
+  at the end of each finished turn reads the request and the answer and judges
+  whether that work is finished, the way auto mode's classifier judges an
+  action. Below the floor no model is asked, nothing is written, and the
+  working model is never told taskcut exists.
+- The ledger is built at the cut, from the transcript: every request answered
+  since the last cut, with the answer the model gave it. Work done before the
+  floor was crossed is recorded too.
+- Each judgement past the floor leaves a dim line in the transcript saying what
+  was decided.
+- **Settings.** `foldModel` is now `model`: the same small model judges and
+  folds. `ledgerMode` is replaced by `outcome` (default off): on, past the floor
+  the working model is offered `close_task` and asked for a written conclusion,
+  kept in place of its answer. `directed`, measured and falsified, is gone.
+
+### Fixed
+
+- A ledger left by an earlier cut is no longer mistaken for a human turn and
+  kept beside the new one.
+- A fold that cannot reach its model no longer fails the cut.
+
 ### Added
 
+- `make eval-mechanism`: one short real session at a low floor, asserting that
+  nothing happens below the floor, that a turn ending in a question is kept, that
+  a finished turn is cut, that crossing again cuts again, and that what was cut
+  can be recalled.
 - `issues-long`, a benchmark workload of twenty real click changes, bugs and
   features, long enough for one Sonnet 5 session to reach a floor of 30%.
-  Measured in docs/measurement.md: every arm got all twenty right; the session
-  peaked at 29% of the window; each `close_task` costs one more request, about
-  10% over the run whether or not anything is cut.
+- The benchmark driver waits for the transcript to record the end of a turn
+  instead of for the screen to go quiet, which a model thinking for a while
+  could fool.
 
 ## [0.4.0] - 2026-09-21
 

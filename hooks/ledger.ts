@@ -7,15 +7,25 @@
 
 import type { SessionMessage } from 'claude-code'
 
-/** One finished sub-task, as the model closed it. */
+/** One piece of finished work: what it was, and what came of it. */
 export type Entry = {
-  /** The sub-task in one line, as the model named it. */
+  /** The work in one line: the request, or the sub-task as the model named it. */
   task: string
-  /** What the model wrote down to carry forward; the only thing that survives the cut. */
+  /** The model's answer for it, or the conclusion it wrote when it closed it. */
   outcome: string
-  /** When it was closed, in milliseconds since the epoch. */
+  /** When the cut that recorded it happened, in milliseconds since the epoch. */
   at: number
 }
+
+/** The name the model calls taskcut's tool by. */
+export const CLOSE_TOOL = 'mcp__taskcut__close_task'
+
+/**
+ * The engine's tool for loading a deferred tool's schema. The model calls it
+ * before its first `close_task` after every cut, which is loading a tool, not
+ * doing work.
+ */
+export const TOOL_SEARCH = 'ToolSearch'
 
 /**
  * Which entries to fold and which to keep verbatim, or null when the ledger is
@@ -28,10 +38,10 @@ export function planFold(ledger: readonly Entry[], verbatim: number): { fold: En
   return { fold: ledger.slice(0, boundary), keep: ledger.slice(boundary) }
 }
 
-/** The prompt that folds a run of finished sub-tasks into one durable record. */
+/** The prompt that folds a run of finished work into one durable record. */
 export function foldPrompt(entries: readonly Entry[]): string {
   return [
-    'These are finished sub-tasks of one long job, oldest first. Write the shortest',
+    'These are finished pieces of one long job, oldest first. Write the shortest',
     'record a worker resuming this job would still need: decisions that still bind,',
     'paths, names, numbers, and anything later work must not contradict. Drop',
     'everything a later entry superseded. No preamble.',
@@ -43,10 +53,22 @@ export function foldPrompt(entries: readonly Entry[]): string {
 /** The entry a fold collapses a run of entries into. */
 export function foldedEntry(folded: readonly Entry[], rolled: string): Entry {
   return {
-    task: `${folded.length} earlier sub-tasks, folded`,
+    task: `${folded.length} earlier pieces of work, folded`,
     outcome: rolled.trim(),
     at: folded[folded.length - 1]?.at ?? 0,
   }
+}
+
+/**
+ * How a ledger message begins. The ledger is a user message, so the keep-set
+ * rule has to be able to tell it from a human turn: an old ledger kept as though
+ * someone had typed it would sit beside the new one and say everything twice.
+ */
+export const LEDGER_HEADER = '[taskcut]'
+
+/** Whether a message is the ledger an earlier cut left in place. */
+export function isLedgerMessage(message: SessionMessage): boolean {
+  return message.role === 'user' && message.text.startsWith(LEDGER_HEADER)
 }
 
 /**
@@ -55,129 +77,121 @@ export function foldedEntry(folded: readonly Entry[], rolled: string): Entry {
  * saying the work is done reads as an open to-do list, and the model redoes it.
  */
 export function renderLedger(ledger: readonly Entry[]): string {
-  if (ledger.length === 0) return 'No sub-tasks have been closed yet.'
+  if (ledger.length === 0) return `${LEDGER_HEADER} Nothing earlier in this conversation has been recorded.`
   return [
-    `The working context of ${ledger.length} closed sub-task(s) was dropped from this`,
-    'conversation. This is what they established:',
+    `${LEDGER_HEADER} The working context of ${ledger.length} earlier piece(s) of work was dropped from`,
+    'this conversation. This is what each was and what came of it:',
     '',
     ledger.map((entry, i) => `${i + 1}. [CLOSED] ${entry.task}\n   ${entry.outcome}`).join('\n'),
     '',
-    'Those sub-tasks are finished. Do not redo them; continue from here.',
+    'That work is finished. Do not redo it; continue from here.',
   ].join('\n')
 }
 
-/**
- * How much of a dropped transcript the directed extractor is shown. A tool
- * result can be an entire file, and the extractor is paid for by the token, so
- * the transcript is trimmed rather than sent whole. Trimming loses the tail of
- * a long result, which is the trade the mode makes: a cheaper reader that saw
- * most of the work, against an expensive one that saw all of it.
- */
-export const DIRECTED_RESULT_LIMIT = 20_000
-export const DIRECTED_TOTAL_LIMIT = 120_000
+/** How much of a request the ledger names it by. The request itself is kept whole, or already gone. */
+export const HEADLINE_LIMIT = 200
 
-/** The messages a cut is about to drop: everything the keep-set rule did not take. */
-export function droppedMessages(
-  all: readonly SessionMessage[],
-  kept: readonly SessionMessage[],
-): SessionMessage[] {
-  const keptSet = new Set<SessionMessage>(kept)
-  return all.filter((message) => !keptSet.has(message))
+/** A request in one line: its first non-blank line, clipped. */
+export function headline(text: string): string {
+  const line = text.split('\n').find((candidate) => candidate.trim() !== '')?.trim() ?? ''
+  return line.length <= HEADLINE_LIMIT ? line : `${line.slice(0, HEADLINE_LIMIT)}...`
 }
 
 /**
- * The first human turn. It is the closest thing a transcript has to a statement
- * of what the whole job is for, and it is often not one: in a session that
- * opens by asking for the first step, this is that step and nothing more.
+ * The ledger entries for everything finished since the last cut, read from the
+ * transcript the cut is about to replace.
  *
- * Nothing can recover the difference, so the caller is told which it has rather
- * than being handed a guess dressed as a fact. An extraction aimed at a first
- * step as though it were the job writes down that the job is finished, and
- * tells the next worker to go and do the step that was just closed.
+ * One entry per request that got an answer. The answer is what the model said
+ * after its last piece of work in that turn -- the conclusion, not the
+ * narration on the way, which was about the working context being dropped.
+ * Loading a tool and closing the task are not work, so a conclusion given
+ * before either is still the conclusion.
+ *
+ * Where the model closed a sub-task with a written `outcome` (the `outcome`
+ * setting), that is what it chose to carry forward, and it is kept instead.
+ *
+ * Every request is covered, closed or not. `close_task` is only offered once
+ * the context is past the floor, so the work before that was never closed --
+ * and without an entry, the first cut would erase any record of it.
+ *
+ * A request an earlier cut kept stands in the transcript with nothing after
+ * it: its answer went with that cut, into the ledger. It yields nothing here,
+ * so nothing is recorded twice.
  */
-export function openingRequest(messages: readonly SessionMessage[]): string {
-  return humanTurnsOf(messages)[0]?.text?.trim() ?? ''
-}
+export function finishedWork(messages: readonly SessionMessage[], at: number): Entry[] {
+  const entries: Entry[] = []
+  let asked: string | undefined
+  let conclusion: string[] = []
+  let outcomes: Entry[] = []
+  const notWork = new Set<string>()
 
-function clip(text: string, limit: number): string {
-  return text.length <= limit ? text : `${text.slice(0, limit)}\n[... ${text.length - limit} characters omitted]`
-}
+  const close = () => {
+    if (asked === undefined) return
+    if (outcomes.length > 0) entries.push(...outcomes)
+    else if (conclusion.length > 0) entries.push({ task: headline(asked), outcome: conclusion.join('\n\n'), at })
+  }
 
-/** A dropped transcript as plain text, for a model that was not in the conversation. */
-export function renderDropped(messages: readonly SessionMessage[]): string {
-  const parts: string[] = []
   for (const message of messages) {
-    if (message.text?.trim()) parts.push(`${message.role}: ${message.text.trim()}`)
-    for (const use of message.toolUses ?? []) {
-      const result = typeof use.text === 'string' ? use.text : ''
-      parts.push(`${message.role} ran ${use.tool}:\n${clip(result, DIRECTED_RESULT_LIMIT)}`)
+    if (message.role === 'user' && (message.toolResults?.length ?? 0) === 0) {
+      close()
+      asked = isLedgerMessage(message) ? undefined : message.text
+      conclusion = []
+      outcomes = []
+      continue
     }
-    for (const result of message.toolResults ?? []) {
-      if (result.text) parts.push(clip(result.text, DIRECTED_RESULT_LIMIT))
+    if (message.role === 'user') {
+      // The result of a piece of work: what was said before it was narration.
+      if ((message.toolResults ?? []).some((result) => !notWork.has(result.tool_use_id))) conclusion = []
+      continue
+    }
+    if (message.text.trim()) conclusion.push(message.text.trim())
+    for (const use of message.toolUses) {
+      if (use.tool !== CLOSE_TOOL && use.tool !== TOOL_SEARCH) continue
+      notWork.add(use.tool_use_id)
+      const written = typeof use.input['outcome'] === 'string' ? use.input['outcome'].trim() : ''
+      if (use.tool === CLOSE_TOOL && written) {
+        const named = typeof use.input['task'] === 'string' ? use.input['task'].trim() : ''
+        outcomes.push({ task: named || headline(asked ?? ''), outcome: written, at })
+      }
     }
   }
-  return clip(parts.join('\n\n'), DIRECTED_TOTAL_LIMIT)
+  close()
+  return entries
 }
 
+/** What the judge answers with. */
+export const FINISHED = 'finished'
+export const UNFINISHED = 'unfinished'
+
 /**
- * The prompt that writes a ledger entry from the work itself rather than from
- * the working model's own account of it.
- *
- * The difference is what the writer knows. A model closing its own sub-task is
- * told that nothing else will survive, and answers that by writing down
- * everything it noticed, which is a poor conclusion and a large one. This
- * writer is not under that pressure and has something the other did not: the
- * standing task, against which most of what happened is irrelevant.
- *
- * It says what the situation is and stops. A list of rules about what to keep
- * and what to drop would decide in advance the very thing the mode exists to
- * test -- whether a model given the job and the work can judge for itself what
- * matters -- and a writer following a checklist produces an inventory, which is
- * the failure the mode is meant to avoid.
+ * How much of a request and of an answer the judge reads. The end of an answer
+ * is where a model says whether it is done or asks what to do next, so an
+ * answer is clipped from the front.
  */
-export function directedPrompt(opening: string, subTask: string, dropped: string): string {
+export const JUDGE_REQUEST_LIMIT = 2_000
+export const JUDGE_ANSWER_LIMIT = 4_000
+
+/**
+ * What the judge is shown: the request, the answer, and the question. It
+ * reads no transcript, so a turn that read a whole codebase costs the same to
+ * judge as one that read nothing.
+ */
+export function judgeText(request: string, answer: string): string {
+  const asked = request.length <= JUDGE_REQUEST_LIMIT ? request : `${request.slice(0, JUDGE_REQUEST_LIMIT)} [...]`
+  const said = answer.length <= JUDGE_ANSWER_LIMIT ? answer : `[...] ${answer.slice(-JUDGE_ANSWER_LIMIT)}`
   return [
-    'A long job is in progress. This is the first thing the person asked for. It',
-    'may be the whole job, or only its first step -- there is no way to tell from',
-    'here, and more work is expected either way:',
+    'A person asked an assistant for something, and the assistant has just stopped and replied.',
+    `Answer "${FINISHED}" if the work that was asked for is done and the reply reports it, so that`,
+    'the files it read and the commands it ran are no longer needed. Answer',
+    `"${UNFINISHED}" if the assistant is asking a question, waiting for a decision, reporting`,
+    'partial progress, or proposing work it has not done yet.',
     '',
-    opening || '(nothing was recorded)',
+    '--- request ---',
+    asked.trim() || '(empty)',
     '',
-    `A sub-task has just finished: ${subTask}`,
-    '',
-    'Below is everything that happened while it was worked on. It is about to be',
-    'deleted. Write what someone continuing the job will need.',
-    '',
-    '--- transcript ---',
-    dropped,
+    '--- reply ---',
+    said.trim() || '(empty)',
   ].join('\n')
-}
-
-/**
- * Everything the assistant said since the last human turn, which is how `reply`
- * mode fills an entry.
- *
- * A model working a sub-task narrates it and closes with what it found. That
- * text has already been written and paid for; asking for the same thing again
- * as a tool argument costs output, and telling the model the argument is all
- * that survives makes it write an inventory rather than a conclusion.
- *
- * All of it, not only the last message. A model that answers and then calls
- * close_task tends to end with a line like "Done." -- the last message alone
- * would keep that and lose the answer.
- */
-export function subtaskReply(messages: readonly SessionMessage[]): string {
-  let start = messages.length
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i]!
-    if (message.role === 'user' && (message.toolResults?.length ?? 0) === 0) break
-    start = i
-  }
-  return messages
-    .slice(start)
-    .filter((message) => message.role === 'assistant' && message.text?.trim())
-    .map((message) => message.text.trim())
-    .join('\n\n')
 }
 
 /** How long a ledger left behind by a session that never ended cleanly is kept. */
@@ -215,7 +229,9 @@ export function staleLedgerKeys(
  * pair together.
  */
 export function humanTurnsOf(messages: readonly SessionMessage[]): SessionMessage[] {
-  return messages.filter((message) => message.role === 'user' && (message.toolResults?.length ?? 0) === 0)
+  return messages.filter(
+    (message) => message.role === 'user' && (message.toolResults?.length ?? 0) === 0 && !isLedgerMessage(message),
+  )
 }
 
 /**

@@ -13,10 +13,15 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-#: The opening words of the message taskcut puts in place of what it dropped.
-#: Recognising it is what lets a metric count cuts and skip the message when
-#: segmenting turns; it is the one piece of plugin knowledge in this module.
-LEDGER_OPENING = "The working context of"
+#: Where Claude Code writes transcripts, one directory per working directory.
+PROJECTS = Path.home() / ".claude" / "projects"
+
+#: The opening words of the message taskcut puts in place of what it dropped:
+#: the current header, and the words versions before 0.5.0 opened with, so that
+#: their transcripts still read. Recognising it is what lets a metric count cuts
+#: and skip the message when segmenting turns; it is the one piece of plugin
+#: knowledge in this module.
+LEDGER_OPENINGS = ("[taskcut]", "The working context of")
 
 
 @dataclass
@@ -120,7 +125,7 @@ def load(path: str | Path) -> Transcript:
             if has_result:
                 continue  # the answer half of a tool call, not a human turn
             text = text.strip()
-            if text.startswith(LEDGER_OPENING):
+            if text.startswith(LEDGER_OPENINGS):
                 out.ledgers.append(text)
                 continue
             current = Turn(prompt=text)
@@ -159,15 +164,18 @@ def load(path: str | Path) -> Transcript:
     return out
 
 
-def find(project_root: str | Path, workspace: str | Path) -> Path:
-    """The newest transcript Claude Code wrote for a workspace.
-
-    The project directory is the workspace's absolute path with every character
-    that is not a letter, a digit or a hyphen replaced by a hyphen.
-    """
+def directory(project_root: str | Path, workspace: str | Path) -> Path:
+    """Where Claude Code writes a workspace's transcripts: the workspace's
+    absolute path with every character that is not a letter, a digit or a
+    hyphen replaced by a hyphen."""
     slug = "".join(c if c.isalnum() or c == "-" else "-" for c in str(Path(workspace).resolve()))
-    directory = Path(project_root) / slug
-    sessions = sorted(directory.glob("*.jsonl"), key=lambda p: p.stat().st_mtime)
+    return Path(project_root) / slug
+
+
+def find(project_root: str | Path, workspace: str | Path) -> Path:
+    """The newest transcript Claude Code wrote for a workspace."""
+    directory_ = directory(project_root, workspace)
+    sessions = sorted(directory_.glob("*.jsonl"), key=lambda p: p.stat().st_mtime)
     if not sessions:
-        raise FileNotFoundError(f"no transcript under {directory}")
+        raise FileNotFoundError(f"no transcript under {directory_}")
     return sessions[-1]

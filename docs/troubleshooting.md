@@ -58,21 +58,25 @@ Neither can compact. Use a terminal session or `claude --bg`. See
 
 ### 4. Is the context still below the floor?
 
-`floorPercent` defaults to 40. Below that, a closed sub-task is recorded in the
-ledger and the transcript is deliberately left alone, because a cut re-caches
-the kept set at full price and that costs more than a small transcript saves.
-The status line's `ctx N%` is the figure being compared. To cut at every
-boundary, set `floorPercent` to `0` with `/plugin`, or reinstall with
+`floorPercent` defaults to 40. Below that taskcut does nothing at all, because a
+cut re-caches the kept set at full price and that costs more than a small
+transcript saves. The status line's `ctx N%` is the figure being compared. To
+judge every turn, set `floorPercent` to `0` with `/plugin`, or reinstall with
 `--config floorPercent=0`.
 
-### 5. Is the model calling the tool?
+### 5. What did the judge say?
 
-The cut is driven by `close_task`. If the model never calls it there is no
-boundary to cut at. Ask for it directly:
+Past the floor, every turn the model finished ends with a dim line:
 
-> Work through the plan. Call close_task after each step.
+```
+taskcut: context at 43%, the work is finished; dropping its working context
+taskcut: context at 43%, the work is not finished; keeping it
+```
 
-Or put it in the project's `CLAUDE.md`.
+No line at all past the floor means the turn was not judged: it was a
+subagent's, or it was interrupted or failed. `not finished` on a turn you
+consider done usually means the answer ended by proposing more work or asking
+a question; the judge reads only the request and the answer.
 
 ## The model redid work that was already finished
 
@@ -86,12 +90,13 @@ Every key should read `ledger:<session-uuid>`. A bare `ledger` key means an olde
 build is installed, and two sessions on this machine are sharing one ledger.
 Reinstall from a current checkout.
 
-## A conclusion came out too thin
+## A ledger entry came out too thin
 
-taskcut keeps the `outcome` text exactly as written; it does not judge whether
-the text is sufficient. If conclusions are coming back thin, the lever is the
-instruction, not the plugin — tell the model what a conclusion has to contain for
-this project, in `CLAUDE.md`.
+taskcut keeps the answer the model gave for each request exactly as written; it
+does not judge whether the text is sufficient. An answer that says only "Done."
+leaves a thin entry. The lever is what you ask for -- a request that says what
+the answer should report -- or the `outcome` setting, which has the model write
+a conclusion for the purpose, at the cost of output tokens and a round-trip.
 
 ## After upgrading Claude Code
 

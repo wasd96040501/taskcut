@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "taskcut",
-      "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. The model calls close_task when a piece of work is finished; taskcut then replaces that work's transcript with the conclusion the model wrote, keeping the human turns verbatim and spending no summarizer call.",
+      "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished; if it is, taskcut replaces its working context with a ledger of what was asked and answered, keeping the human turns verbatim and spending no summarizer call. Below the floor it does nothing and costs nothing.",
       "author": {
         "name": "Yangze Luo"
       },

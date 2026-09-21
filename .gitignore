@@ -2,6 +2,10 @@
 .claude/types/
 .claude/
 
+# Python
+__pycache__/
+*.pyc
+
 # Node / TypeScript
 node_modules/
 *.tsbuildinfo

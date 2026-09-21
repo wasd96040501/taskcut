@@ -22,8 +22,9 @@ conversation when a sub-task ends, instead of when the context window fills.
 ```
 
 Your own turns are kept **word for word**. Everything the model did for a
-finished sub-task is replaced by the conclusion the model itself wrote. No
-summariser runs, so nothing that is kept is paraphrased.
+finished sub-task is replaced by the answer it gave for it. No summariser runs,
+so nothing that is kept is paraphrased. And until the context is actually
+filling up, taskcut does nothing at all and costs nothing.
 
 ## Try it in two minutes
 
@@ -43,24 +44,26 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 Answer **yes** to the folder-trust prompt, then paste these three, one at a time:
 
 ```
-Sub-task 1: run `wc -l a.txt` and tell me the number. Then call close_task.
+Run `wc -l a.txt` and tell me the number.
 ```
 ```
-Sub-task 2: run `cat b.txt` and tell me the last word. Then call close_task.
+Run `cat b.txt` and tell me the last word.
 ```
 ```
-Without running any tool: list every sub-task you have closed.
+Without running any tool: list every task I have given you, with its result.
 ```
 
-The third answer comes back complete — both sub-tasks, with what each
-established — even though the work that produced them is no longer in the
-conversation. Watch `ctx N%` in the status line: it does not climb.
+After each of the first two, a dim line says what taskcut decided:
+`taskcut: context at 3%, the work is finished; dropping its working context`.
+The third answer comes back complete — both tasks, with their results — even
+though the work that produced them is no longer in the conversation. Nothing
+in the prompts mentions taskcut: it needs nothing from you or from the model.
 
 Throw the trial away with `cd .. && rm -rf taskcut-trial`.
 
-> `floorPercent=0` is for the demo only. It makes taskcut cut at **every**
-> boundary so you can see it work. The default is `40`, which is the setting
-> you actually want — see [What it costs](#what-it-costs).
+> `floorPercent=0` is for the demo only. It makes taskcut judge **every** turn
+> so you can see it work. The default is `40`, below which it does nothing —
+> see [What it costs](#what-it-costs).
 
 ## The problem it solves
 
@@ -70,8 +73,11 @@ the middle of a sub-task, summarising away detail that is still live while
 keeping detail from work that finished an hour ago.
 
 A long job is a sequence of shorter ones, and the moment when *what still
-matters* has a clean answer is the end of a sub-task. taskcut gives the model a
-tool, `close_task`, and cuts there instead.
+matters* has a clean answer is the end of a sub-task. taskcut cuts there
+instead: once the context is past a floor, a small model reads what you asked
+and what the assistant answered at the end of each turn, and judges whether
+that piece of work is finished — the way auto mode has a classifier judge each
+action.
 
 ## Install it for real
 
@@ -91,13 +97,8 @@ claude plugin marketplace add wasd96040501/taskcut
 claude plugin install taskcut@taskcut --scope user
 ```
 
-Then start a session with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, and ask
-for `close_task` when a piece of work is done — in the prompt, or once in the
-project's `CLAUDE.md`:
-
-```markdown
-Call close_task when you finish a sub-task and move on to the next.
-```
+Then start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`. There is
+nothing to add to your prompts or to `CLAUDE.md`.
 
 **Switching it off for one session:** `TASKCUT=0 claude`. That outranks
 everything.
@@ -135,32 +136,38 @@ Every setting has a working default. Set one at install time with
 
 | Setting | Default | What it controls |
 | --- | --- | --- |
-| `floorPercent` | `40` | Context fill, as a percentage, below which a closed sub-task is recorded but no cut is made. A cut re-caches the kept set at full price, measured at 12k–15k tokens, so below the floor it costs more than it saves. `0` cuts at every boundary. |
+| `floorPercent` | `40` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is cut. A cut re-caches the kept set at full price, measured at 12k–15k tokens, so below the floor it costs more than it saves. `0` judges every turn. |
 | `recentHumanTurns` | `2` | How many of your most recent turns are kept beside the first one. Your turns are unbounded on a long run, so keeping all of them only moves the growth. |
-| `ledgerVerbatim` | `12` | How many closed sub-tasks stay in the model's own words. Past this, the oldest fold into one rolled-up entry. |
-| `foldModel` | `haiku` | The model that folds them. An alias or a full id, resolved the way a `--model` value is. |
-| `ledgerMode` | `outcome` | Who writes a ledger entry. `directed` hands the job to `foldModel`; measured, it halves the ledger and doubles the re-reading, so it is off by default. |
+| `ledgerVerbatim` | `12` | How many finished pieces of work stay in the model's own words. Past this, the oldest fold into one rolled-up entry. |
+| `model` | `haiku` | The small model taskcut asks: whether a turn's work is finished, and to fold the ledger. An alias or a full id, resolved the way a `--model` value is. |
+| `outcome` | `false` | Whether the working model is asked to write a conclusion for each sub-task. Off, its own answer is what is kept and taskcut costs it nothing. On, past the floor it is offered a `close_task` tool: that costs output tokens and one request per call, and the tool stays for the rest of the session. |
 
 ## How it works
 
-At `session.start` taskcut registers one tool, `close_task`. Its argument is the
-conclusion, and it is the only thing that survives. When the model calls it,
-the conclusion goes into a session-keyed ledger. At the end of that turn, if the
-window has filled past `floorPercent`, a `session.compact` hook answers with a
-transcript it builds itself:
+Nothing happens until the context is past `floorPercent`. From then on, at the
+end of each turn that the model finished, taskcut makes one small-model call:
+it shows `model` what you asked and what the assistant answered — a few
+thousand characters, never the transcript — and asks whether that work is
+finished. A reply that asks you something, waits for a decision or reports
+partial progress is not; the context is kept.
+
+When it is finished, a `session.compact` hook answers with a transcript it
+builds itself:
 
 * your first turn, and your most recent `recentHumanTurns`, **verbatim** by
   their engine handles — nothing you said is ever paraphrased. The first is
   always kept because nothing else records what the job is for;
-* one message holding the ledger of closed sub-tasks.
+* one message holding the ledger: every request since the last cut, with the
+  answer the model gave it, after the ones earlier cuts recorded.
 
 That hook never calls `next`, so no summariser runs and the cut is a
-deterministic function of the transcript.
+deterministic function of the transcript. After it the context is back below
+the floor, and taskcut is silent again until it fills.
 
 | File | Role |
 | --- | --- |
 | `hooks/register.ts` | Every hook, and every call on the engine interface. |
-| `hooks/ledger.ts` | The ledger and the keep-set rule, as pure functions. |
+| `hooks/ledger.ts` | The ledger, the keep-set rule and what the judge reads, as pure functions. |
 | `hooks/activation.ts` | Whether taskcut runs at all, as a pure rule. |
 | `hooks/config.ts` | Settings, with defaults for anything unset. |
 | `eval/` | The benchmark. `make eval-list`. |
@@ -175,17 +182,20 @@ everything that can be reasoned about as plain data lives beside it.
 * **Interactive sessions only.** `claude -p` and the SDK transport cannot
   compact at all, so taskcut logs and does nothing there. A terminal session or
   `claude --bg` works.
-* **The conclusion is only as good as what the model wrote.** taskcut keeps the
-  `outcome` text exactly; it does not check that it is sufficient.
-* **No assistant message survives a cut.** After a cut the model cannot see what
-  it said in the turn that just ended, so a follow-up phrased as *the approach
-  you just described* has nothing to resolve against. On a long autonomous run
-  this is the point; in a conversation it is a cost.
-* **Every boundary costs a round-trip.** Calling `close_task` ends the model's
-  response, so finishing the turn takes one more request that re-reads the
-  context from the cache — about 10% over a twenty-change session, whether or
-  not anything is cut. After a cut the model also reloads the tool's schema
-  with a `ToolSearch` call.
+* **The ledger is only as good as the answers.** taskcut keeps what the model
+  answered, exactly; it does not check that it is sufficient. A model that ends
+  a long job with "Done." leaves a thin record.
+* **Only answers survive a cut.** The model's narration, its tool calls and
+  their output go; its answer to each request stays, in the ledger. A detail it
+  saw but never said has to be looked up again.
+* **The judge sees the request and the answer, not the work.** It can call a
+  turn finished that the model only claimed to finish. A wrong call costs
+  re-reading, not a lost request: your turns and the answers survive.
+* **Cuts happen between turns.** A single turn that runs for hours is not cut
+  until it ends; the engine's own compaction, told what the ledger already
+  settled, remains the safety net for it.
+* **Under `outcome`, the tool cannot be taken back.** Claude Code has no way to
+  unregister a tool, so once `close_task` has been offered it stays offered.
 * **One session per process.** Module state assumes Claude Code loads a hooks
   module once per session, which holds today but the API does not guarantee.
 * **Early access.** The function-hooks API may change between Claude Code

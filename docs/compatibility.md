@@ -24,16 +24,16 @@ default to on, or stop being read at all. A plugin that relied on it to stay
 inert would become active in every session on an unrelated Claude Code release,
 with no change to the plugin and nothing for the user to notice.
 
-So activation is decided by taskcut, from inputs taskcut owns: the `activation`
-setting, a `.taskcut` marker in the repository, and the `TASKCUT` environment
-variable, resolved deny-by-default. Removing the flag changes when the module is
-*loaded*; it does not change whether taskcut *does* anything. `TASKCUT=0` remains
-a kill switch either way.
+So consent is the install: a session runs taskcut because someone installed it
+for that scope, and `TASKCUT=0` switches off a single session. Removing the flag
+changes when the module is *loaded*; it does not change where taskcut was
+installed, and `TASKCUT=0` remains a kill switch either way.
 
 ## Version support
 
 | taskcut | Claude Code |
 | --- | --- |
+| 0.5.x | 2.1.278 and newer |
 | 0.4.x | 2.1.278 and newer |
 
 Older releases have no `session.compact` hook that answers with `{ messages }`,
@@ -63,9 +63,9 @@ integration rather than in the rules.
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 For a plugin, the public surface that a major version protects is:
 
-* the name and input schema of the `close_task` tool;
 * the `userConfig` keys and their meanings;
-* the activation inputs: `.taskcut`, `TASKCUT`, and the `activation` setting;
+* the `TASKCUT` switch;
+* under the `outcome` setting, the name and input schema of the `close_task` tool;
 * the shape of the ledger stored under `~/.claude/plugins/store/`.
 
 Changing the transcript the cut produces is a minor-version change, not a major

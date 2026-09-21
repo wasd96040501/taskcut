@@ -9,8 +9,8 @@ describe('readConfig', () => {
   })
 
   test('reads values that are in range', () => {
-    const config = readConfig({ floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, foldModel: 'sonnet', ledgerMode: 'outcome' })
-    assert.deepEqual(config, { floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, foldModel: 'sonnet', ledgerMode: 'outcome' })
+    const config = readConfig({ floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, model: 'sonnet', outcome: true })
+    assert.deepEqual(config, { floorPercent: 0, recentHumanTurns: 5, ledgerVerbatim: 4, model: 'sonnet', outcome: true })
   })
 
   test('accepts a numeric string, as a settings file may hold one', () => {
@@ -31,8 +31,8 @@ describe('readConfig', () => {
   })
 
   test('falls back for an empty or non-string model', () => {
-    assert.equal(readConfig({ foldModel: '' }).foldModel, DEFAULTS.foldModel)
-    assert.equal(readConfig({ foldModel: 7 as never }).foldModel, DEFAULTS.foldModel)
+    assert.equal(readConfig({ model: '' }).model, DEFAULTS.model)
+    assert.equal(readConfig({ model: 7 as never }).model, DEFAULTS.model)
   })
 
   test('the shipped defaults are the cautious ones', () => {
@@ -44,15 +44,20 @@ describe('readConfig', () => {
   })
 })
 
-describe('ledgerMode', () => {
-  test('takes each mode when it is asked for by name', () => {
-    assert.equal(readConfig({ ledgerMode: 'directed' }).ledgerMode, 'directed')
-    assert.equal(readConfig({ ledgerMode: 'reply' }).ledgerMode, 'reply')
+describe('outcome', () => {
+  test('is off unless asked for, so the working model is asked for nothing', () => {
+    assert.equal(DEFAULTS.outcome, false)
+    for (const value of [undefined, null, false, 'false', '', 0, 'yes', {}]) {
+      assert.equal(readConfig({ outcome: value } as never).outcome, false)
+    }
   })
 
-  test('falls back to outcome for anything it does not recognise', () => {
-    for (const value of ['DIRECTED', 'smart', '', null, undefined, 1, {}]) {
-      assert.equal(readConfig({ ledgerMode: value } as never).ledgerMode, 'outcome')
-    }
+  test('is on for true, as a boolean or as a settings file may spell it', () => {
+    assert.equal(readConfig({ outcome: true }).outcome, true)
+    assert.equal(readConfig({ outcome: 'true' }).outcome, true)
+  })
+
+  test('ignores the settings 0.4.0 had', () => {
+    assert.deepEqual(readConfig({ ledgerMode: 'directed', foldModel: 'opus' } as never), DEFAULTS)
   })
 })
