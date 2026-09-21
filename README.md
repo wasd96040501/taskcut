@@ -80,8 +80,10 @@ claude plugin marketplace add wasd96040501/taskcut
 claude plugin install taskcut@taskcut --scope user
 ```
 
-Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`. Off for one
-session: `TASKCUT=0 claude`. To remove it, uninstall with the same `--scope`.
+Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, or put
+`"CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"` under `env` in
+`~/.claude/settings.json` and start them as usual. Off for one session:
+`TASKCUT=0 claude`. To remove it, uninstall with the same `--scope`.
 
 ## What it costs
 
