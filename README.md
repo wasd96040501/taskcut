@@ -36,6 +36,9 @@ claude plugin install taskcut@taskcut --scope local
 CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 ```
 
+The install notes that options are "not yet set". That is fine: unset, each
+takes its default.
+
 Then work as usual. Nothing happens until the context passes 40% — the `ctx`
 figure in the status line. From then on, each turn that finishes a piece of
 work ends with a dim line, and Claude Code compacts exactly as `/compact` would:
