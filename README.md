@@ -41,6 +41,9 @@ claude plugin install taskcut@taskcut --scope project --config floorPercent=0
 CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 ```
 
+The install may note that some options are not yet set. That is fine: every
+setting has a default.
+
 Answer **yes** to the folder-trust prompt, then paste these three, one at a time:
 
 ```
@@ -54,7 +57,7 @@ Without running any tool: list every task I have given you, with its result.
 ```
 
 After each of the first two, a dim line says what taskcut decided:
-`taskcut: context at 3%, the work is finished; dropping its working context`.
+`taskcut: context at 4%, the work is finished; dropping its working context`.
 The third answer comes back complete — both tasks, with their results — even
 though the work that produced them is no longer in the conversation. Nothing
 in the prompts mentions taskcut: it needs nothing from you or from the model.
