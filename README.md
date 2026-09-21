@@ -25,46 +25,34 @@ reads. If it is, taskcut runs Claude Code's own compaction, the one `/compact`
 runs. Below the floor it does nothing at all and costs nothing, and nothing in
 your prompts has to mention it.
 
-## Try it in two minutes
+## Try it
 
-Needs Claude Code **2.1.278 or newer** (`claude --version`).
+Needs Claude Code **2.1.278 or newer**. In a project you work on — installed for
+you alone, nothing committed:
 
 ```bash
-mkdir taskcut-trial && cd taskcut-trial && git init -q
-printf 'alpha\nbeta\ngamma\n' > a.txt
-printf 'delta\nepsilon\n'     > b.txt
-
-claude plugin marketplace add wasd96040501/taskcut --scope project
-claude plugin install taskcut@taskcut --scope project --config floorPercent=0
-
+claude plugin marketplace add wasd96040501/taskcut --scope local
+claude plugin install taskcut@taskcut --scope local
 CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 ```
 
-(A note that options are not yet set is fine: every setting has a default.)
+Then work as usual. Nothing happens until the context passes 40% — the `ctx`
+figure in the status line. From then on, each turn that finishes a piece of
+work ends with a dim line, and Claude Code compacts exactly as `/compact` would:
 
-Answer **yes** to the folder-trust prompt, then paste these three, one at a time:
-
 ```
-Run `wc -l a.txt` and tell me the number.
-```
-```
-Run `cat b.txt` and tell me the last word.
-```
-```
-Without running any tool: list every task I have given you, with its result.
+taskcut: context at 43%, the work is finished; compacting
 ```
 
-After each of the first two, a dim line says what taskcut decided —
-`taskcut: context at 4%, the work is finished; compacting` — and Claude Code
-compacts, as `/compact` would. The third answer comes back complete, both tasks
-with their results, from the compacted conversation. Nothing in the prompts
-mentions taskcut: it needs nothing from you or from the model.
+A turn that ends in a question, or with the work half done, is left alone:
+`the work is not finished; keeping it`. Nothing you type mentions taskcut.
 
-Throw the trial away with `cd .. && rm -rf taskcut-trial`.
+To remove it:
 
-> `floorPercent=0` is for the demo only. It makes taskcut judge **every** turn
-> so you can see it work. The default is `40`, below which it does nothing —
-> see [What it costs](#what-it-costs).
+```bash
+claude plugin uninstall taskcut@taskcut --scope local
+claude plugin marketplace remove taskcut --scope local
+```
 
 ## The problem it solves
 
@@ -77,33 +65,20 @@ A long job is a sequence of shorter ones, and the moment when *what still
 matters* has a clean answer is the end of a sub-task. taskcut compacts there
 instead, and leaves what a compaction keeps to Claude Code.
 
-## Install it for real
-
-Pick where it should run:
+## Install it for a whole project, or everywhere
 
 ```bash
 # this repository, for everyone who clones it
 claude plugin marketplace add wasd96040501/taskcut --scope project
 claude plugin install taskcut@taskcut --scope project
 
-# this repository, for you alone (not committed)
-claude plugin marketplace add wasd96040501/taskcut --scope local
-claude plugin install taskcut@taskcut --scope local
-
 # every session on this machine
 claude plugin marketplace add wasd96040501/taskcut
 claude plugin install taskcut@taskcut --scope user
 ```
 
-Then start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`. Nothing
-goes in your prompts or `CLAUDE.md`.
-
-On a 1M-token window the default floor of 40% is 400,000 tokens, which only a
-long session reaches. To watch it act on ordinary work first, install with
-`--config floorPercent=10`.
-
-Off for one session: `TASKCUT=0 claude`. Removing it:
-`claude plugin uninstall taskcut@taskcut && claude plugin marketplace remove taskcut`.
+Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`. Off for one
+session: `TASKCUT=0 claude`. To remove it, uninstall with the same `--scope`.
 
 ## What it costs
 
@@ -123,7 +98,10 @@ benchmark is for: [docs/measurement.md](docs/measurement.md).
 ## Settings
 
 Both have a working default. Set one at install time with `--config KEY=VALUE`,
-or change it later from a session with `/plugin`.
+or change it later from a session with `/plugin`. Settings are yours, not a
+scope's: Claude Code keeps plugin settings in your user settings, so they apply
+wherever taskcut is installed on this machine, whatever `--scope` it was
+installed with.
 
 | Setting | Default | What it controls |
 | --- | --- | --- |
