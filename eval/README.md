@@ -57,11 +57,15 @@ make eval-verify          # every probe is answerable from the material
 make eval-mechanism       # the mechanism, end to end, in one short session
 make eval-run WORKLOAD=issues-long ARM=off
 make eval-run WORKLOAD=issues-long ARM=on
+make eval-run WORKLOAD=sqlglot-long ARM=off
+make eval-run WORKLOAD=sqlglot-long ARM=default
 make eval-report
 make eval-test            # the harness's own tests
 ```
 
-There are two arms, `off` and `on` (taskcut as shipped), both at a floor of 30%.
+There are three arms: `off` and `on`, both at a floor of 30%, and `default`,
+taskcut exactly as installed -- a floor of 40%, judged by `sonnet` -- for a
+workload long enough to pass it.
 
 `make eval-run` materialises the workspace, bakes the arm's settings into a
 copy of the plugin, drives the session, and copies the transcript into
@@ -83,6 +87,9 @@ twice, and asserts from the transcript:
   kept, and a finished one is compacted, none skipped;
 * nothing is compacted below the floor, and crossing again compacts again;
 * what was compacted can still be recalled, value for value;
+* in one message with three tasks and nobody stepping in, a finished task is
+  compacted inside the turn, the work carries on with `Continue.`, and every
+  task is done;
 * the working model is never asked for anything.
 
 It exits non-zero if any fails. The assertions were also run against a 0.4.0
@@ -131,6 +138,26 @@ of their upstream issue. Seven land in `core.py`. Twenty real changes are what
 it takes for one session on Sonnet 5 to reach 30% of its 1M window, which is the
 lowest floor anyone would run -- so this is the workload where a cutting arm at
 a realistic setting cuts at all. About forty minutes and $10 to $12 an arm.
+
+**`sqlglot-long`** -- thirty-six changes sqlglot shipped, reverted source-only
+at a pinned commit: eleven in the optimizer, four in the parser, one each in
+the executor, lineage, expressions, the generator and transforms, and sixteen
+in dialects; twenty-nine bugs and seven features. Unlike
+every workload above, it is handed over in **one message**: ISSUES.md lists
+them, and the model is told to work through all of them in order without
+stopping to ask. That is the job taskcut is for, and the one a trigger at the
+end of a turn never sees. If the model stops early anyway, the harness sends
+the same nudge under every arm and counts it. sqlglot's parser alone is ten
+thousand lines, so the work reads a lot, and one Sonnet 5 session goes past
+half its 1M window. Graded per issue by the test cases that issue broke --
+several sqlglot tests hold cases broken by different issues -- with a helper
+that lives outside the workspace; plus the whole suite and `git diff`.
+
+Every change was kept only after checking, in the state the session gets, that
+its cases fail and that its own fix alone removes them without adding any; with
+all thirty-six real fixes put back, every check passes. Two changes only apply
+on top of an older one's; both stay separate issues, and the cases that need
+both belong to the later.
 
 **`audit`** -- five steps researching a real Flask checkout, then five building
 a standard-library tool that finds configuration key reads, run against that
