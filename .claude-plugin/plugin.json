@@ -1,6 +1,6 @@
 {
   "name": "taskcut",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. The model calls close_task when a piece of work is finished; taskcut then replaces that work's transcript with the conclusion the model wrote, keeping the human turns verbatim and spending no summarizer call.",
   "author": {
     "name": "Yangze Luo"
@@ -15,17 +15,6 @@
     "function-hooks"
   ],
   "userConfig": {
-    "activation": {
-      "type": "string",
-      "title": "Where taskcut runs",
-      "description": "\"opt-in\" (default): only in a repository whose root holds a .taskcut file, or a session where TASKCUT=1. \"always\": in every session this plugin is loaded in. TASKCUT=0 switches it off whatever this says.",
-      "required": false,
-      "default": "opt-in",
-      "options": [
-        "opt-in",
-        "always"
-      ]
-    },
     "floorPercent": {
       "type": "number",
       "title": "Compact above this context fill",

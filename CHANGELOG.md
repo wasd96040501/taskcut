@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-21
+
+### Removed
+
+- **The `.taskcut` marker file and the `activation` setting are gone.** Between
+  them they answered the question `--scope` had already answered, and all three
+  had to be read together to know whether anything would happen. taskcut now
+  runs wherever it is installed -- `--scope user` for every session on the
+  machine, `--scope project` for one repository, `--scope local` for one
+  repository and only you -- and `TASKCUT=0` switches off a single session.
+  That is the whole rule.
+
+  Consent is still the plugin's own and still does not rest on
+  `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`. It is the install: a session that loaded
+  the plugin is one someone asked for, which an early access flag flipping
+  cannot manufacture.
+
+  **Upgrading:** a `--scope user` install that relied on `.taskcut` markers now
+  runs everywhere. Either reinstall per repository with `--scope project`, or
+  keep the user install and put `TASKCUT=0` in the environment where you do not
+  want it.
+
+- `scripts/install.sh` and `scripts/uninstall.sh`. Two native commands do the
+  same thing, and a script that wraps them is one more thing to keep correct.
+
+### Changed
+
+- An unrecognised `TASKCUT` value no longer switches taskcut off. A typo that
+  silently disables a plugin is the failure hardest to notice.
+
 ## [0.3.0] - 2026-09-21
 
 ### Added
@@ -128,7 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   plugin store has a hard size limit, so leftovers cannot be allowed to
   accumulate.
 
-[Unreleased]: https://github.com/wasd96040501/taskcut/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/wasd96040501/taskcut/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/wasd96040501/taskcut/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/wasd96040501/taskcut/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/wasd96040501/taskcut/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/wasd96040501/taskcut/releases/tag/v0.1.0

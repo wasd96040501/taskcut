@@ -38,9 +38,6 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
           shellcheck scripts/*.sh
-
-      - name: Scripts are executable
-        run: |
           for file in scripts/*.sh; do
             test -x "$file" || { echo "::error::$file is not executable"; exit 1; }
           done

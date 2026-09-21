@@ -33,7 +33,7 @@ class Arm:
 #: The floor exists to keep taskcut off short runs. A benchmark that respects it
 #: measures nothing, so every cutting arm forces it to zero and the cost of doing
 #: so is reported rather than hidden.
-_FORCE_EVERY_BOUNDARY = {"floorPercent": 0, "activation": "always"}
+_FORCE_EVERY_BOUNDARY = {"floorPercent": 0}
 
 
 ARMS: dict[str, Arm] = {

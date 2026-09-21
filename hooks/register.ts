@@ -18,14 +18,7 @@
 
 import type { EngineInterface, Register, SessionMessage } from 'claude-code'
 
-import {
-  ENV_VAR,
-  INERT,
-  MARKER_FILE,
-  decideActivation,
-  readActivationMode,
-  type Activation,
-} from './activation'
+import { ENV_VAR, INERT, decideActivation, type Activation } from './activation'
 import { readConfig, type Config } from './config'
 import {
   LEDGER_PREFIX,
@@ -155,15 +148,11 @@ async function directLastEntry(
 
 export const register: Register = (on, options) => {
   const config = readConfig(options)
-  const mode = readActivationMode(options['activation'])
 
   on('session.start', async ($, e, next) => {
     const result = await next(e)
 
-    const root = await $.session.root()
     activation = decideActivation({
-      mode,
-      markerPresent: await $.fs.exists(`${root}/${MARKER_FILE}`),
       // Spelled out: $.env.get takes a literal name so that the loader can list
       // every variable a module reads. ENV_VAR_LITERAL fails the build if this
       // string and the constant ever disagree.

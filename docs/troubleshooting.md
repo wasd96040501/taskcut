@@ -4,18 +4,16 @@
 
 Work down this list; the first four cover almost everything.
 
-### 1. Has this session opted in?
-
-taskcut is inert until something turns it on. Check, in order:
+### 1. Is it installed for this session, and not switched off?
 
 ```bash
-echo "$TASKCUT"          # 0 is a kill switch; 1 turns it on for this session
-ls -a . | grep taskcut   # .taskcut at the project root turns it on here
+claude plugin list        # taskcut should be here
+echo "$TASKCUT"           # 0 switches it off for the session; anything else does not
 ```
 
-If neither is set and `activation` is left at its default `opt-in`, taskcut is
-loaded and doing nothing, which is what it is supposed to do. Turn it on with
-`touch .taskcut` in the repository, or `TASKCUT=1 claude` for one session.
+taskcut runs wherever it is installed. If `claude plugin list` does not show it,
+the install went to a different scope than the directory you are in -- a
+`--scope project` install only applies inside that repository.
 
 ### 1b. Are function hooks enabled?
 

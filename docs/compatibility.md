@@ -34,10 +34,10 @@ a kill switch either way.
 
 | taskcut | Claude Code |
 | --- | --- |
-| 0.2.x | 2.1.278 and newer |
+| 0.4.x | 2.1.278 and newer |
 
-`scripts/install.sh` refuses to install against anything older, because the
-`session.compact` hook's `{ messages }` answer is what the whole design rests on.
+Older releases have no `session.compact` hook that answers with `{ messages }`,
+and that answer is what the whole design rests on.
 
 ## After a Claude Code upgrade
 
