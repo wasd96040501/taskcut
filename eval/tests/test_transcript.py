@@ -98,3 +98,32 @@ class Segmentation(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WhatTaskcutDid(unittest.TestCase):
+    """A cut and a judgement are recorded as system lines, not as messages."""
+
+    def setUp(self):
+        self.loaded = transcript.load(write([
+            user("fix it"),
+            assistant("req_1", [{"type": "text", "text": "fixed"}], USAGE),
+            {"type": "system", "subtype": "informational",
+             "content": "taskcut: context at 31%, the work is finished; dropping its working context"},
+            {"type": "system", "subtype": "compact_boundary", "content": "Conversation compacted"},
+            user("[taskcut] The working context of 1 earlier piece(s) of work was dropped"),
+            user("next"),
+            assistant("req_2", [{"type": "text", "text": "a question?"}], USAGE),
+            {"type": "system", "subtype": "informational",
+             "content": "taskcut: context at 33%, the work is not finished; keeping it"},
+            {"type": "system", "subtype": "informational", "content": "something else entirely"},
+        ]))
+
+    def test_every_compaction_is_a_cut(self):
+        self.assertEqual(self.loaded.cuts, 1)
+
+    def test_every_judgement_is_counted_and_nothing_else(self):
+        self.assertEqual(len(self.loaded.judgements), 2)
+        self.assertEqual(sum("is finished" in j for j in self.loaded.judgements), 1)
+
+    def test_a_system_line_is_not_a_turn(self):
+        self.assertEqual([t.prompt for t in self.loaded.turns], ["fix it", "next"])

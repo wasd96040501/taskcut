@@ -45,8 +45,12 @@ def context_table(runs: list[Run], model: Model | None = None) -> str:
             f"{run.mean_context:,.0f}",
             f"{run.prefix[-1]:,}" if run.prefix else "-",
             f"{run.ledger:,}" if run.ledger else "-",
+            f"{run.finished}/{run.judged}" if run.judged else "-",
+            str(run.cuts) if run.cuts else "-",
         ])
-    return table(["arm", "first turn", "peak", "of window", "mean", "last turn", "ledger"], rows)
+    return table(
+        ["arm", "first turn", "peak", "of window", "mean", "last turn", "ledger", "finished/judged", "cuts"], rows
+    )
 
 
 def fidelity_table(runs: list[Run]) -> str:

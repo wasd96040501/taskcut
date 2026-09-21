@@ -146,6 +146,9 @@ def _numbers(run) -> dict:
         "context_series": run.prefix,
         "ledger_tokens": run.ledger,
         "ledger_messages": run.ledger_messages,
+        "cuts": run.cuts,
+        "judged": run.judged,
+        "judged_finished": run.finished,
         "checks": {c.id: c.passed for c in run.checks},
         "drift": {
             d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,

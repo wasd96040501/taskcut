@@ -23,6 +23,10 @@ PROJECTS = Path.home() / ".claude" / "projects"
 #: knowledge in this module.
 LEDGER_OPENINGS = ("[taskcut]", "The working context of")
 
+#: How the notice taskcut leaves for each judgement opens, the engine having
+#: put the plugin's name in front of it.
+JUDGEMENT_OPENING = "taskcut: context at"
+
 
 @dataclass
 class Request:
@@ -65,6 +69,10 @@ class Transcript:
     #: count is an upper bound on the number of cuts, not the number itself.
     #: The last one is the ledger as it finally stood.
     ledgers: list[str] = field(default_factory=list)
+    #: Compactions the engine recorded, of any kind: each is a cut.
+    cuts: int = 0
+    #: taskcut's own notices, one per judgement it made past the floor.
+    judgements: list[str] = field(default_factory=list)
 
     @property
     def ledger_messages(self) -> int:
@@ -119,6 +127,14 @@ def load(path: str | Path) -> Transcript:
         except ValueError:
             continue
         message = record.get("message") or {}
+
+        if record.get("type") == "system":
+            content = str(record.get("content") or "")
+            if record.get("subtype") == "compact_boundary":
+                out.cuts += 1
+            elif content.startswith(JUDGEMENT_OPENING):
+                out.judgements.append(content)
+            continue
 
         if record.get("type") == "user":
             text, has_result = _text_of(message)

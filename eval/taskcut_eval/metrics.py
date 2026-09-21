@@ -229,6 +229,11 @@ class Run:
     #: Ledger messages recorded, an upper bound on the number of cuts.
     ledger_messages: int
     drift: list[Drift]
+    #: Compactions that happened.
+    cuts: int = 0
+    #: Judgements taskcut made past the floor, and how many said finished.
+    judged: int = 0
+    finished: int = 0
     #: Filled in from the sidecar a run writes; empty for a workload with none.
     checks: list = field(default_factory=list)
 
@@ -255,6 +260,9 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         ledger=ledger_tokens(transcript),
         ledger_messages=transcript.ledger_messages,
         drift=constraint_drift(transcript, workload),
+        cuts=transcript.cuts,
+        judged=len(transcript.judgements),
+        finished=sum("is finished" in j for j in transcript.judgements),
     )
 
 

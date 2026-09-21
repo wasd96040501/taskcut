@@ -180,9 +180,13 @@ def materialise(workload: Workload, root: Path, generators: Path) -> Path:
 
     A workspace is per-workload and per-arm: two arms must not share one, or the
     second session inherits the first's transcript directory and the two runs
-    cannot be told apart afterwards.
+    cannot be told apart afterwards. It is made fresh every time: a run leaves
+    the work it did behind, and the next run of the same arm would start from
+    it -- or, for a workload prepared by reverting fixes, fail to revert them.
     """
-    root.mkdir(parents=True, exist_ok=True)
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
     if workload.source.kind == "git":
         if not (root / ".git").exists():
             if workload.source.ref:
