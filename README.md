@@ -104,12 +104,12 @@ Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, or put
 Past the floor is a short stretch: a compaction takes the context back under
 it, and judging stops until it fills again.
 
-On twenty real changes to click in one Sonnet 5 session, with the floor at 30%,
-taskcut did nothing for nineteen. After the nineteenth it judged the turn
-finished and compacted 315,608 tokens to a 5,960-token summary; the twentieth
-ran on 37,646 tokens and passed, as every change did with and without it.
-Whether compacting earlier makes long sessions work better is what the
-benchmark is for: [docs/measurement.md](docs/measurement.md).
+Thirty-six real sqlglot changes, handed to Sonnet 5 in one message and left
+to run: with taskcut as installed, it compacted once inside the turn, after
+issue 20, from 431,567 tokens to 10,511, and carried on. The peak context fell
+from 71% of the window to 43%, and the cost by about a fifth; both runs solved
+all thirty-six. Whether compacting at boundaries makes long sessions *work*
+better is what the benchmark is for: [docs/measurement.md](docs/measurement.md).
 
 ## Settings
 
