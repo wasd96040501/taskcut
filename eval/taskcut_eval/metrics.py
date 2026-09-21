@@ -16,7 +16,7 @@ import re
 from dataclasses import dataclass, field
 from statistics import mean
 
-from .transcript import Transcript, Turn
+from .transcript import CONTINUE_OPENING, Transcript, Turn
 from .workload import Constraint, Probe, Workload
 
 #: Published cache multipliers, in base-input-token equivalents. A cache write
@@ -234,6 +234,10 @@ class Run:
     #: Judgements taskcut made past the floor, and how many said finished.
     judged: int = 0
     finished: int = 0
+    #: For a one-message workload: how often the benchmark had to nudge a model
+    #: that stopped early, and how often taskcut carried the work on itself.
+    nudges: int = 0
+    continued: int = 0
     #: Filled in from the sidecar a run writes; empty for a workload with none.
     checks: list = field(default_factory=list)
 
@@ -263,6 +267,8 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         cuts=transcript.cuts,
         judged=len(transcript.judgements),
         finished=sum("is finished" in j for j in transcript.judgements),
+        nudges=sum(t.prompt.strip() == workload.nudge for t in transcript.turns) if workload.nudge else 0,
+        continued=sum(t.prompt.startswith(CONTINUE_OPENING) for t in transcript.turns),
     )
 
 

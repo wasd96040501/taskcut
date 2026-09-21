@@ -28,6 +28,7 @@ from pathlib import Path
 
 from . import driver
 from .arms import Arm
+from .transcript import CONTINUE_OPENING
 
 #: Low enough that a short session crosses it twice. The judge, the cut and
 #: the ledger do not know what the floor is, only whether it has been passed.
@@ -65,9 +66,6 @@ STEPS = [
 
 #: What the files the long turn writes must hold once it is over.
 LONG_TURN_ANSWERS = {"answer4.txt": "OSPREY-12", "answer5.txt": "HERON-58", "answer6.txt": "3"}
-
-#: How the plugin's own prompt opens in the transcript.
-CONTINUE_OPENING = "The taskcut plugin sent a message"
 
 
 def _filler(rng: random.Random, count: int) -> list[str]:

@@ -73,3 +73,31 @@ class Fidelity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OneMessage(unittest.TestCase):
+    """A job handed over in one message: the benchmark counts how often it had
+    to step in, and how often taskcut carried the work on by itself."""
+
+    def setUp(self):
+        self.job = workload.Workload(
+            name="job", description="", source=workload.Source(kind="generated"), files=("a", "b"),
+            step_template="", probes=(), task="do a and b", nudge="Keep going.", done_marker="ALL DONE", max_nudges=3,
+        )
+        turns = [
+            transcript.Turn(prompt="do a and b"),
+            transcript.Turn(prompt=f"{transcript.CONTINUE_OPENING}: Continue."),
+            transcript.Turn(prompt="Keep going."),
+            transcript.Turn(prompt=f"{transcript.CONTINUE_OPENING}: Continue."),
+        ]
+        self.run = metrics.summarise(transcript.Transcript(path=None, turns=turns), self.job, "on")
+
+    def test_nudges_are_the_benchmark_prompts(self):
+        self.assertEqual(self.run.nudges, 1)
+
+    def test_continues_are_taskcut_prompts(self):
+        self.assertEqual(self.run.continued, 2)
+
+    def test_a_workload_without_a_task_takes_a_turn_per_file(self):
+        self.assertEqual(workload.Workload(name="w", description="", source=workload.Source(kind="generated"),
+                                           files=("x",), step_template="{file}", probes=()).task, "")

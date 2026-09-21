@@ -120,6 +120,15 @@ class Workload:
     #: Files the generator lays down that the steps do not name -- a test
     #: suite, a fixture -- so `materialise` can verify they arrived.
     fixtures: tuple[str, ...] = ()
+    #: When set, the whole job is this one message instead of a turn per file:
+    #: the case of work handed over and left to run. `files` then only names
+    #: the pieces, for the report.
+    task: str = ""
+    #: Sent when a turn ends before the reply says `done_marker`, at most
+    #: `max_nudges` times -- the same words under every arm.
+    nudge: str = ""
+    done_marker: str = ""
+    max_nudges: int = 0
 
     def steps(self) -> list[str]:
         """The prompt for each sub-task, in order.
@@ -168,6 +177,10 @@ def load(path: str | Path) -> Workload:
             for c in raw.get("checks", ())
         ),
         fixtures=tuple(raw.get("fixtures", ())),
+        task=raw.get("task", ""),
+        nudge=raw.get("nudge", ""),
+        done_marker=raw.get("done_marker", ""),
+        max_nudges=int(raw.get("max_nudges", 0)),
     )
 
 

@@ -21,6 +21,10 @@ PROJECTS = Path.home() / ".claude" / "projects"
 #: their transcripts still read. Recognising it is what lets a metric count cuts
 #: and skip the message when segmenting turns; it is the one piece of plugin
 #: knowledge in this module.
+#: How the prompt taskcut submits after compacting inside a turn opens: Claude
+#: Code frames a plugin's prompt this way.
+CONTINUE_OPENING = "The taskcut plugin sent a message"
+
 LEDGER_OPENINGS = ("[taskcut]", "The working context of")
 
 #: How the notice taskcut leaves for each judgement opens, the engine having

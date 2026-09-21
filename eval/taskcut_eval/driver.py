@@ -182,6 +182,24 @@ class Session:
                 return self.read_until_quiet(quiet=settle, timeout=120)
         return False
 
+    def last_reply(self) -> str:
+        """The text of the last assistant message the transcript holds."""
+        mine = [p for p in self.transcripts.glob("*.jsonl") if p not in self.earlier]
+        reply = ""
+        for path in mine:
+            for line in path.read_text(errors="replace").splitlines():
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                if record.get("type") != "assistant":
+                    continue
+                texts = [b.get("text", "") for b in (record.get("message") or {}).get("content") or []
+                         if isinstance(b, dict) and b.get("type") == "text"]
+                if any(t.strip() for t in texts):
+                    reply = "\n".join(texts)
+        return reply
+
     def close(self) -> None:
         try:
             os.write(self.master, b"\x03")
@@ -210,6 +228,25 @@ def _log(message: str) -> None:
     print(message, flush=True)   # a benchmark runs for a long time unattended
 
 
+#: How long one message's worth of work may run before the benchmark gives up
+#: on it: long enough for hours of unattended work, short of forever.
+LONG_TURN_TIMEOUT = 8 * 3600
+
+
+def _one_message(session: Session, workload: Workload, log) -> None:
+    """The whole job as one message, and nobody at the keyboard after it.
+
+    A model may still stop before the job is done -- to report, or to ask. The
+    benchmark then sends the workload's nudge, the same words under every arm,
+    and counts on the transcript to show how often it had to.
+    """
+    log(f"  task settled={session.ask(workload.task, timeout=LONG_TURN_TIMEOUT)}")
+    for n in range(1, workload.max_nudges + 1):
+        if workload.done_marker and workload.done_marker in session.last_reply():
+            return
+        log(f"  nudge {n}/{workload.max_nudges} settled={session.ask(workload.nudge, timeout=LONG_TURN_TIMEOUT)}")
+
+
 def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str, log=_log) -> None:
     """Drives one workload under one arm. Results are read from the transcript."""
     session = Session(workspace, plugin, dict(arm.env), model)
@@ -218,6 +255,10 @@ def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str,
         if session.accept_trust_prompt():
             log("trusted the workspace")
         log(f"boot: {workload.name} / {arm.name}")
+
+        if workload.task:
+            _one_message(session, workload, log)
+            return
 
         # The briefing is its own turn, before any work. It is the standing task
         # and the place any global rule is set, and it is the turn taskcut keeps

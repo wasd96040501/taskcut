@@ -149,6 +149,8 @@ def _numbers(run) -> dict:
         "cuts": run.cuts,
         "judged": run.judged,
         "judged_finished": run.finished,
+        "nudges": run.nudges,
+        "continued": run.continued,
         "checks": {c.id: c.passed for c in run.checks},
         "drift": {
             d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,
