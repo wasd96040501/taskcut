@@ -122,6 +122,7 @@ including two that build something and are graded by running it
 | **Accuracy never moved** | across ten runs, no arm ever answered wrongly or failed an acceptance check. What a cut costs is re-reading, not correctness |
 | **A cut is not free** | with the floor forced to zero, **$0.41 to $2.04** more per run, 1.4× to 2.7× — which is exactly what the floor exists to avoid |
 | **Still unproven** | nothing yet shows the *baseline* doing worse work. taskcut reliably does what it says to the context; whether that buys anything is open. [What would settle it](docs/measurement.md#6-what-has-not-been-shown) |
+| **On a 1M window it waits a long time** | nine real bugs fixed in one session peaked at 155,702 tokens, 15.6% of Sonnet 5's window. At the default floor of 40% taskcut does not act until 400,000. It is for sessions that genuinely get that long |
 
 One run per cell, on Sonnet. These show the shape of a difference, not its size.
 

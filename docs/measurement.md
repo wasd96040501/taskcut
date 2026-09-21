@@ -169,7 +169,7 @@ run against what it produced.
 | Weighted input | 282,552 | 573,747 |
 | Requests | 38 | 54 |
 | Context, first to last | 38,337 → 82,155 | 38,381 → 59,475 |
-| Peak, as a share of the window | 41% | 30% |
+| Peak, as a share of the 1M window | 8.2% | 5.9% |
 | Ledger | — | 6,978 |
 
 Both packages import, parse the fixture, aggregate exactly the four hundred
@@ -191,7 +191,7 @@ format changes at step nine, invalidating what step seven built.
 | Acceptance checks | **9/9** | **9/9** |
 | Weighted input | 467,723 | 1,007,906 |
 | Peak context | 128,133 | 76,749 |
-| Peak, as a share of the window | **64%** | 38% |
+| Peak, as a share of the 1M window | **12.8%** | 7.7% |
 | Ledger | — | 12,081 |
 
 This is the most context any run here has carried, and the result is the same:
@@ -223,7 +223,7 @@ the one that was not written down.
 ## 6. What has not been shown
 
 Five workloads, two of which produce something that is graded by running it.
-Peak context from 44,743 to 128,133 tokens, up to 64% of the window. Ten
+Peak context from 44,743 to 128,133 tokens, at most 12.8% of the 1M window. Ten
 interdependent steps, a public contract reversed mid-way, three standing rules
 never repeated after the briefing.
 
@@ -243,7 +243,7 @@ that.
 
 Two honest explanations, and only one experiment separates them.
 
-**Either the effect needs a fuller window.** 64% is the most this reached.
+**Either the effect needs a fuller window.** 12.8% is the most this reached.
 Reports of context degradation concentrate well above that, and the engine's
 own auto-compaction fires higher still. The comparison that has not been run
 is one long enough for the *baseline* to hit auto-compaction: at that point it
@@ -258,7 +258,57 @@ that; it is a different thing that finishes before the problem starts.
 Until one of those is run, the honest summary is that taskcut reliably does
 what it says to the context and has not yet been shown to buy anything with it.
 
-## 7. What a cut costs
+### A correction to every share of the window above
+
+`sonnet` resolves to Sonnet 5, whose window is 1M, not 200k. The harness had
+the old figure, and every "share of the window" it reported was five times too
+high: the `audit` run described as reaching 64% reached 12.8%. The token counts
+were always right; only the denominator was wrong. The evidence is the status
+line itself -- a session at 37,403 tokens reads `ctx 4%`, which is 1M, where
+200k would read 19%.
+
+It does not change what was measured, but it changes what it means. Every run
+here sat between 4% and 16% of the window. None came near the regime where
+anyone reports a crowded context degrading work, so "no measurement found the
+baseline doing worse" is a statement about a tenth of the window, not about the
+window.
+
+## 7. At a realistic floor, on real bugs
+
+Everything above forced `floorPercent` to 0, which cuts at every boundary and is
+not a setting anyone would run. `issues` is the first workload at a realistic
+floor, 30, on real work: nine bugs click shipped and fixed, reverted source-only
+at a pinned commit so each keeps its original regression test, handed out as a
+symptom and the failing tests.
+
+| | off | boundary | reply |
+| --- | --- | --- | --- |
+| Acceptance checks | **11/11** | **11/11** | **11/11** |
+| Cost at Sonnet list price | $3.31 | $2.90 | $3.14 |
+| Requests | 60 | 63 | 67 |
+| Peak context | 155,702 | 133,059 | 136,939 |
+| Peak, as a share of the 1M window | 15.6% | 13.3% | 13.7% |
+| `close_task` calls | — | 9 | 9 |
+| **Cuts** | — | **0** | **0** |
+
+Every arm fixed all nine bugs, broke nothing and touched no test. And no arm
+cut: the model closed every sub-task, but a 30% floor on a 1M window is 300,000
+tokens, and nine real debugging sessions with repeated test runs peaked at
+155,702. taskcut, correctly, did nothing.
+
+That is the most consequential measurement here, and it is not about whether
+cutting helps. **At its shipped default of 40% on a 1M window, taskcut does not
+act until a session holds 400,000 tokens.** A floor expressed as a share of the
+window was calibrated when windows were 200k; at five times the window it means
+five times the context before anything happens.
+
+It also turned the run into an A/A/A comparison, which is useful in its own
+right. Three runs of identical work cost $3.31, $2.90 and $3.14 -- about ±7% --
+so a single run cannot resolve a difference in cost smaller than roughly ten
+percent. And calling `close_task` without cutting cost nothing measurable: the
+two arms that called it nine times were the two cheapest.
+
+## 8. What a cut costs
 
 A compaction invalidates the prompt cache past the tool definitions. Measured
 over four consecutive cuts, `cache_read_input_tokens` on the first request after
@@ -285,7 +335,7 @@ which crosses near the fourteenth sub-task.
 **taskcut is a bet on the run being long. The floor is what keeps the bet off
 the table when it is not.**
 
-## 8. Two costs that are not in the table
+## 9. Two costs that are not in the table
 
 **A boundary costs an extra round-trip.** `close_task` is a registered tool and
 the model spends a `ToolSearch` call loading its schema before each use -- at

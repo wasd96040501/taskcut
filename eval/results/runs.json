@@ -401,6 +401,127 @@
    }
   }
  },
+ "issues": {
+  "sonnet": {
+   "boundary": {
+    "cache_read": 5496029,
+    "cache_write": 127799,
+    "checks": {
+     "issue1": true,
+     "issue2": true,
+     "issue3": true,
+     "issue4": true,
+     "issue5": true,
+     "issue6": true,
+     "issue7": true,
+     "issue8": true,
+     "issue9": true,
+     "no_regressions": true,
+     "tests_untouched": true
+    },
+    "context_first": 38270,
+    "context_last": 133059,
+    "context_peak": 133059,
+    "context_series": [
+     38270,
+     38489,
+     53032,
+     59421,
+     80734,
+     93796,
+     102585,
+     115179,
+     121248,
+     133059
+    ],
+    "drift": {},
+    "fidelity": {},
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "output": 51462,
+    "requests": 63,
+    "weighted_input": 709498
+   },
+   "off": {
+    "cache_read": 5979719,
+    "cache_write": 150092,
+    "checks": {
+     "issue1": true,
+     "issue2": true,
+     "issue3": true,
+     "issue4": true,
+     "issue5": true,
+     "issue6": true,
+     "issue7": true,
+     "issue8": true,
+     "issue9": true,
+     "no_regressions": true,
+     "tests_untouched": true
+    },
+    "context_first": 38221,
+    "context_last": 155702,
+    "context_peak": 155702,
+    "context_series": [
+     38221,
+     38400,
+     51082,
+     63001,
+     91663,
+     110718,
+     119872,
+     137296,
+     141029,
+     155702
+    ],
+    "drift": {},
+    "fidelity": {},
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "output": 63309,
+    "requests": 60,
+    "weighted_input": 785725
+   },
+   "reply": {
+    "cache_read": 6123208,
+    "cache_write": 131651,
+    "checks": {
+     "issue1": true,
+     "issue2": true,
+     "issue3": true,
+     "issue4": true,
+     "issue5": true,
+     "issue6": true,
+     "issue7": true,
+     "issue8": true,
+     "issue9": true,
+     "no_regressions": true,
+     "tests_untouched": true
+    },
+    "context_first": 38267,
+    "context_last": 136939,
+    "context_peak": 136939,
+    "context_series": [
+     38267,
+     38452,
+     53061,
+     59149,
+     78206,
+     98626,
+     108931,
+     121896,
+     125864,
+     136939
+    ],
+    "drift": {},
+    "fidelity": {},
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "output": 53672,
+    "requests": 67,
+    "weighted_input": 777039
+   }
+  }
+ },
  "synthetic": {
   "sonnet": {
    "boundary": {

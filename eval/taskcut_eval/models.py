@@ -22,10 +22,15 @@ class Model:
     description: str
 
 
+#: Windows as Claude Code reports them, not as the model family was once sold.
+#: `sonnet` resolves to Sonnet 5, whose window is 1M: a session at 37,403 tokens
+#: shows `ctx 4%` in the status line, which is 1M and not 200k (that would read
+#: 19%). An earlier version of this table said 200k, and every share of the
+#: window it reported was five times too high.
 MODELS: dict[str, Model] = {
-    "haiku": Model("haiku", 200_000, "Smallest and cheapest; the most likely to show an effect if there is one."),
-    "sonnet": Model("sonnet", 200_000, "The middle of the range."),
-    "opus": Model("opus", 200_000, "The strongest; the hardest case for any claim that context hurts."),
+    "haiku": Model("haiku", 200_000, "Smallest and cheapest."),
+    "sonnet": Model("sonnet", 1_000_000, "Sonnet 5, with a 1M window."),
+    "opus": Model("opus", 1_000_000, "Opus 5, with a 1M window."),
 }
 
 
