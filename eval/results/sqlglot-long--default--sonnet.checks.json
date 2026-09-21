@@ -1,0 +1,268 @@
+[
+ {
+  "id": "issue-01",
+  "description": "issue 1: Column lineage breaks on chained PIVOT and UNPIVOT",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-02",
+  "description": "issue 2: Oracle rejects the PIVOT and UNPIVOT sqlglot generates",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-03",
+  "description": "issue 3: Dropping an unnamed UNIQUE constraint breaks the CREATE TABLE",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-04",
+  "description": "issue 4: Support INSERT ... REPLACE USING",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-05",
+  "description": "issue 5: SingleStore: NULL ordering inside percentile WITHIN GROUP",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-06",
+  "description": "issue 6: SQLite: DATE_ADD with a computed amount generates a broken modifier",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-07",
+  "description": "issue 7: Doris: reserved words are generated unquoted",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-08",
+  "description": "issue 8: normalize_identifiers folds names it should leave alone",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-09",
+  "description": "issue 9: The Python executor ignores DISTINCT inside aggregates",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-10",
+  "description": "issue 10: An expression's hash is stale after append()",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-11",
+  "description": "issue 11: Pipe syntax: generated __tmp CTEs collide with outer CTEs",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-12",
+  "description": "issue 12: StarRocks: parse REFRESH EXTERNAL TABLE",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-13",
+  "description": "issue 13: optimize_joins rewrites joins it cannot reorder safely",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-14",
+  "description": "issue 14: Decorrelating EXISTS over a grouped subquery duplicates rows",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-15",
+  "description": "issue 15: MySQL: key parts of UNIQUE and INDEX pick up NULLS FIRST",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-16",
+  "description": "issue 16: GROUPING() gets the wrong type in the Hive family",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-17",
+  "description": "issue 17: qualify_tables strips the parentheses of a function body",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-18",
+  "description": "issue 18: Snowflake: PUT with an unquoted file:// source is not parsed as PUT",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-19",
+  "description": "issue 19: Dremio: support the four-argument REGEXP_SPLIT",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-20",
+  "description": "issue 20: simplify changes the meaning of arithmetic when it collapses a CASE or IF",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-21",
+  "description": "issue 21: pushdown_projections prunes columns that a positional column list still names",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-22",
+  "description": "issue 22: pushdown_predicates loses precedence when it inlines an aliased expression",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-23",
+  "description": "issue 23: Spark: GROUPING SETS as a suffix and as a GROUP BY element are confused",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-24",
+  "description": "issue 24: Transpile Spark's CONCAT_WS over arrays to Trino",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-25",
+  "description": "issue 25: Druid: JSON_VALUE with RETURNING",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-26",
+  "description": "issue 26: The optimizer scopes subqueries inside DML and DDL wrongly",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-27",
+  "description": "issue 27: simplify's gen() gives two different expressions the same key",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-28",
+  "description": "issue 28: A qualified star exclusion removes the column from every source",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-29",
+  "description": "issue 29: ClickHouse: LAG and LEAD are generated as lagInFrame and leadInFrame",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-30",
+  "description": "issue 30: T-SQL: star over an UNPIVOT expands columns in the wrong order",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-31",
+  "description": "issue 31: A second OFFSET silently replaces the first",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-32",
+  "description": "issue 32: GROUP BY reorders CUBE, ROLLUP and GROUPING SETS",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-33",
+  "description": "issue 33: Exasol: transpile MySQL's SHOW DATABASES and SHOW SCHEMAS",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-34",
+  "description": "issue 34: Hive: support NAMED_STRUCT",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-35",
+  "description": "issue 35: FETCH FIRST ROWS ONLY without a count becomes a bare LIMIT",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "issue-36",
+  "description": "issue 36: DuckDB: table alias misplaced next to time-travel syntax",
+  "kind": "solved",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "tests-untouched",
+  "description": "no test was modified, skipped or deleted",
+  "kind": "consistency",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "id": "suite-passes",
+  "description": "the whole suite passes, but for the one test that needs `python` on the PATH",
+  "kind": "consistency",
+  "passed": true,
+  "detail": "uu.uuuuuuuuuuuuuu.uuuu.uu.uu [ 98%]\nuuuu.uu...uuuuuuuuuuuuuuuuuu.uuuuuuuuuu.uuuuuu.uuu.uuuuuuuuuuuuuuuuuuuuu [ 99%]\n....uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu. [ 99%]\n.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu [ 99%]\nuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu..uuuuuuuuuuuuuuuuuu...uuuuuu.  [100%]\n1267 passed, 19684 subtests passed in 52.21s"
+ }
+]

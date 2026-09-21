@@ -70,6 +70,42 @@ the next, as a plain promise, and the engine skipped the hook for running past
 its 10-second budget; the judgement now runs inside the step's own dispatch,
 beside its tools.
 
+### Thirty-six real changes in one message, with the shipped settings
+
+`sqlglot-long`: thirty-six changes sqlglot shipped -- optimizer, parser,
+executor, lineage and sixteen dialects -- reverted at a pinned commit, listed
+in ISSUES.md and handed over in **one message**: work through all of them in
+order, without stopping to ask. `off` against `default`, taskcut exactly as
+installed (a floor of 40%, judged by `sonnet`), on Sonnet 5, each arm once:
+
+| | off | default |
+| --- | --- | --- |
+| issues solved (per test case) | 36/36 | 36/36 |
+| tests untouched, whole suite passes | yes | yes |
+| turns | 1 | 2 -- taskcut's `Continue.` started the second |
+| nudges the benchmark had to send | 0 | 0 |
+| model requests | 264 | 274 |
+| context at the peak request | 707,187 (71%) | 426,173 (43%) |
+| mean context per request | 369,817 | 240,908 |
+| requests made at 40% or more | 109 | 9 |
+| cache read / cache write / output tokens | 96.9M / 0.71M / 309k | 65.2M / 0.77M / 348k |
+| cost at $3 / $15 per million, cache read $0.30, write $3.75 | $36.37 | $27.66 |
+| wall clock | 102 min | 97 min |
+
+taskcut judged the steps past 40% and cut once, inside the turn, after issue
+20: 431,567 tokens compacted to 10,511 in 88 seconds. The next request, after
+`Continue.`, opened with "Continuing with Issue 21" and re-read that issue in
+ISSUES.md. Not in the transcript, so not in the table: at most nine judgements
+(one per step past the floor, a few cents each) and the compaction request
+itself, 431,567 tokens uncached -- about $1.50 together at the same prices, which
+leaves `default` about a fifth cheaper than `off`.
+
+What this does not show is the thing taskcut is for. Both arms solved every
+issue: at 71% of its window, Sonnet 5 on this work showed no dilution that the
+checks can see, so the quality comparison is a tie at the ceiling. The saving
+is in context and cost, and one pair is one pair -- identical work varies by
+about ten percent from run to run.
+
 ### Twenty real changes, at a realistic floor
 
 `issues-long` again -- twenty changes click shipped, bugs and features -- with

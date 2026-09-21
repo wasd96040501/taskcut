@@ -35,8 +35,10 @@
      75919,
      76749
     ],
+    "continued": 0,
     "cuts": 10,
     "drift": {},
+    "elapsed_seconds": 1453,
     "fidelity": {
      "headline": {
       "asked": 2,
@@ -61,7 +63,10 @@
     "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 12081,
+    "nudges": 0,
     "output": 98241,
+    "request_context_mean": 67227,
+    "request_context_peak": 100725,
     "requests": 70,
     "weighted_input": 1007906
    },
@@ -99,8 +104,10 @@
      127993,
      128133
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 1144,
     "fidelity": {
      "headline": {
       "asked": 2,
@@ -125,7 +132,10 @@
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 70342,
+    "request_context_mean": 81816,
+    "request_context_peak": 128137,
     "requests": 43,
     "weighted_input": 467723
    }
@@ -168,8 +178,10 @@
      59442,
      59475
     ],
+    "continued": 0,
     "cuts": 10,
     "drift": {},
+    "elapsed_seconds": 554,
     "fidelity": {
      "headline": {
       "asked": 2,
@@ -194,7 +206,10 @@
     "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 6978,
+    "nudges": 0,
     "output": 36219,
+    "request_context_mean": 49559,
+    "request_context_peak": 63520,
     "requests": 54,
     "weighted_input": 573747
    },
@@ -233,8 +248,10 @@
      82122,
      82155
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 540,
     "fidelity": {
      "headline": {
       "asked": 2,
@@ -259,7 +276,10 @@
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 36632,
+    "request_context_mean": 58238,
+    "request_context_peak": 82159,
     "requests": 38,
     "weighted_input": 282552
    }
@@ -294,8 +314,10 @@
      61597,
      62792
     ],
+    "continued": 0,
     "cuts": 9,
     "drift": {},
+    "elapsed_seconds": 418,
     "fidelity": {
      "headline": {
       "asked": 5,
@@ -314,7 +336,10 @@
     "judged_finished": 0,
     "ledger_messages": 17,
     "ledger_tokens": 5872,
+    "nudges": 0,
     "output": 18933,
+    "request_context_mean": 51793,
+    "request_context_peak": 62796,
     "requests": 41,
     "weighted_input": 482953
    },
@@ -345,8 +370,10 @@
      54087,
      55313
     ],
+    "continued": 0,
     "cuts": 8,
     "drift": {},
+    "elapsed_seconds": 427,
     "fidelity": {
      "headline": {
       "asked": 5,
@@ -365,7 +392,10 @@
     "judged_finished": 0,
     "ledger_messages": 15,
     "ledger_tokens": 3090,
+    "nudges": 0,
     "output": 13053,
+    "request_context_mean": 47561,
+    "request_context_peak": 57256,
     "requests": 47,
     "weighted_input": 424574
    },
@@ -396,8 +426,10 @@
      69850,
      69975
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 240,
     "fidelity": {
      "headline": {
       "asked": 5,
@@ -416,7 +448,10 @@
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 3341,
+    "request_context_mean": 57310,
+    "request_context_peak": 69979,
     "requests": 26,
     "weighted_input": 195279
    }
@@ -455,14 +490,19 @@
      121248,
      133059
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 878,
     "fidelity": {},
     "judged": 0,
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 51462,
+    "request_context_mean": 89269,
+    "request_context_peak": 144387,
     "requests": 63,
     "weighted_input": 709498
    },
@@ -497,14 +537,19 @@
      141029,
      155702
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 1124,
     "fidelity": {},
     "judged": 0,
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 63309,
+    "request_context_mean": 102166,
+    "request_context_peak": 165607,
     "requests": 60,
     "weighted_input": 785725
    },
@@ -539,14 +584,19 @@
      125864,
      136939
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 936,
     "fidelity": {},
     "judged": 0,
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 53672,
+    "request_context_mean": 93358,
+    "request_context_peak": 148242,
     "requests": 67,
     "weighted_input": 777039
    }
@@ -607,14 +657,19 @@
      267657,
      292546
     ],
+    "continued": 0,
     "cuts": 1,
     "drift": {},
+    "elapsed_seconds": 2196,
     "fidelity": {},
     "judged": 0,
     "judged_finished": 0,
     "ledger_messages": 1,
     "ledger_tokens": 4336,
+    "nudges": 0,
     "output": 130949,
+    "request_context_mean": 173525,
+    "request_context_peak": 302512,
     "requests": 165,
     "weighted_input": 3179837
    },
@@ -671,14 +726,19 @@
      259584,
      285735
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 2130,
     "fidelity": {},
     "judged": 0,
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 122818,
+    "request_context_mean": 167411,
+    "request_context_peak": 297449,
     "requests": 141,
     "weighted_input": 2683781
    },
@@ -735,14 +795,19 @@
      289821,
      37646
     ],
+    "continued": 0,
     "cuts": 1,
     "drift": {},
+    "elapsed_seconds": 2486,
     "fidelity": {},
     "judged": 1,
     "judged_finished": 1,
     "ledger_messages": 1,
     "ledger_tokens": 3090,
+    "nudges": 0,
     "output": 142032,
+    "request_context_mean": 165592,
+    "request_context_peak": 314092,
     "requests": 150,
     "weighted_input": 2852826
    },
@@ -799,16 +864,156 @@
      272262,
      40294
     ],
+    "continued": 0,
     "cuts": 1,
     "drift": {},
+    "elapsed_seconds": 2214,
     "fidelity": {},
     "judged": 0,
     "judged_finished": 0,
     "ledger_messages": 1,
     "ledger_tokens": 1084,
+    "nudges": 0,
     "output": 135031,
+    "request_context_mean": 164909,
+    "request_context_peak": 301139,
     "requests": 160,
     "weighted_input": 2995421
+   }
+  }
+ },
+ "sqlglot-long": {
+  "sonnet": {
+   "default": {
+    "cache_read": 65241047,
+    "cache_write": 767155,
+    "checks": {
+     "issue-01": true,
+     "issue-02": true,
+     "issue-03": true,
+     "issue-04": true,
+     "issue-05": true,
+     "issue-06": true,
+     "issue-07": true,
+     "issue-08": true,
+     "issue-09": true,
+     "issue-10": true,
+     "issue-11": true,
+     "issue-12": true,
+     "issue-13": true,
+     "issue-14": true,
+     "issue-15": true,
+     "issue-16": true,
+     "issue-17": true,
+     "issue-18": true,
+     "issue-19": true,
+     "issue-20": true,
+     "issue-21": true,
+     "issue-22": true,
+     "issue-23": true,
+     "issue-24": true,
+     "issue-25": true,
+     "issue-26": true,
+     "issue-27": true,
+     "issue-28": true,
+     "issue-29": true,
+     "issue-30": true,
+     "issue-31": true,
+     "issue-32": true,
+     "issue-33": true,
+     "issue-34": true,
+     "issue-35": true,
+     "issue-36": true,
+     "suite-passes": true,
+     "tests-untouched": true
+    },
+    "context_first": 44070,
+    "context_last": 51456,
+    "context_peak": 51456,
+    "context_series": [
+     44070,
+     51456
+    ],
+    "continued": 1,
+    "cuts": 1,
+    "drift": {},
+    "elapsed_seconds": 5835,
+    "fidelity": {},
+    "judged": 1,
+    "judged_finished": 1,
+    "ledger_messages": 1,
+    "ledger_tokens": 3221,
+    "nudges": 0,
+    "output": 347613,
+    "request_context_mean": 240908,
+    "request_context_peak": 426173,
+    "requests": 274,
+    "weighted_input": 7483596
+   },
+   "off": {
+    "cache_read": 96923928,
+    "cache_write": 707185,
+    "checks": {
+     "issue-01": true,
+     "issue-02": true,
+     "issue-03": true,
+     "issue-04": true,
+     "issue-05": true,
+     "issue-06": true,
+     "issue-07": true,
+     "issue-08": true,
+     "issue-09": true,
+     "issue-10": true,
+     "issue-11": true,
+     "issue-12": true,
+     "issue-13": true,
+     "issue-14": true,
+     "issue-15": true,
+     "issue-16": true,
+     "issue-17": true,
+     "issue-18": true,
+     "issue-19": true,
+     "issue-20": true,
+     "issue-21": true,
+     "issue-22": true,
+     "issue-23": true,
+     "issue-24": true,
+     "issue-25": true,
+     "issue-26": true,
+     "issue-27": true,
+     "issue-28": true,
+     "issue-29": true,
+     "issue-30": true,
+     "issue-31": true,
+     "issue-32": true,
+     "issue-33": true,
+     "issue-34": true,
+     "issue-35": true,
+     "issue-36": true,
+     "suite-passes": true,
+     "tests-untouched": true
+    },
+    "context_first": 44073,
+    "context_last": 44073,
+    "context_peak": 44073,
+    "context_series": [
+     44073
+    ],
+    "continued": 0,
+    "cuts": 0,
+    "drift": {},
+    "elapsed_seconds": 6105,
+    "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "nudges": 0,
+    "output": 309079,
+    "request_context_mean": 369817,
+    "request_context_peak": 707187,
+    "requests": 264,
+    "weighted_input": 10576902
    }
   }
  },
@@ -841,8 +1046,10 @@
      44635,
      44743
     ],
+    "continued": 0,
     "cuts": 10,
     "drift": {},
+    "elapsed_seconds": 326,
     "fidelity": {
      "headline": {
       "asked": 5,
@@ -861,7 +1068,10 @@
     "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 1860,
+    "nudges": 0,
     "output": 7394,
+    "request_context_mean": 45364,
+    "request_context_peak": 50923,
     "requests": 38,
     "weighted_input": 433308
    },
@@ -892,8 +1102,10 @@
      51368,
      51513
     ],
+    "continued": 0,
     "cuts": 10,
     "drift": {},
+    "elapsed_seconds": 392,
     "fidelity": {
      "headline": {
       "asked": 5,
@@ -912,7 +1124,10 @@
     "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 3311,
+    "nudges": 0,
     "output": 6902,
+    "request_context_mean": 47964,
+    "request_context_peak": 54968,
     "requests": 46,
     "weighted_input": 501844
    },
@@ -943,8 +1158,10 @@
      107760,
      107857
     ],
+    "continued": 0,
     "cuts": 0,
     "drift": {},
+    "elapsed_seconds": 215,
     "fidelity": {
      "headline": {
       "asked": 5,
@@ -963,7 +1180,10 @@
     "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
+    "nudges": 0,
     "output": 2019,
+    "request_context_mean": 82701,
+    "request_context_peak": 107861,
     "requests": 28,
     "weighted_input": 322873
    }
