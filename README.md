@@ -40,8 +40,7 @@ claude plugin install taskcut@taskcut --scope project --config floorPercent=0
 CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 ```
 
-The install may note that some options are not yet set. That is fine: every
-setting has a default.
+(A note that options are not yet set is fine: every setting has a default.)
 
 Answer **yes** to the folder-trust prompt, then paste these three, one at a time:
 
@@ -80,7 +79,7 @@ instead, and leaves what a compaction keeps to Claude Code.
 
 ## Install it for real
 
-Pick where it should run. That is the only decision.
+Pick where it should run:
 
 ```bash
 # this repository, for everyone who clones it
@@ -96,35 +95,30 @@ claude plugin marketplace add wasd96040501/taskcut
 claude plugin install taskcut@taskcut --scope user
 ```
 
-Then start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`. There is
-nothing to add to your prompts or to `CLAUDE.md`.
+Then start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`. Nothing
+goes in your prompts or `CLAUDE.md`.
 
-**Switching it off for one session:** `TASKCUT=0 claude`. That outranks
-everything.
+On a 1M-token window the default floor of 40% is 400,000 tokens, which only a
+long session reaches. To watch it act on ordinary work first, install with
+`--config floorPercent=10`.
 
-**Removing it:**
-
-```bash
-claude plugin uninstall taskcut@taskcut
-claude plugin marketplace remove taskcut
-```
+Off for one session: `TASKCUT=0 claude`. Removing it:
+`claude plugin uninstall taskcut@taskcut && claude plugin marketplace remove taskcut`.
 
 ## What it costs
 
 | | |
 | --- | --- |
-| **Below the floor** | Nothing. No model is asked, nothing is written, and the working model is never told taskcut exists. `make eval-mechanism` asserts it on a real session. |
-| **Each finished turn past the floor** | One call to `model` — `haiku` by default — reading at most about 12k tokens: your messages, the assistant's non-read-only tool calls, `CLAUDE.md` and the reply. Under two cents. |
-| **Each compaction** | Exactly what `/compact` costs, because it is `/compact`. On a 65k-token session it took 21–25 seconds; at 315k, 80 seconds. |
-| **On real work** | Twenty real changes to click in one Sonnet 5 session, floor 30%: for nineteen, taskcut did nothing at all. After the nineteenth it judged the turn finished and compacted 315,608 tokens to a 5,960-token summary; the twentieth ran on 37,646 and passed. Both arms passed all 22 checks. |
+| **Below the floor** | Nothing: no model call, no tool, nothing written. |
+| **Each finished turn past it** | One `haiku` call of at most ~12k tokens — about a cent. |
+| **Each compaction** | Whatever `/compact` costs, because it is `/compact`. |
 
-What it buys is the question the benchmark is for; see
-[docs/measurement.md](docs/measurement.md), which also records what earlier
-versions — which built their own compacted transcript — measured.
-
-On a 1M window the default floor of 40% is 400,000 tokens, and twenty real
-changes in one Sonnet 5 session reached 29%. taskcut is for sessions that
-genuinely get that long.
+On twenty real changes to click in one Sonnet 5 session, with the floor at 30%,
+taskcut did nothing for nineteen. After the nineteenth it judged the turn
+finished and compacted 315,608 tokens to a 5,960-token summary; the twentieth
+ran on 37,646 tokens and passed, as every change did with and without it.
+Whether compacting earlier makes long sessions work better is what the
+benchmark is for: [docs/measurement.md](docs/measurement.md).
 
 ## Settings
 
@@ -138,53 +132,31 @@ or change it later from a session with `/plugin`.
 
 ## How it works
 
-Nothing happens until the context is past `floorPercent`, read from the same
-figure the status line shows. From then on, at the end of each turn the model
-finished, taskcut makes one call to `model` with `$.model.classify`, the hooks
-API's classifier. It sees what auto mode's permission classifier sees — every
-message you sent, every tool call the assistant made except read-only lookups,
-and `CLAUDE.md`, with all tool output stripped — plus the reply the assistant
-just stopped on, and it answers `finished` or `unfinished`.
+At the end of each turn the model finished, taskcut reads the context fill the
+status line shows. Below `floorPercent` it stops there. Past it, it asks `model`,
+through the hooks API's `$.model.classify`, whether the work you asked for is
+done. The judge reads what auto mode's permission classifier reads — your
+messages, the assistant's tool calls except read-only lookups, and `CLAUDE.md`,
+never any tool output — plus the reply it stopped on. On `finished`, taskcut
+calls `$.session.compact()`, the call `/compact` makes; on anything else it
+leaves the conversation alone.
 
-A reply that asks you something, waits for a decision or reports partial
-progress is `unfinished`, and nothing happens. On `finished`, taskcut calls
-`$.session.compact()` — the same call `/compact` makes — and Claude Code
-compacts as it always does. The context drops back below the floor, and taskcut
-is silent again until it fills.
-
-| File | Role |
-| --- | --- |
-| `hooks/register.ts` | The two hooks, and every call on the engine interface. |
-| `hooks/judge.ts` | What the judge reads, as a pure function. |
-| `hooks/activation.ts` | Whether taskcut runs at all, as a pure rule. |
-| `hooks/config.ts` | Settings, with defaults for anything unset. |
-| `eval/` | The benchmark. `make eval-list`. |
-
-The split is not stylistic. A hooks module may pass `$` only to a function
-declared in the same file; the loader refuses a module that passes it across an
-import. So everything that touches the engine lives in `register.ts`, and
-everything that can be reasoned about as plain data lives beside it.
+The source is two files: `hooks/register.ts` (the two hooks) and
+`hooks/judge.ts` (what the judge reads). [docs/design.md](docs/design.md) has
+the reasoning, and the designs this one replaced.
 
 ## Limitations
 
 * **Interactive sessions only.** `claude -p` and the SDK transport cannot
-  compact at all, so taskcut logs and does nothing there. A terminal session or
-  `claude --bg` works.
-* **The judge sees what was done, not what came of it.** Like the permission
-  classifier, it never reads tool output, so it can call a turn finished that
-  the model only claimed to finish. A wrong call costs a compaction a turn
-  early, which is what Claude Code would have done at the threshold anyway.
-* **Compaction happens between turns.** A single turn that runs for hours is
-  not compacted until it ends; Claude Code's own threshold compaction remains
-  the safety net inside it.
-* **A prompt typed while the judge runs wins.** Compaction cannot start once the
-  next turn has, so it is skipped and noted; the next finished turn is judged
-  again.
-* **One session per process.** Module state assumes Claude Code loads a hooks
-  module once per session, which holds today but the API does not guarantee.
+  compact; a terminal session or `claude --bg` can.
+* **The judge never sees tool output**, so a reply that claims more than was
+  done can fool it. The cost is a compaction a little early.
+* **Compaction happens between turns.** Inside one very long turn, Claude
+  Code's own threshold compaction is still the safety net.
+* **A prompt typed while the judge runs wins.** The compaction is skipped and
+  the next finished turn is judged again.
 * **Early access.** The function-hooks API may change between Claude Code
-  releases. `./scripts/validate.sh` reports anything the engine would refuse
-  before a session loads the plugin.
+  releases; `make validate` reports anything the engine would refuse.
 
 ## Documentation
 
