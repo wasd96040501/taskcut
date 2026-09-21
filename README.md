@@ -239,8 +239,15 @@ process access of its own; everything goes through that interface.
 
 ## Configuration
 
-Every setting has a working default. Change them under `/config`, in the
-`taskcut` section.
+Every setting has a working default. Set one at install time with
+`--config KEY=VALUE`, repeatable:
+
+```bash
+claude plugin install taskcut@taskcut --scope user --config floorPercent=30
+```
+
+or change it later from a session with `/plugin`, which is the interactive
+form of the same thing.
 
 | Setting | Default | What it controls |
 | --- | --- | --- |

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-21
+
 ### Added
 
 - A benchmark, in `eval/`, and a `Makefile` to drive it. It is built along four
@@ -40,6 +42,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   assumed a kept set of about 3k tokens; the measurement says the kept set
   carries a per-session preamble of 12k-15k that is re-cached on every cut, so
   the original prompt-cache argument was right after all.
+- Settings are documented as `--config KEY=VALUE` at install time and `/plugin`
+  from a session. The documentation had named `/config`, which is a different
+  command and does not configure a plugin.
+- The README no longer claims the cut keeps every human turn. It keeps the
+  first and the most recent `recentHumanTurns`; the rest are dropped, because
+  human turns are unbounded on a long run.
 
 
 ## [0.2.0] - 2026-09-20
@@ -120,6 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   plugin store has a hard size limit, so leftovers cannot be allowed to
   accumulate.
 
-[Unreleased]: https://github.com/wasd96040501/taskcut/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/wasd96040501/taskcut/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/wasd96040501/taskcut/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/wasd96040501/taskcut/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/wasd96040501/taskcut/releases/tag/v0.1.0

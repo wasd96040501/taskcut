@@ -43,6 +43,12 @@ eval-verify: ## Check every probe is answerable from the material it ships with
 eval-run: ## Run one workload under one arm (WORKLOAD=, ARM=, MODEL=)
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm $(ARM) --model $(MODEL)
 
+.PHONY: eval-ab
+eval-ab: ## Run both arms of one workload and print the comparison (WORKLOAD=, MODEL=)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm off --model $(MODEL)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) run --workload $(WORKLOAD) --arm boundary --model $(MODEL)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report
+
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report
