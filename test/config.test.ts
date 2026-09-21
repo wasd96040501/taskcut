@@ -9,7 +9,7 @@ describe('readConfig', () => {
   })
 
   test('reads values that are in range', () => {
-    assert.deepEqual(readConfig({ floorPercent: 0, model: 'sonnet' }), { floorPercent: 0, model: 'sonnet' })
+    assert.deepEqual(readConfig({ floorPercent: 0, model: 'haiku' }), { floorPercent: 0, model: 'haiku' })
   })
 
   test('accepts a numeric string, as a settings file may hold one', () => {

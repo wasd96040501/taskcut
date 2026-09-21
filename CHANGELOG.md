@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-21
+
+### Added
+
+- **Compaction inside a long turn.** Past the floor, each step of the main
+  conversation is judged, while the step's tools run. When one finished a piece
+  of the work, taskcut ends the turn before the next request, runs the same
+  compaction `/compact` runs, and submits `Continue.` -- so a list of tasks
+  handed over in one message is compacted between tasks, with nobody at the
+  keyboard. Interactive sessions only; a `-p` run is never interrupted.
+
+### Changed
+
+- The judge is asked through `$.model.complete` with rules of its own, and
+  writes a sentence before its verdict. A step that ends by asking the person
+  something is never a boundary.
+- The default judge is `sonnet`, as auto mode's permission classifier's is:
+  on the same steps, `haiku` missed four boundaries in nine where `sonnet`
+  missed none.
+- After a compaction that leaves the context above the floor, the next
+  judgement waits until the context has grown five points more.
+
 ## [0.6.0] - 2026-09-21
 
 ### Changed

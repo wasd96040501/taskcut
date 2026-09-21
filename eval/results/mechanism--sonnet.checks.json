@@ -2,12 +2,12 @@
  {
   "name": "quiet below the floor",
   "passed": true,
-  "detail": "3 turn(s) below the floor, 0 with any taskcut activity"
+  "detail": "4 turn(s) below the floor, 0 with any taskcut activity"
  },
  {
   "name": "every turn past the floor is judged",
   "passed": true,
-  "detail": "4/4 judged"
+  "detail": "6/6 judged"
  },
  {
   "name": "a turn that ends in a question is kept",
@@ -17,22 +17,32 @@
  {
   "name": "a finished turn is compacted",
   "passed": true,
-  "detail": "3 judged finished, 3 compacted, 0 skipped"
+  "detail": "5 judged finished, 5 compacted, 0 skipped"
  },
  {
   "name": "nothing is compacted below the floor",
   "passed": true,
-  "detail": "compactions at [67877, 61938, 61958]"
+  "detail": "compactions at [66206, 60691, 61033, 74810, 62221]"
  },
  {
   "name": "crossing again compacts again",
   "passed": true,
-  "detail": "3 compaction(s)"
+  "detail": "5 compaction(s)"
  },
  {
   "name": "what was compacted can be recalled",
   "passed": true,
   "detail": "all six"
+ },
+ {
+  "name": "a piece finished inside a turn is compacted there",
+  "passed": true,
+  "detail": "2 compaction(s) inside the turn, 2 turn(s) carried on with 'The taskcut plugin sent a message'"
+ },
+ {
+  "name": "the work that was interrupted gets finished",
+  "passed": true,
+  "detail": "files: {'answer4.txt': 'OSPREY-12', 'answer5.txt': 'HERON-58', 'answer6.txt': '3'}; ends with ALL DONE: True"
  },
  {
   "name": "the working model is never asked for anything",

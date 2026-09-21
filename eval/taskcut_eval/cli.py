@@ -182,7 +182,7 @@ def cmd_mechanism(args) -> int:
     destination.write_bytes(transcript.find(PROJECTS, space).read_bytes())
     print(f"transcript -> {destination}")
 
-    verdicts = mechanism.check(destination, model.window)
+    verdicts = mechanism.check(destination, model.window, space)
     (results / f"{stem}.checks.json").write_text(json.dumps([vars(v) for v in verdicts], indent=1) + "\n")
     for v in verdicts:
         print(f"  {'PASS' if v.passed else 'FAIL'}  {v.name}: {v.detail}")

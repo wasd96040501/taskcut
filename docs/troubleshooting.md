@@ -67,27 +67,50 @@ plugin was installed at.
 
 ### 5. What did the judge say?
 
-Past the floor, every turn the model finished ends with a dim line:
+Past the floor, every turn the model finished ends with a dim line, and a
+piece finished inside a turn gets one of its own:
 
 ```
 taskcut: context at 43%, the work is finished; compacting
 taskcut: context at 43%, the work is not finished; keeping it
+taskcut: context at 43%, a piece of the work is finished; compacting
 ```
 
-No line at all past the floor means the turn was not judged: it was a
-subagent's, or it was interrupted or failed. `not finished` on a turn you
-consider done usually means the reply ended by proposing more work or asking a
-question. The judge reads what auto mode's permission classifier reads -- your
-messages, the assistant's non-read-only tool calls and `CLAUDE.md` -- plus the
-reply, and never any tool output.
+Steps inside a turn that are judged still working get no line; `claude --debug`
+shows them. No line at all at the end of a turn past the floor means it was not
+judged: it was a subagent's, or it was interrupted or failed. `not finished` on
+a turn you consider done usually means the reply ended by proposing more work
+or asking a question -- which is never a boundary, even when asking is what you
+told it to do. The judge reads what auto mode's permission classifier reads --
+your messages, the assistant's non-read-only tool calls and `CLAUDE.md` -- plus
+the step, and never any tool output.
+
+### 6. Nothing is compacted inside a long turn
+
+Only an interactive session ends a turn early: a `-p` run or an SDK transport
+never does. In a terminal session or `claude --bg`, look for this line:
+
+```
+taskcut: turn.step hook skipped: ran past its 10s budget
+```
+
+It means the engine skipped the step hook, and on that step taskcut could not
+act. Report it with your Claude Code version.
 
 ## It compacts on every turn
 
 The context after a compaction -- the summary, the recent messages Claude Code
-keeps, the system prompt and tool definitions -- is still past `floorPercent`,
-so the next finished turn is judged and compacted again. It happens only with a
-floor lower than what a compaction leaves, typically a few percent: raise
-`floorPercent`. At `0`, compacting at every finished turn is what was asked for.
+keeps, the system prompt and tool definitions -- is still past `floorPercent`.
+taskcut then waits until the context has grown five points past what the
+compaction left before judging again, so this takes a floor lower than what a
+compaction leaves, typically a few percent: raise `floorPercent`.
+
+## A message from the taskcut plugin says `Continue.`
+
+That is taskcut picking the work back up after compacting inside a turn: Claude
+Code compacts only between turns, so taskcut ended the turn, compacted, and
+started the next one. It is what you would do yourself with Esc, `/compact` and
+"continue".
 
 ## Something was lost in a compaction
 

@@ -1,5 +1,5 @@
 {
-  "description": "Once the context window is past the configured floor, judges at the end of each turn, with one small-model call reading what the permission classifier reads, whether the work asked for is finished. If it is, calls $.session.compact(), the same compaction /compact runs. Below the floor nothing runs.",
+  "description": "Once the context window is past the configured floor, judges each step of the main loop, and the reply a turn ends on, with one model call reading what the permission classifier reads. When a step finished a piece of the work, runs $.session.compact(), the same compaction /compact runs -- ending the turn first when it is still running, and submitting 'Continue.' after. Below the floor nothing runs.",
   "modules": [
     "./register.ts"
   ]

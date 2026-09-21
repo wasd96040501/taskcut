@@ -58,7 +58,12 @@ INHERITED = (
 #: environment's interpreter, its test runner -- and a permission denial the
 #: benchmark did not intend would be measured as the model failing. The
 #: workspace is a throwaway copy, per arm and per model.
-TOOLS = "Bash,Read,Grep,Glob,Write,Edit,mcp__taskcut__close_task"
+TOOLS = "Bash,Read,Grep,Glob,Write,Edit"
+
+#: Nobody is at the keyboard to answer a dialog. A model that asks through one
+#: would wait on it until the run times out; asked in text, its question is
+#: part of the answer the benchmark reads.
+DENIED = "AskUserQuestion"
 
 
 def prepare_plugin(arm: Arm, source: Path, destination: Path) -> Path:
@@ -101,7 +106,7 @@ class Session:
         self.process = subprocess.Popen(
             # No plugin directory is a session with whatever is installed, the way
             # a person would start one.
-            [_binary(), *(["--plugin-dir", str(plugin)] if plugin else []), "--model", model, "--allowedTools", TOOLS],
+            [_binary(), *(["--plugin-dir", str(plugin)] if plugin else []), "--model", model, "--allowedTools", TOOLS, "--disallowedTools", DENIED],
             cwd=str(cwd),
             env=environment,
             stdin=slave,

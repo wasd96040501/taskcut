@@ -5,13 +5,13 @@ import type { PluginOptions } from 'claude-code'
 export type Config = {
   /** Context fill, as a percentage, below which taskcut does nothing at all. */
   floorPercent: number
-  /** The small model that judges whether a turn's work is finished, as a `--model` value. */
+  /** The model that judges whether a step finished a piece of the work, as a `--model` value. */
   model: string
 }
 
 export const DEFAULTS: Config = {
   floorPercent: 40,
-  model: 'haiku',
+  model: 'sonnet',
 }
 
 function numberOr(value: unknown, fallback: number, min: number): number {

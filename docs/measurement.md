@@ -26,8 +26,9 @@ wins some and loses others:
 ## The current version: taskcut decides when, Claude Code compacts
 
 Since 0.6, taskcut changes only *when* Claude Code compacts. Past the floor a
-small model judges each finished turn, and on `finished` taskcut runs the same
-compaction `/compact` does. Everything from "The runs" down measured versions up
+model judges each finished turn, and on `finished` taskcut runs the same
+compaction `/compact` does. Since 0.7 it also judges each step inside a turn,
+and compacts between pieces of work in a turn nobody interrupts. Everything from "The runs" down measured versions up
 to 0.5, which built the compacted transcript themselves and, until 0.5, had the
 working model call `close_task` at every boundary. Those numbers describe a
 mechanism that no longer ships; they are kept because they are what led here.
@@ -50,6 +51,24 @@ The working model was never asked for anything: no tool, no reminder, no
 `ToolSearch`. Each compaction is recorded in the same transcript exactly as a
 typed `/compact` is -- `trigger: "manual"`, the same summary, the same
 preserved recent messages -- and took 21 to 25 seconds.
+
+0.7 adds an eighth turn: one message with three tasks to do in order without
+stopping -- read a long file and write its last line to a file, the same for a
+second file, then count a file's lines -- and nobody stepping in. On two runs,
+0.7.0 passed every check both times:
+
+| | run 1 | run 2 |
+| --- | --- | --- |
+| compactions inside that one turn | 2, each after a task was reported done | 2 |
+| turns taskcut carried on with `Continue.` | 2 | 2 |
+| answer files correct, reply ends `ALL DONE` | yes | yes |
+| the question turn (the second above) kept | yes | yes |
+| step hook skipped for overrunning its budget | 0 | 0 |
+
+In the first 0.7 draft the judgement of one step was awaited at the start of
+the next, as a plain promise, and the engine skipped the hook for running past
+its 10-second budget; the judgement now runs inside the step's own dispatch,
+beside its tools.
 
 ### Twenty real changes, at a realistic floor
 

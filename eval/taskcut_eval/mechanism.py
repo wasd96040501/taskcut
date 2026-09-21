@@ -10,7 +10,9 @@ the things that have to hold every time:
 * a turn that finished its work is judged finished and cut;
 * after a cut, back below the floor, nothing happens again;
 * crossing again cuts again;
-* what was cut can still be recalled from the ledger.
+* what was cut can still be recalled;
+* inside one long turn, a finished piece is compacted there and then, and the
+  work picks back up and gets finished.
 
 It costs a few minutes and around a dollar, and needs a terminal
 and credentials, so it is not in CI.
@@ -39,6 +41,8 @@ _LINES = 700
 
 #: What each file ends with, so that recall can be checked exactly.
 LAST_LINES = {"notes2.txt": "KESTREL-41", "notes3.txt": "MARLIN-07"}
+#: The same, for the files the one long turn works through.
+LONG_TURN_LINES = {"notes4.txt": "OSPREY-12", "notes5.txt": "HERON-58"}
 SECTION_3_FIRST = "PELICAN-93"
 
 STEPS = [
@@ -49,7 +53,21 @@ STEPS = [
     "Read notes2.txt in full and tell me its last line.",
     "Read notes3.txt in full and tell me its last line.",
     "Without running any tool: list every task I have given you in this conversation, with its result.",
+    # One message, several pieces, nobody stepping in: the case a turn-end
+    # trigger never sees.
+    "Work through these tasks in order, one at a time, without stopping to ask me anything. "
+    "Finish and check each one before you start the next. "
+    "1. Read notes4.txt in full, write its last line to answer4.txt, and check the file with cat. "
+    "2. Read notes5.txt in full, write its last line to answer5.txt, and check the file with cat. "
+    "3. Run `wc -l a.txt` and write the number to answer6.txt. "
+    "When all three are done, list each task with its result and end with the words ALL DONE.",
 ]
+
+#: What the files the long turn writes must hold once it is over.
+LONG_TURN_ANSWERS = {"answer4.txt": "OSPREY-12", "answer5.txt": "HERON-58", "answer6.txt": "3"}
+
+#: How the plugin's own prompt opens in the transcript.
+CONTINUE_OPENING = "The taskcut plugin sent a message"
 
 
 def _filler(rng: random.Random, count: int) -> list[str]:
@@ -71,7 +89,7 @@ def materialise(root: Path) -> Path:
         first = SECTION_3_FIRST if n == 3 else f"SECTION-{n}-OPENS"
         sections += [f"## Section {n}", first, *_filler(rng, _LINES // 5)]
     (root / "notes1.txt").write_text("\n".join(sections) + "\n")
-    for name, last in LAST_LINES.items():
+    for name, last in {**LAST_LINES, **LONG_TURN_LINES}.items():
         (root / name).write_text("\n".join([*_filler(rng, _LINES), last]) + "\n")
     return root
 
@@ -186,18 +204,31 @@ class Result:
     detail: str
 
 
-def check(path: Path, window: int) -> list[Result]:
-    """Every property the mechanism promises, asserted against one transcript."""
-    work = [t for t in turns(path) if t.contexts]  # turns that ran, not re-emitted copies
+def check(path: Path, window: int, workspace: Path | None = None) -> list[Result]:
+    """Every property the mechanism promises, asserted against one transcript
+    and, for the long turn, the files it left in the workspace."""
+    everything = turns(path)
+    work = [t for t in everything if t.contexts]  # turns that ran, not re-emitted copies
     floor = window * FLOOR / 100
     # A whole percentage, compared as the plugin compares it: allow a point of
     # rounding either side rather than assert on the boundary itself.
     below = [t for t in work if t.carried < floor - window / 100]
     above = [t for t in work if t.carried >= floor + window / 100]
     step = {s: next((t for t in work if t.prompt.strip() == s), None) for s in STEPS}
+    # The long turn, and every turn taskcut started to carry it on.
+    start = next((i for i, t in enumerate(everything) if t.prompt.strip() == STEPS[-1]), len(everything))
+    long_turn = [t for t in everything[start:start + 1]] + [
+        t for t in everything[start + 1:] if t.prompt.startswith(CONTINUE_OPENING)
+    ]
+    carried_on = [t for t in long_turn[1:] if t.contexts]
+    mid_turn_cuts = [c for t in long_turn[:-1] for c in t.cuts] if len(long_turn) > 1 else []
+    written = {
+        name: (workspace / name).read_text().strip() if workspace and (workspace / name).exists() else None
+        for name in LONG_TURN_ANSWERS
+    }
+    ending = " ".join(long_turn[-1].texts) if long_turn else ""
     question, answered = step[STEPS[1]], step[STEPS[2]]
-    last = work[-1] if work else Turn(prompt="")
-    recall = " ".join(last.texts)
+    recall = " ".join(step[STEPS[6]].texts) if step[STEPS[6]] else ""
     wanted = ["3", SECTION_3_FIRST, "epsilon", *LAST_LINES.values()]
     cuts = [c for t in work for c in t.cuts]
     finished = [t for t in work if any("is finished" in v for v in t.verdicts)]
@@ -230,6 +261,16 @@ def check(path: Path, window: int) -> list[Result]:
             "what was compacted can be recalled",
             all(w in recall for w in wanted),
             "missing: " + ", ".join(w for w in wanted if w not in recall) if any(w not in recall for w in wanted) else "all six",
+        ),
+        Result(
+            "a piece finished inside a turn is compacted there",
+            bool(mid_turn_cuts) and bool(carried_on),
+            f"{len(mid_turn_cuts)} compaction(s) inside the turn, {len(carried_on)} turn(s) carried on with {CONTINUE_OPENING!r}",
+        ),
+        Result(
+            "the work that was interrupted gets finished",
+            all(written[name] == want for name, want in LONG_TURN_ANSWERS.items()) and "ALL DONE" in ending,
+            f"files: {written}; ends with ALL DONE: {'ALL DONE' in ending}",
         ),
         Result(
             "the working model is never asked for anything",

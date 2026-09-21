@@ -1,7 +1,7 @@
 {
   "name": "taskcut",
-  "version": "0.6.0",
-  "description": "Compacts at the end of a sub-task instead of when the context window fills. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished, from the same inputs auto mode's permission classifier reads; if it is, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
+  "version": "0.7.0",
+  "description": "Compacts at the end of a sub-task instead of when the context window fills, including in the middle of a long turn. Once the context is past a floor, a model judges each step, from the same inputs auto mode's permission classifier reads, for whether it finished a piece of the work; if it did, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
   "author": {
     "name": "Yangze Luo"
   },
@@ -25,9 +25,9 @@
     "model": {
       "type": "string",
       "title": "Model that judges",
-      "description": "Judges, at the end of a turn past the floor, whether the work asked for is finished. Alias or full id, resolved the way a --model value is.",
+      "description": "Judges, past the floor, whether a step of the working model finished a piece of the work. Alias or full id, resolved the way a --model value is.",
       "required": false,
-      "default": "haiku"
+      "default": "sonnet"
     }
   }
 }

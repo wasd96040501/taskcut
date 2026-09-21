@@ -8,9 +8,10 @@ declarations it is written against are generated per Claude Code version by
 
 | Depends on | Kind | If it changes |
 | --- | --- | --- |
-| `session.start`, `tool.call`, `turn.complete`, `session.compact`, `session.end` | hook events | taskcut stops working; `claude plugin validate` reports the unknown event before a session loads it |
-| `$.tool.register`, `$.session.compact`, `$.session.usage`, `$.session.id`, `$.session.root`, `$.store.*`, `$.fs.exists`, `$.env.get`, `$.model.complete`, `$.clock.now`, `$.ui.log` | engine calls | same: refused at load, named in the validation output |
-| `SessionMessage` carrying an engine `handle` | data shape | the keep-set would stop being verbatim; this is the one that could degrade quietly |
+| `session.start`, `turn.step`, `turn.complete` | hook events | taskcut stops working; `claude plugin validate` reports the unknown event before a session loads it |
+| `$.session.usage`, `$.session.messages`, `$.session.compact`, `$.fs.read`, `$.env.get`, `$.model.complete`, `$.turn.abort`, `$.prompt.submit`, `$.ui.log` | engine calls | same: refused at load, named in the validation output |
+| a hook's budget counting only its own code, not its `$` calls | engine rule | the judgement inside a step would overrun it, and the engine would skip the hook: taskcut would compact only at the end of a turn, and say so in the transcript |
+| `session.start`'s `isInteractive` | data shape | taskcut would stop ending turns early; a compaction at the end of a turn still works |
 | `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` | early-access flag | **nothing**, by design — see below |
 
 ## The early-access flag is not a dependency
@@ -33,12 +34,12 @@ installed, and `TASKCUT=0` remains a kill switch either way.
 
 | taskcut | Claude Code |
 | --- | --- |
+| 0.7.x | 2.1.278 and newer |
 | 0.6.x | 2.1.278 and newer |
 | 0.5.x | 2.1.278 and newer |
 | 0.4.x | 2.1.278 and newer |
 
-Older releases have no `session.compact` hook that answers with `{ messages }`,
-and that answer is what the whole design rests on.
+Older releases do not have the function-hooks API this is written against.
 
 ## After a Claude Code upgrade
 
@@ -68,5 +69,5 @@ For a plugin, the public surface that a major version protects is:
 * the `TASKCUT` switch;
 * that a compaction taskcut triggers is Claude Code's own, as `/compact` runs it.
 
-Changing when taskcut judges a turn finished is a minor-version change: it is
-the point of the plugin, and it is governed by the settings above.
+Changing when taskcut judges a piece of work finished is a minor-version
+change: it is the point of the plugin, and it is governed by the settings above.
