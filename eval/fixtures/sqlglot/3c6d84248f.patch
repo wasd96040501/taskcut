@@ -1,0 +1,27 @@
+diff --git a/sqlglot/dialects/starrocks.py b/sqlglot/dialects/starrocks.py
+index 3eca375..c53b80a 100644
+--- a/sqlglot/dialects/starrocks.py
++++ b/sqlglot/dialects/starrocks.py
+@@ -14,6 +14,7 @@ class StarRocks(MySQL):
+         KEYWORDS = {
+             **MySQL.Tokenizer.KEYWORDS,
+             "LARGEINT": TokenType.INT128,
++            "REFRESH": TokenType.REFRESH,
+         }
+ 
+     Parser = StarRocksParser
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index 650d88f..091f6b7 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -8816,7 +8816,9 @@ class Parser:
+         return self.expression(exp.Commit(chain=chain))
+ 
+     def _parse_refresh(self) -> exp.Refresh | exp.Command:
+-        if self._match(TokenType.TABLE):
++        if self._match_text_seq("EXTERNAL", "TABLE"):
++            kind = "EXTERNAL TABLE"
++        elif self._match(TokenType.TABLE):
+             kind = "TABLE"
+         elif self._match_text_seq("MATERIALIZED", "VIEW"):
+             kind = "MATERIALIZED VIEW"

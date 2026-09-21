@@ -1,0 +1,252 @@
+diff --git a/sqlglot/dialects/bigquery.py b/sqlglot/dialects/bigquery.py
+index e79f497..dafa232 100644
+--- a/sqlglot/dialects/bigquery.py
++++ b/sqlglot/dialects/bigquery.py
+@@ -10,6 +10,7 @@ from sqlglot._typing import E
+ from sqlglot.parsers.bigquery import BigQueryParser
+ from sqlglot.generators.bigquery import BigQueryGenerator
+ from sqlglot.dialects.dialect import (
++    ASCII_LOWER,
+     Dialect,
+     NormalizationStrategy,
+ )
+@@ -50,6 +51,7 @@ class BigQuery(Dialect):
+ 
+     # https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#case_sensitivity
+     NORMALIZATION_STRATEGY = NormalizationStrategy.CASE_INSENSITIVE
++    ASCII_ONLY_NORMALIZATION = True
+ 
+     # bigquery udfs are case sensitive
+     NORMALIZE_FUNCTIONS = False
+@@ -152,7 +154,7 @@ class BigQuery(Dialect):
+                 or expression.meta_get("is_table")
+             )
+             if not case_sensitive:
+-                expression.set("this", expression.this.lower())
++                expression.set("this", expression.this.translate(ASCII_LOWER))
+ 
+             return t.cast(E, expression)
+ 
+diff --git a/sqlglot/dialects/dialect.py b/sqlglot/dialects/dialect.py
+index 7474fc2..db0f883 100644
+--- a/sqlglot/dialects/dialect.py
++++ b/sqlglot/dialects/dialect.py
+@@ -2,6 +2,7 @@ from __future__ import annotations
+ 
+ import importlib
+ import logging
++import string
+ import typing as t
+ import sys
+ from collections.abc import Iterable, MutableSequence
+@@ -77,6 +78,9 @@ UNESCAPED_SEQUENCES = {
+ 
+ PLUGIN_GROUP_NAME = "sqlglot.dialects"
+ 
++ASCII_LOWER = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
++ASCII_UPPER = str.maketrans(string.ascii_lowercase, string.ascii_uppercase)
++
+ 
+ class Dialects(str, Enum):
+     """Dialects supported by SQLGLot."""
+@@ -375,6 +379,10 @@ class Dialect(metaclass=_Dialect):
+     NORMALIZATION_STRATEGY = NormalizationStrategy.LOWERCASE
+     """Specifies the strategy according to which identifiers should be normalized."""
+ 
++    ASCII_ONLY_NORMALIZATION = False
++    """Whether identifiers are only normalized with respect to ASCII characters, e.g. `Ä` and
++    `ä` are different identifiers in DuckDB, but the same identifier in Spark."""
++
+     IDENTIFIERS_CAN_START_WITH_DIGIT = False
+     """Whether an unquoted identifier can start with a digit."""
+ 
+@@ -1079,15 +1087,22 @@ class Dialect(metaclass=_Dialect):
+                 )
+             )
+         ):
+-            normalized = (
+-                expression.this.upper()
+-                if self.normalization_strategy
+-                in (
+-                    NormalizationStrategy.UPPERCASE,
+-                    NormalizationStrategy.CASE_INSENSITIVE_UPPERCASE,
++            if self.normalization_strategy in (
++                NormalizationStrategy.UPPERCASE,
++                NormalizationStrategy.CASE_INSENSITIVE_UPPERCASE,
++            ):
++                normalized = (
++                    expression.this.translate(ASCII_UPPER)
++                    if self.ASCII_ONLY_NORMALIZATION
++                    else expression.this.upper()
+                 )
+-                else expression.this.lower()
+-            )
++            else:
++                normalized = (
++                    expression.this.translate(ASCII_LOWER)
++                    if self.ASCII_ONLY_NORMALIZATION
++                    else expression.this.lower()
++                )
++
+             expression.set("this", normalized)
+ 
+         return expression
+diff --git a/sqlglot/dialects/duckdb.py b/sqlglot/dialects/duckdb.py
+index 33c6f9f..29a3066 100644
+--- a/sqlglot/dialects/duckdb.py
++++ b/sqlglot/dialects/duckdb.py
+@@ -28,6 +28,7 @@ class DuckDB(Dialect):
+ 
+     # https://duckdb.org/docs/sql/introduction.html#creating-a-new-table
+     NORMALIZATION_STRATEGY = NormalizationStrategy.CASE_INSENSITIVE
++    ASCII_ONLY_NORMALIZATION = True
+ 
+     DATE_PART_MAPPING = {
+         **Dialect.DATE_PART_MAPPING,
+diff --git a/sqlglot/dialects/postgres.py b/sqlglot/dialects/postgres.py
+index 7fd6572..210730e 100644
+--- a/sqlglot/dialects/postgres.py
++++ b/sqlglot/dialects/postgres.py
+@@ -11,6 +11,7 @@ from sqlglot.typing.postgres import EXPRESSION_METADATA
+ class Postgres(Dialect):
+     EXPRESSION_METADATA = EXPRESSION_METADATA.copy()
+     INDEX_OFFSET = 1
++    ASCII_ONLY_NORMALIZATION = True
+     # Normalizing `x IS NOT NULL` to `NOT x IS NULL` is unsafe due to row values,
+     # e.g. `ROW(1, NULL) IS NOT NULL` is false whereas `NOT ROW(1, NULL) IS NULL` is true
+     NORMALIZE_NOT_NULL = False
+diff --git a/sqlglot/dialects/sqlite.py b/sqlglot/dialects/sqlite.py
+index 017f104..4b96cb7 100644
+--- a/sqlglot/dialects/sqlite.py
++++ b/sqlglot/dialects/sqlite.py
+@@ -13,6 +13,7 @@ from sqlglot.tokens import TokenType
+ class SQLite(Dialect):
+     # https://sqlite.org/forum/forumpost/5e575586ac5c711b?raw
+     NORMALIZATION_STRATEGY = NormalizationStrategy.CASE_INSENSITIVE
++    ASCII_ONLY_NORMALIZATION = True
+     TYPED_DIVISION = True
+     SAFE_DIVISION = True
+     SAFE_TO_ELIMINATE_DOUBLE_NEGATION = False
+diff --git a/sqlglot/optimizer/annotate_types.py b/sqlglot/optimizer/annotate_types.py
+index bd99fea..38c811b 100644
+--- a/sqlglot/optimizer/annotate_types.py
++++ b/sqlglot/optimizer/annotate_types.py
+@@ -518,21 +518,7 @@ class TypeAnnotator:
+                 else:
+                     self._set_type(expr, exp.DType.UNKNOWN)
+ 
+-                if expr.is_type(exp.DType.JSON) and (dot_parts := expr.meta_get("dot_parts")):
+-                    # JSON dot access is case sensitive across all dialects, so we need to undo the normalization.
+-                    i = iter(dot_parts)
+-                    parent = expr.parent
+-                    while isinstance(parent, exp.Dot):
+-                        identifier = parent.expression
+-                        if isinstance(identifier, exp.Identifier):
+-                            # Rename in place to preserve the identifier's meta, e.g. token positions
+-                            identifier.set("this", next(i))
+-                            identifier.set("quoted", True)
+-                        else:
+-                            identifier.replace(exp.to_identifier(next(i), quoted=True))
+-                        parent = parent.parent
+-
+-                    expr.meta.pop("dot_parts", None)
++                self._restore_dot_parts(expr)
+ 
+                 if expr.type and expr.type.args.get("nullable") is False:
+                     expr.meta["nonnull"] = True
+@@ -547,6 +533,34 @@ class TypeAnnotator:
+             else:
+                 self._set_type(expr, exp.DType.UNKNOWN)
+ 
++            self._restore_dot_parts(expr)
++
++    def _restore_dot_parts(self, expr: exp.Expr) -> None:
++        # Dot access into semi-structured values is a case sensitive data lookup, i.e. the
++        # engine doesn't resolve the keys as identifiers, so we undo their normalization.
++        dot_parts = expr.meta_get("dot_parts")
++        if not dot_parts or not expr.is_type(exp.DType.JSON, exp.DType.MAP, exp.DType.VARIANT):
++            if dot_parts:
++                expr.meta.pop("dot_parts", None)
++            return
++
++        parent = expr.parent
++        for part in dot_parts:
++            if not isinstance(parent, exp.Dot):
++                break
++
++            identifier = parent.expression
++            if isinstance(identifier, exp.Identifier):
++                # Rename in place to preserve the identifier's meta, e.g. token positions
++                identifier.set("this", part)
++                identifier.set("quoted", True)
++            else:
++                identifier.replace(exp.to_identifier(part, quoted=True))
++
++            parent = parent.parent
++
++        expr.meta.pop("dot_parts", None)
++
+     def _fixup_order_by_aliases(self, scope: Scope) -> None:
+         query = scope.expression
+         if not isinstance(query, exp.Query):
+diff --git a/sqlglot/optimizer/normalize_identifiers.py b/sqlglot/optimizer/normalize_identifiers.py
+index 00daa5f..e771f64 100644
+--- a/sqlglot/optimizer/normalize_identifiers.py
++++ b/sqlglot/optimizer/normalize_identifiers.py
+@@ -41,6 +41,11 @@ def normalize_identifiers(expression, dialect=None, store_original_column_identi
+         Some dialects (e.g. DuckDB) treat all identifiers as case-insensitive even
+         when they're quoted, so in these cases all identifiers are normalized.
+ 
++    Known limitation:
++        Engines that preserve case expose it as data, i.e., as output column names, so normalizing
++        can change what a statement produces. E.g., `CREATE TABLE t AS SELECT 1 AS Foo` materializes
++        a `foo` column in DuckDB after this transformation, instead of `Foo`.
++
+     Example:
+         >>> import sqlglot
+         >>> expression = sqlglot.parse_one('SELECT Bar.A AS A FROM "Foo".Bar')
+@@ -64,16 +69,33 @@ def normalize_identifiers(expression, dialect=None, store_original_column_identi
+         expression = exp.parse_identifier(expression, dialect=dialect)
+ 
+     for node in expression.walk(prune=lambda n: bool(n.meta_get("case_sensitive"))):
+-        if not node.meta_get("case_sensitive"):
+-            if store_original_column_identifiers and isinstance(node, exp.Column):
+-                # TODO: This does not handle non-column cases, e.g PARSE_JSON(...).key
+-                parent = node
+-                while parent and isinstance(parent.parent, exp.Dot):
+-                    parent = parent.parent
+-
+-                node.meta["dot_parts"] = [p.name for p in parent.parts]
+-
+-            if isinstance(node, exp.Identifier):
+-                dialect.normalize_identifier(node)
++        if node.meta_get("case_sensitive"):
++            continue
++
++        # A dot chain is recorded once, at its outermost Dot. Ancestors are visited before
++        # their descendants, so none of the names it wraps have been normalized yet
++        if (
++            store_original_column_identifiers
++            and isinstance(node, (exp.Column, exp.Dot))
++            and not isinstance(node.parent, exp.Dot)
++        ):
++            if isinstance(node, exp.Column):
++                node.meta["dot_parts"] = [p.name for p in node.parts]
++            elif not node.is_star:
++                root, dot_parts = node, []
++                while isinstance(root, exp.Dot):
++                    dot_parts.append(root.expression.name)
++                    root = root.this
++
++                dot_parts.reverse()
++
++                # The chain may be rooted at a column (j.k), or at an arbitrary expression (f().k)
++                if isinstance(root, exp.Column):
++                    dot_parts = [p.name for p in root.parts] + dot_parts
++
++                root.meta["dot_parts"] = dot_parts
++
++        if isinstance(node, exp.Identifier):
++            dialect.normalize_identifier(node)
+ 
+     return expression

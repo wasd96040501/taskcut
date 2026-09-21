@@ -1,0 +1,54 @@
+diff --git a/sqlglot/typing/databricks.py b/sqlglot/typing/databricks.py
+index 1759f09..d676447 100644
+--- a/sqlglot/typing/databricks.py
++++ b/sqlglot/typing/databricks.py
+@@ -33,7 +33,6 @@ EXPRESSION_METADATA = {
+             exp.Secret,
+         }
+     },
+-    exp.Grouping: {"returns": exp.DType.TINYINT},
+     exp.RegrCount: {"returns": exp.DType.BIGINT},
+     exp.Search: {"returns": exp.DType.BOOLEAN},
+     exp.RegexpExtractAll: {
+diff --git a/sqlglot/typing/hive.py b/sqlglot/typing/hive.py
+index 494c298..3318a57 100644
+--- a/sqlglot/typing/hive.py
++++ b/sqlglot/typing/hive.py
+@@ -56,7 +56,6 @@ EXPRESSION_METADATA = {
+             exp.Minute,
+         }
+     },
+-    exp.PercentileDisc: {"returns": exp.DType.DOUBLE},
+     **{
+         expr_type: {"annotator": lambda self, e: self._annotate_by_args(e, "this")}
+         for expr_type in {
+@@ -68,14 +67,16 @@ EXPRESSION_METADATA = {
+             exp.Reverse,
+         }
+     },
+-    exp.ApproxQuantile: {"annotator": lambda self, e: self._annotate_by_args(e, "quantile")},
+-    exp.WithinGroup: {"annotator": lambda self, e: self._annotate_by_args(e, "this")},
+     exp.ArrayIntersect: {"annotator": lambda self, e: self._annotate_by_args(e, "expressions")},
++    exp.ApproxQuantile: {"annotator": lambda self, e: self._annotate_by_args(e, "quantile")},
+     exp.Coalesce: {
+         "annotator": lambda self, e: self._annotate_by_args(e, "this", "expressions", promote=True)
+     },
++    exp.Grouping: {"returns": exp.DType.BIGINT},
+     exp.If: {"annotator": lambda self, e: self._annotate_by_args(e, "true", "false", promote=True)},
++    exp.PercentileDisc: {"returns": exp.DType.DOUBLE},
+     exp.Quantile: {"annotator": lambda self, e: self._annotate_by_args(e, "quantile")},
+     exp.RegexpSplit: {"returns": exp.DataType.from_str("ARRAY<STRING>")},
+     exp.StrToMap: {"returns": exp.DataType.from_str("MAP<STRING, STRING>")},
++    exp.WithinGroup: {"annotator": lambda self, e: self._annotate_by_args(e, "this")},
+ }
+diff --git a/sqlglot/typing/spark.py b/sqlglot/typing/spark.py
+index 384d618..78dc253 100644
+--- a/sqlglot/typing/spark.py
++++ b/sqlglot/typing/spark.py
+@@ -51,5 +51,6 @@ EXPRESSION_METADATA = {
+         }
+     },
+     exp.BitmapCount: {"returns": exp.DType.BIGINT},
++    exp.Grouping: {"returns": exp.DType.TINYINT},
+     exp.Localtimestamp: {"returns": exp.DType.TIMESTAMPNTZ},
+ }

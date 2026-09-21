@@ -1,0 +1,739 @@
+[
+ {
+  "sha": "cb4a821460",
+  "kind": "bug",
+  "title": "Column lineage breaks on chained PIVOT and UNPIVOT",
+  "body": "    SELECT id, score, headcount\n    FROM sales UNPIVOT(score FOR month IN (jan, feb)) UNPIVOT(headcount FOR region IN (north, south))\n\nLineage only handles one pivot operator per source, so `score` and `headcount`\nare traced to the wrong columns. Each operator consumes the previous one's\noutput, and lineage has to follow the whole chain.",
+  "failing": [
+   "tests/test_lineage.py::TestLineage::test_chained_pivots",
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_consuming_alias_columns",
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_mixed",
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_through_cte",
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_with_alias_columns"
+  ],
+  "cases": {
+   "tests/test_lineage.py::TestLineage::test_chained_pivots": [
+    "(test)"
+   ],
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_consuming_alias_columns": [
+    "(test)",
+    "[hc]",
+    "[region]"
+   ],
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_mixed": [
+    "(test)"
+   ],
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_through_cte": [
+    "(test)"
+   ],
+   "tests/test_lineage.py::TestLineage::test_chained_pivots_with_alias_columns": [
+    "[a]",
+    "[b]",
+    "[c]",
+    "[d]",
+    "[e]",
+    "[f]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "6443883c2a",
+  "kind": "bug",
+  "title": "Oracle rejects the PIVOT and UNPIVOT sqlglot generates",
+  "body": "Oracle only accepts plain column names in a pivot's `FOR` clause and `IN` list\n(ORA-01748) and rejects `AS` before the operator's alias (ORA-03048):\n\n    SELECT * FROM t UNPIVOT(revenue FOR month IN (t.jan, t.feb)) AS u\n\nshould generate `SELECT * FROM t UNPIVOT(revenue FOR month IN (jan, feb)) u` for\nOracle. The aggregate inside a PIVOT may stay qualified.",
+  "failing": [
+   "tests/dialects/test_oracle.py::TestOracle::test_pivot_syntax_restrictions"
+  ],
+  "cases": {
+   "tests/dialects/test_oracle.py::TestOracle::test_pivot_syntax_restrictions": [
+    "(test)",
+    "[SELECT * FROM t PIVOT(SUM(t.val) FOR t.cat IN ('a' AS a)) AS p -> oracle]",
+    "[SELECT * FROM t UNPIVOT(revenue FOR month IN (t.jan, t.feb)) AS u -> oracle]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "c6c1fa4d37",
+  "kind": "bug",
+  "title": "Dropping an unnamed UNIQUE constraint breaks the CREATE TABLE",
+  "body": "Spark, Hive and Databricks have no UNIQUE constraints, so they are removed when\ntranspiling. For an unnamed one,\n\n    CREATE TABLE t (a INT, b STRING, UNIQUE (a))\n\nshould become `CREATE TABLE t (a INT, b STRING)` for Spark, Spark2, Hive and\nDatabricks, while DuckDB keeps the constraint. The output is wrong today.",
+  "failing": [
+   "tests/dialects/test_spark.py::TestSpark::test_ddl",
+   "tests/test_transforms.py::TestTransforms::test_remove_unique_constraints"
+  ],
+  "cases": {
+   "tests/dialects/test_spark.py::TestSpark::test_ddl": [
+    "[CREATE TABLE t (a INT, b STRING, UNIQUE (a)) -> databricks]",
+    "[CREATE TABLE t (a INT, b STRING, UNIQUE (a)) -> hive]",
+    "[CREATE TABLE t (a INT, b STRING, UNIQUE (a)) -> materialize]",
+    "[CREATE TABLE t (a INT, b STRING, UNIQUE (a)) -> spark2]",
+    "[CREATE TABLE t (a INT, b STRING, UNIQUE (a)) -> spark]"
+   ],
+   "tests/test_transforms.py::TestTransforms::test_remove_unique_constraints": [
+    "(test)",
+    "[CREATE TABLE t (a INT, UNIQUE (a), PRIMARY KEY (a), FOREIGN KEY (a) REFERENCES u (b))]",
+    "[CREATE TABLE t (a INT, b INT, UNIQUE (a))]",
+    "[CREATE TABLE t (a INT, b INT, UNIQUE (a), UNIQUE (b))]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "8a79d074b3",
+  "kind": "feature",
+  "title": "Support INSERT ... REPLACE USING",
+  "body": "Databricks supports\n\n    INSERT INTO target REPLACE USING (c1, c2) SELECT c1, c2 FROM source\n\nIt should parse and generate back unchanged.",
+  "failing": [
+   "tests/dialects/test_databricks.py::TestDatabricks::test_databricks",
+   "tests/dialects/test_databricks.py::TestDatabricks::test_insert_replace_using"
+  ],
+  "cases": {
+   "tests/dialects/test_databricks.py::TestDatabricks::test_databricks": [
+    "(test)"
+   ],
+   "tests/dialects/test_databricks.py::TestDatabricks::test_insert_replace_using": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "87d16d022d",
+  "kind": "bug",
+  "title": "SingleStore: NULL ordering inside percentile WITHIN GROUP",
+  "body": "Percentile functions ignore NULLs, so a `NULLS FIRST` / `NULLS LAST` inside\n`WITHIN GROUP (ORDER BY ...)` changes nothing. Transpiling `PERCENTILE_CONT` and\n`PERCENTILE_DISC` between Postgres and SingleStore should treat\n`ORDER BY x` and SingleStore's `ORDER BY x NULLS LAST` as the same thing, with and\nwithout an `OVER` clause.",
+  "failing": [
+   "tests/dialects/test_singlestore.py::TestSingleStore::test_percentile_null_ordering"
+  ],
+  "cases": {
+   "tests/dialects/test_singlestore.py::TestSingleStore::test_percentile_null_ordering": [
+    "[postgres -> SELECT PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY x) FROM t]",
+    "[postgres -> SELECT PERCENTILE_CONT(1) WITHIN GROUP (ORDER BY x) FROM t ORDER BY x NULLS LAST]",
+    "[postgres -> SELECT PERCENTILE_DISC(0.75) WITHIN GROUP (ORDER BY x) FROM t]",
+    "[singlestore -> SELECT PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY x DESC NULLS FIRST) OVER (PARTITION BY g) FROM t]",
+    "[singlestore -> SELECT PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY x) FROM t]",
+    "[singlestore -> SELECT PERCENTILE_DISC(0.75) WITHIN GROUP (ORDER BY x DESC NULLS FIRST) OVER (PARTITION BY g) FROM t]",
+    "[singlestore -> SELECT PERCENTILE_DISC(0.75) WITHIN GROUP (ORDER BY x) FROM t]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "338bb06993",
+  "kind": "bug",
+  "title": "SQLite: DATE_ADD with a computed amount generates a broken modifier",
+  "body": "From DuckDB,\n\n    SELECT DATE_ADD(d, INTERVAL (n) DAY) FROM t\n\nshould become `SELECT DATE(d, (n) || ' DAY') FROM t` in SQLite, and\n`INTERVAL (-1) DAY` should become `'-1 DAY'`. Today the amount is not evaluated,\nso the modifier SQLite receives is not a valid one.",
+  "failing": [
+   "tests/dialects/test_sqlite.py::TestSQLite::test_sqlite"
+  ],
+  "cases": {
+   "tests/dialects/test_sqlite.py::TestSQLite::test_sqlite": [
+    "[duckdb -> SELECT DATE(d, '-1 DAY') FROM t]",
+    "[duckdb -> SELECT DATE(d, (-n) || ' MONTH') FROM t]",
+    "[duckdb -> SELECT DATE(d, (NULL) || ' DAY') FROM t]",
+    "[duckdb -> SELECT DATE(d, (n + 1) || ' DAY') FROM t]",
+    "[duckdb -> SELECT DATE(d, (n) || ' DAY') FROM t]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "5dea557136",
+  "kind": "bug",
+  "title": "Doris: reserved words are generated unquoted",
+  "body": "Doris 4.1 reserves words such as `analyzer`, `asof`, `both`, `char_filter`,\n`dump`, `layout` and `leading`. An identifier with one of these names must be\nquoted when generating Doris SQL, or Doris rejects the statement.",
+  "failing": [
+   "tests/dialects/test_doris.py::TestDoris::test_identity"
+  ],
+  "cases": {
+   "tests/dialects/test_doris.py::TestDoris::test_identity": [
+    "[Doris reserved keyword: analyzer]",
+    "[Doris reserved keyword: asof]",
+    "[Doris reserved keyword: both]",
+    "[Doris reserved keyword: char_filter]",
+    "[Doris reserved keyword: dump]",
+    "[Doris reserved keyword: layout]",
+    "[Doris reserved keyword: leading]",
+    "[Doris reserved keyword: match_condition]",
+    "[Doris reserved keyword: no_use_mv]",
+    "[Doris reserved keyword: play]",
+    "[Doris reserved keyword: token_filter]",
+    "[Doris reserved keyword: tokenizer]",
+    "[Doris reserved keyword: trailing]",
+    "[Doris reserved keyword: try_cast]",
+    "[Doris reserved keyword: use_mv]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "21092b3086",
+  "kind": "bug",
+  "title": "normalize_identifiers folds names it should leave alone",
+  "body": "Two problems with `normalize_identifiers`:\n\n* DuckDB, Postgres, BigQuery, Redshift and SQLite only fold ASCII letters:\n  `SELECT \"FoÄ\" FROM \"BaÜ\"` in DuckDB normalizes to `SELECT \"foÄ\" FROM \"baÜ\"`.\n  Spark folds Unicode too.\n* A dot into a semi-structured value (a MAP, VARIANT or JSON column) is a\n  case-sensitive lookup into the data, not a reference: in\n  `SELECT m.Foo FROM t` with `m` a MAP, `Foo` must keep its case, while a STRUCT\n  field is folded like any identifier.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_dot_parts_of_non_column_roots",
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_semi_structured_dot_parts",
+   "tests/test_optimizer.py::TestOptimizer::test_normalize_identifiers"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_dot_parts_of_non_column_roots": [
+    "[SELECT ('{\"Foo\":1}'::JSON).Foo]",
+    "[SELECT ('{\"Foo\":{\"Bar\":{\"Baz\":1}}}'::JSON).Foo.Bar.Baz]",
+    "[SELECT PARSE_JSON('{\"Foo\":1}').Foo]",
+    "[SELECT PARSE_JSON('{\"Foo\":{\"Bar\":1}}').Foo.Bar]"
+   ],
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_semi_structured_dot_parts": [
+    "[SELECT m.Foo FROM t]",
+    "[SELECT t.m.Foo FROM t]",
+    "[SELECT v.Foo FROM t]"
+   ],
+   "tests/test_optimizer.py::TestOptimizer::test_normalize_identifiers": [
+    "[bigquery only normalizes ascii characters]",
+    "[duckdb only normalizes ascii characters]",
+    "[postgres only normalizes ascii characters]",
+    "[redshift only normalizes ascii characters]",
+    "[sqlite only normalizes ascii characters]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "8b6ff9386d",
+  "kind": "bug",
+  "title": "The Python executor ignores DISTINCT inside aggregates",
+  "body": "`sqlglot.executor.execute` computes `COUNT(DISTINCT v)` and `SUM(DISTINCT v)` as\nif the `DISTINCT` were not there. Over the rows v = 1, 1, 2, NULL:\n\n    SELECT COUNT(DISTINCT v) AS c FROM t   -- expected 2\n    SELECT SUM(DISTINCT v) AS c FROM t     -- expected 3\n\nand the same per group under `GROUP BY`.",
+  "failing": [
+   "tests/test_executor.py::TestExecutor::test_count_distinct",
+   "tests/test_executor.py::TestExecutor::test_count_distinct_multiple_columns"
+  ],
+  "cases": {
+   "tests/test_executor.py::TestExecutor::test_count_distinct_multiple_columns": [
+    "(test)"
+   ],
+   "tests/test_executor.py::TestExecutor::test_count_distinct": [
+    "[SELECT COUNT(DISTINCT v) AS c FROM t]",
+    "[SELECT SUM(DISTINCT v) AS c FROM t]",
+    "[SELECT a, COUNT(DISTINCT v) AS c FROM t GROUP BY a]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "08e61b775b",
+  "kind": "bug",
+  "title": "An expression's hash is stale after append()",
+  "body": "    expr = parse_one(\"SELECT a\")\n    hash(expr)\n    expr.append(\"expressions\", exp.column(\"b\"))\n    hash(expr) == hash(parse_one(\"SELECT a, b\"))   # False\n\n`set()` invalidates the cached hash up the parent chain; `append()` does not, so\nhashing and equality can return stale results.",
+  "failing": [
+   "tests/test_expressions.py::TestExprs::test_hash_invalidated_on_append"
+  ],
+  "cases": {
+   "tests/test_expressions.py::TestExprs::test_hash_invalidated_on_append": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "c19bb4b3d7",
+  "kind": "bug",
+  "title": "Pipe syntax: generated __tmp CTEs collide with outer CTEs",
+  "body": "    WITH x AS (SELECT 1 AS x1) FROM x |> SELECT x1 AS a |> SELECT a AS b\n\nshould become `WITH x AS (SELECT 1 AS x1), __tmp1 AS (SELECT x1 AS a FROM x),\n__tmp2 AS (SELECT a AS b FROM __tmp1) SELECT * FROM __tmp2`. Today the CTEs the pipe\noperators generate replace or clash with the outer ones.",
+  "failing": [
+   "tests/dialects/test_pipe_syntax.py::TestPipeSyntax::test_select"
+  ],
+  "cases": {
+   "tests/dialects/test_pipe_syntax.py::TestPipeSyntax::test_select": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "3c6d84248f",
+  "kind": "feature",
+  "title": "StarRocks: parse REFRESH EXTERNAL TABLE",
+  "body": "    REFRESH EXTERNAL TABLE hive_catalog.hive_db.hive_table\n    REFRESH EXTERNAL TABLE hudi1 PARTITION('date=2022-12-20', 'date=2022-12-21')\n\nshould round-trip in StarRocks.",
+  "failing": [
+   "tests/dialects/test_starrocks.py::TestStarrocks::test_ddl"
+  ],
+  "cases": {
+   "tests/dialects/test_starrocks.py::TestStarrocks::test_ddl": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "5c12472a80",
+  "kind": "bug",
+  "title": "optimize_joins rewrites joins it cannot reorder safely",
+  "body": "`optimize_joins` moves conditions in joins whose meaning depends on them staying\nput:\n\n    SELECT * FROM x CROSS JOIN y JOIN z ON x.a = z.a OR y.a = x.a\n    SELECT * FROM x CROSS JOIN y ANTI JOIN z ON x.a = z.a AND y.a = x.a\n\nmust come out unchanged, as must the `SEMI JOIN` forms.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_optimize_joins"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_optimize_joins": [
+    "[15, SELECT * FROM x CROSS JOIN y ANTI JOIN z ON x.a = z.a AND y.a = x.a]",
+    "[16, SELECT * FROM x CROSS JOIN y JOIN z ON x.a = z.a OR y.a = x.a]",
+    "[17, SELECT * FROM x CROSS JOIN y SEMI JOIN z ON x.a = z.a OR y.a = x.a]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "0d88a211de",
+  "kind": "bug",
+  "title": "Decorrelating EXISTS over a grouped subquery duplicates rows",
+  "body": "`unnest_subqueries` turns\n\n    SELECT x.a FROM x WHERE EXISTS (SELECT 1 FROM y WHERE y.a = x.a GROUP BY y.c)\n\ninto a join that is not unique on its key, so rows of `x` are repeated. The\nrewrite has to group by the correlation key alone. Some shapes must not be\nunnested at all -- a `HAVING`, a `QUALIFY`, a `ROLLUP` or an empty grouping set --\nand an aggregate-only projection with `GROUP BY ALL` is always true. The\nfixtures list each case.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_unnest_subqueries"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_unnest_subqueries": [
+    "[exists with a group by and having is not unnested]",
+    "[exists with a group by and qualify is not unnested]",
+    "[exists with a group by drops it so that the join stays unique on its keys]",
+    "[exists with a non-equality key and having is not unnested]",
+    "[exists with a rollup is not unnested since it returns a row even for empty input]",
+    "[exists with an aggregate projection and a group by is not always true]",
+    "[exists with an empty grouping set is not unnested]",
+    "[exists with an order by drops it]",
+    "[exists with distinct drops it]",
+    "[exists with group by all and only aggregate projections is always true]",
+    "[not exists with a group by]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "45595690cf",
+  "kind": "bug",
+  "title": "MySQL: key parts of UNIQUE and INDEX pick up NULLS FIRST",
+  "body": "    CREATE TABLE t (a INT, b INT, CONSTRAINT u UNIQUE (a, b))\n\nshould generate unchanged for MySQL, Postgres and DuckDB. An implicit\n`NULLS FIRST` ends up on the key parts instead.",
+  "failing": [
+   "tests/dialects/test_mysql.py::TestMySQL::test_ddl"
+  ],
+  "cases": {
+   "tests/dialects/test_mysql.py::TestMySQL::test_ddl": [
+    "[CREATE TABLE t (a INT, b INT, CONSTRAINT u UNIQUE (a, b)) -> duckdb]",
+    "[CREATE TABLE t (a INT, b INT, CONSTRAINT u UNIQUE (a, b)) -> postgres]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "13e6c07984",
+  "kind": "bug",
+  "title": "GROUPING() gets the wrong type in the Hive family",
+  "body": "`annotate_types` types `GROUPING(col)` as TINYINT for Spark and Databricks, which\nis right, but Hive and Spark2 return BIGINT.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_funcs"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_funcs": [
+    "[1096, GROUPING(tbl.str_col)]",
+    "[1097, GROUPING(tbl.str_col)]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "9bebfd283c",
+  "kind": "bug",
+  "title": "qualify_tables strips the parentheses of a function body",
+  "body": "In BigQuery,\n\n    CREATE TEMPORARY FUNCTION f() RETURNS STRING AS ((((SELECT 'foo'))));\n\nqualifies to a body without the parentheses the query needs. The result should\nbe `CREATE TEMPORARY FUNCTION c.db.f() RETURNS STRING AS ((SELECT 'foo'))`.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_qualify_tables"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_qualify_tables": [
+    "[Preserve wrapping parens of a query used as a function body]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "9bc418af0e",
+  "kind": "bug",
+  "title": "Snowflake: PUT with an unquoted file:// source is not parsed as PUT",
+  "body": "    PUT file:///dir/tmp.csv @%table\n\nshould parse to `exp.Put`, with the source as the string `'file:///dir/tmp.csv'`\nand the stage as `@%table`, and generate `PUT 'file:///dir/tmp.csv' @%table`.\nThe quoted form already works.",
+  "failing": [
+   "tests/dialects/test_snowflake.py::TestSnowflake::test_put_to_stage",
+   "tests/dialects/test_snowflake.py::TestSnowflake::test_staged_files"
+  ],
+  "cases": {
+   "tests/dialects/test_snowflake.py::TestSnowflake::test_put_to_stage": [
+    "(test)"
+   ],
+   "tests/dialects/test_snowflake.py::TestSnowflake::test_staged_files": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "f3b7c6cb73",
+  "kind": "feature",
+  "title": "Dremio: support the four-argument REGEXP_SPLIT",
+  "body": "Dremio's `REGEXP_SPLIT(string, pattern, mode, limit)` takes a mode such as `'ALL'`\nbefore the limit.\n\n    SELECT REGEXP_SPLIT(tags, ',', 'ALL', 1000) AS t\n\nshould parse with the mode and the limit in their own arguments and generate\nthem back in Dremio's order.",
+  "failing": [
+   "tests/dialects/test_dremio.py::TestDremio::test_regexp_split"
+  ],
+  "cases": {
+   "tests/dialects/test_dremio.py::TestDremio::test_regexp_split": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "06c7b3dd7b",
+  "kind": "bug",
+  "title": "simplify changes the meaning of arithmetic when it collapses a CASE or IF",
+  "body": "When `simplify` reduces a `CASE` or `IF` with a constant condition to one of its\nbranches, the branch loses its grouping under the surrounding operator:\n\n    x * CASE WHEN FALSE THEN NULL ELSE a - b END\n\nshould simplify to `x * (a - b)`, but the parentheses are lost. The same happens\nfor `IF(TRUE, a - b, c)`, for a branch that is `NOT p` under `||`, and so on.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_simplify"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_simplify": [
+    "[538, x * CASE WHEN FALSE THEN NULL ELSE a - b END]",
+    "[539, x * (CASE WHEN 1 IS NULL THEN NULL ELSE 1 - b END)]",
+    "[540, x - CASE WHEN TRUE THEN a + b ELSE c END]",
+    "[541, CASE WHEN FALSE THEN NULL ELSE a - b END * x]",
+    "[542, x / CASE WHEN FALSE THEN 1 ELSE a * b END]",
+    "[544, x * IF(TRUE, a - b, c)]",
+    "[545, x * IF(FALSE, c, a - b)]",
+    "[546, x * CASE WHEN TRUE THEN IF(FALSE, c, a - b) ELSE c END]",
+    "[547, CASE WHEN TRUE THEN NOT p ELSE FALSE END || 'x']",
+    "[548, IF(FALSE, FALSE, NOT p) || 'x']",
+    "[549, NOT CASE WHEN TRUE THEN a AND b ELSE c END]",
+    "[550, -CASE WHEN TRUE THEN a + b ELSE c END]"
+   ]
+  },
+  "partial": [
+   "tests/test_optimizer.py::TestOptimizer::test_simplify"
+  ]
+ },
+ {
+  "sha": "4e973f0c0c",
+  "kind": "bug",
+  "title": "pushdown_projections prunes columns that a positional column list still names",
+  "body": "A column list on a derived table or CTE names the source's columns by position:\n`WITH t(c, d) AS (SELECT a, b FROM x)`. `pushdown_projections` prunes projections\nthe list covers, which shifts every name after them. For example\n\n    WITH RECURSIVE t(c, d) AS (SELECT a, b FROM x) SELECT c FROM t\n\nmust keep both projections of the CTE. The same holds for every operand of a set\noperation under such a CTE, and for a source referenced twice with column lists\nof different lengths.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_pushdown_projection",
+   "tests/test_optimizer.py::TestOptimizer::test_pushdown_projections_keeps_positionally_aliased_columns"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_pushdown_projection": [
+    "[a source referenced with column lists of different lengths keeps the longest prefix]",
+    "[recursive cte column list applies to every set operation operand]",
+    "[recursive cte column list is kept by qualify, so its columns can't be pruned]"
+   ],
+   "tests/test_optimizer.py::TestOptimizer::test_pushdown_projections_keeps_positionally_aliased_columns": [
+    "[SELECT t.c FROM ((SELECT a, b FROM x)) AS t(c, d)]",
+    "[SELECT t.c FROM (SELECT a, b FROM x UNION ALL SELECT b, c FROM y) AS t(c, d)]",
+    "[SELECT t.c FROM (SELECT a, b FROM x) AS t(c)]",
+    "[SELECT t.c FROM (SELECT a, b FROM x) AS t(c, d)]",
+    "[WITH t(c) AS (SELECT a, b FROM x UNION ALL BY NAME SELECT b, a FROM x) SELECT c FROM t]",
+    "[WITH t(c, d) AS (SELECT a, b FROM x) SELECT c FROM t]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "5cfb5997a9",
+  "kind": "bug",
+  "title": "pushdown_predicates loses precedence when it inlines an aliased expression",
+  "body": "Pushing a predicate into a subquery replaces an alias with the expression it\nnames, without parentheses:\n\n    SELECT x.a FROM (SELECT x.a AS a, x.b OR x.c AS d FROM x) AS x WHERE x.d = FALSE\n\nmust push down `(x.b OR x.c) = FALSE`, not `x.b OR x.c = FALSE`. Arithmetic\n(`x.b * 1`) and negations are affected the same way.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_pushdown_predicates"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_pushdown_predicates": [
+    "[6, SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x) AS x WHERE x.c = 1]",
+    "[7, SELECT x.a FROM (SELECT x.a AS a, x.b * 1 AS c FROM x) AS x WHERE x.c = 1 or x.c = 2]",
+    "[8, SELECT x.a FROM (SELECT x.a AS a, x.b OR x.c AS d FROM x) AS x WHERE x.d = FALSE]",
+    "[9, SELECT x.a FROM (SELECT x.a AS a, x.b AND x.c AS d FROM x) AS x WHERE NOT x.d]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "d5468304f6",
+  "kind": "bug",
+  "title": "Spark: GROUPING SETS as a suffix and as a GROUP BY element are confused",
+  "body": "In Spark these mean different things:\n\n    SELECT COUNT(1), d, h FROM t GROUP BY d, h GROUPING SETS ((d, h), (d))    -- suffix\n    SELECT COUNT(1), d, h FROM t GROUP BY d, h, GROUPING SETS ((d, h), (d))   -- element\n\nBoth should parse to what they mean and round-trip exactly as written, in Spark\nand in Hive.",
+  "failing": [
+   "tests/dialects/test_hive.py::TestHive::test_hive",
+   "tests/dialects/test_spark.py::TestSpark::test_grouping_sets_as_group_by_element"
+  ],
+  "cases": {
+   "tests/dialects/test_hive.py::TestHive::test_hive": [
+    "(test)"
+   ],
+   "tests/dialects/test_spark.py::TestSpark::test_grouping_sets_as_group_by_element": [
+    "(sql=\"'SELECT COUNT(1), d, h FROM t GROUP BY d, h GROUPING SETS ((d, h), (d))'\")"
+   ]
+  },
+  "partial": [
+   "tests/dialects/test_spark.py::TestSpark::test_grouping_sets_as_group_by_element"
+  ]
+ },
+ {
+  "sha": "90d44b8556",
+  "kind": "feature",
+  "title": "Transpile Spark's CONCAT_WS over arrays to Trino",
+  "body": "Spark's `CONCAT_WS` accepts array arguments, flattening them and skipping NULL\nelements. Transpiled to Trino it should keep those semantics, for example\n\n    CONCAT_WS('', ARRAY('a', 'b'))\n    -> CONCAT_WS('', COALESCE(CAST(ARRAY['a', 'b'] AS ARRAY(VARCHAR)), ARRAY[]))\n\nThe tests cover typed, untyped and mixed arguments.",
+  "failing": [
+   "tests/dialects/test_trino.py::TestTrino::test_concat_ws",
+   "tests/dialects/test_trino.py::TestTrino::test_concat_ws_typed",
+   "tests/dialects/test_trino.py::TestTrino::test_concat_ws_unknown_types"
+  ],
+  "cases": {
+   "tests/dialects/test_trino.py::TestTrino::test_concat_ws": [
+    "[spark -> SELECT CONCAT_WS('', COALESCE(CAST(ARRAY['a', 'b'] AS ARRAY(VARCHAR)), ARRAY[]))] (source='\"CONCAT_WS(\\'\\', ARRAY(\\'a\\', \\'b\\'))\"')",
+    "[spark -> SELECT CONCAT_WS('-', COALESCE(CAST(ARRAY['a', NULL, '', 'b'] AS ARRAY(VARCHAR)), ARRAY[]))] (source='\"CONCAT_WS(\\'-\\', ARRAY(\\'a\\', NULL, \\'\\', \\'b\\'))\"')",
+    "[spark -> SELECT CONCAT_WS('-', COALESCE(CAST(ARRAY[] AS ARRAY(VARCHAR)), ARRAY[]))] (source='\"CONCAT_WS(\\'-\\', ARRAY())\"')",
+    "[spark -> SELECT CONCAT_WS('-', COALESCE(TRY_CAST(NULL AS ARRAY(VARCHAR)), ARRAY[]))] (source='\"CONCAT_WS(\\'-\\', CAST(NULL AS ARRAY<STRING>))\"')",
+    "[spark -> SELECT CONCAT_WS('-', CONCAT(ARRAY[CAST('x' AS VARCHAR)], COALESCE(CAST(ARRAY[] AS ARRAY(VARCHAR)), ARRAY[]), COALESCE(CAST(ARRAY[NULL] AS ARRAY(VARCHAR)), ARRAY[]), COALESCE(TRY_CAST(NULL AS ARRAY(VARCHAR)), ARRAY[]), ARRAY[CAST(NULL AS VARCHAR)], ARRAY[CAST('y' AS VARCHAR)]))] (source='\"CONCAT_WS(\\'-\\', \\'x\\', ARRAY(), ARRAY(NULL), CAST(NULL AS ARRAY<STRING>), NULL, \\'y\\')\"')",
+    "[spark -> SELECT CONCAT_WS('-', CONCAT(COALESCE(CAST(ARRAY['abc', 'def'] AS ARRAY(VARCHAR)), ARRAY[]), ARRAY[CAST('ghi' AS VARCHAR)]))] (source='\"CONCAT_WS(\\'-\\', ARRAY(\\'abc\\', \\'def\\'), \\'ghi\\')\"')",
+    "[spark -> SELECT CONCAT_WS('-', CONCAT(COALESCE(CAST(ARRAY['abc', 'def'] AS ARRAY(VARCHAR)), ARRAY[]), COALESCE(CAST(ARRAY['bla', 'bob'] AS ARRAY(VARCHAR)), ARRAY[])))] (source='\"CONCAT_WS(\\'-\\', ARRAY(\\'abc\\', \\'def\\'), ARRAY(\\'bla\\', \\'bob\\'))\"')",
+    "[spark -> SELECT CONCAT_WS(NULL, COALESCE(TRY_CAST(NULL AS ARRAY(VARCHAR)), ARRAY[]))] (source=\"'CONCAT_WS(NULL, CAST(NULL AS ARRAY<STRING>))'\")"
+   ],
+   "tests/dialects/test_trino.py::TestTrino::test_concat_ws_typed": [
+    "(a_type=\"'ARRAY<INT>'\", b_type=\"'INT'\")",
+    "(a_type=\"'ARRAY<STRING>'\", b_type=\"'ARRAY<STRING>'\")",
+    "(a_type=\"'ARRAY<STRING>'\", b_type=\"'STRING'\")"
+   ],
+   "tests/dialects/test_trino.py::TestTrino::test_concat_ws_unknown_types": [
+    "(sql='\"SELECT CONCAT_WS(\\'-\\', ARRAY(\\'a\\'), t.b) FROM t\"', annotated='False')",
+    "(sql='\"SELECT CONCAT_WS(\\'-\\', ARRAY(\\'a\\'), t.b) FROM t\"', annotated='True')",
+    "(sql='\"SELECT CONCAT_WS(\\'-\\', t.a, t.b) FROM t\"', annotated='False')",
+    "(sql='\"SELECT CONCAT_WS(\\'-\\', t.a, t.b) FROM t\"', annotated='True')"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "31cee10b18",
+  "kind": "feature",
+  "title": "Druid: JSON_VALUE with RETURNING",
+  "body": "    SELECT JSON_VALUE(x, '$.a' RETURNING BIGINT) FROM t\n\nshould round-trip in Druid, with and without `RETURNING`.",
+  "failing": [
+   "tests/dialects/test_druid.py::TestDruid::test_json_value"
+  ],
+  "cases": {
+   "tests/dialects/test_druid.py::TestDruid::test_json_value": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "b7386b7566",
+  "kind": "bug",
+  "title": "The optimizer scopes subqueries inside DML and DDL wrongly",
+  "body": "Queries embedded in `MERGE`, `UPDATE`, `INSERT` and `CREATE TABLE AS` are scoped\nas if they belonged to the statement around them. For example\n`eliminate_subqueries` hoists a CTE out of an `UPDATE`'s value subquery:\n\n    UPDATE t SET x = (SELECT a FROM (SELECT a FROM x) AS y)\n\nshould become `UPDATE t SET x = (WITH y AS (SELECT a FROM x) SELECT a FROM y AS y)`,\nwith the CTE inside that subquery. The references of the DML shell itself belong\nto no scope. The tests go through each kind of statement.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_canonicalize_internal_names",
+   "tests/test_optimizer.py::TestOptimizer::test_eliminate_subqueries",
+   "tests/test_optimizer.py::TestOptimizer::test_scope"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_canonicalize_internal_names": [
+    "[DML shell references live outside every scope, so the statement is left untouched]"
+   ],
+   "tests/test_optimizer.py::TestOptimizer::test_eliminate_subqueries": [
+    "[25, UPDATE t SET x = (SELECT a FROM (SELECT a FROM x) AS y)]",
+    "[26, WITH c AS (SELECT 1 AS y) UPDATE t SET x = 1 FROM (SELECT x FROM (SELECT x FROM t2) AS i) AS s]",
+    "[27, MERGE INTO t USING (SELECT id FROM (SELECT id FROM u) AS i) AS s ON t.id = s.id WHEN MATCHED THEN UPDATE SET x = 1]"
+   ],
+   "tests/test_optimizer.py::TestOptimizer::test_scope": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "8ba04354d3",
+  "kind": "bug",
+  "title": "simplify's gen() gives two different expressions the same key",
+  "body": "`sqlglot.optimizer.simplify.gen` writes names and literals without escaping them,\nso their content can forge structure:\n\n    gen(parse_one(\"v IN ('x'',''y')\")) == gen(parse_one(\"v IN ('x', 'y')\"))\n\nis true, though one is a single literal and the other two. Quoted strings and\ndelimited identifiers must be escaped.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_simplify"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_simplify": [
+    "(test)"
+   ]
+  },
+  "partial": [
+   "tests/test_optimizer.py::TestOptimizer::test_simplify"
+  ]
+ },
+ {
+  "sha": "a60171e8f7",
+  "kind": "bug",
+  "title": "A qualified star exclusion removes the column from every source",
+  "body": "    SELECT * EXCEPT (y.b) FROM x AS x JOIN y AS y ON x.b = y.b\n\nshould expand to `SELECT x.a AS a, x.b AS b, y.c AS c ...`: only `y.b` is excluded.\nToday `x.b` disappears too.",
+  "failing": [
+   "tests/test_optimizer.py::TestOptimizer::test_qualify_columns"
+  ],
+  "cases": {
+   "tests/test_optimizer.py::TestOptimizer::test_qualify_columns": [
+    "[164, SELECT * EXCEPT (y.b) FROM x AS x JOIN y AS y ON x.b = y.b]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "2a46a03311",
+  "kind": "bug",
+  "title": "ClickHouse: LAG and LEAD are generated as lagInFrame and leadInFrame",
+  "body": "`lagInFrame` and `leadInFrame` are relative to the window frame, not the\npartition. Under ClickHouse's default frame they return the default value where\n`LAG`/`LEAD` would return a row, so they are not the same function. ClickHouse\nhas native `lag` and `lead`; generate those.",
+  "failing": [
+   "tests/dialects/test_clickhouse.py::TestClickhouse::test_clickhouse"
+  ],
+  "cases": {
+   "tests/dialects/test_clickhouse.py::TestClickhouse::test_clickhouse": [
+    "[oracle -> SELECT lag(salary, 1, 0) OVER (ORDER BY hire_date) AS prev_sal FROM employees]",
+    "[oracle -> SELECT lead(salary, 1, 0) OVER (ORDER BY hire_date) AS prev_sal FROM employees]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "978bbd276f",
+  "kind": "bug",
+  "title": "T-SQL: star over an UNPIVOT expands columns in the wrong order",
+  "body": "SQL Server returns an UNPIVOT's value column before its name column:\n`SELECT * FROM t UNPIVOT(revenue FOR month IN (jan, feb)) AS u` returns\n`(id, revenue, month)`. DuckDB, Snowflake, Oracle and Spark return it after.\nQualifying the star has to follow the source dialect's order, and carry it to\nany target.",
+  "failing": [
+   "tests/dialects/test_tsql.py::TestTSQL::test_unpivot_value_column_comes_first"
+  ],
+  "cases": {
+   "tests/dialects/test_tsql.py::TestTSQL::test_unpivot_value_column_comes_first": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "d53cbc9885",
+  "kind": "bug",
+  "title": "A second OFFSET silently replaces the first",
+  "body": "    SELECT a FROM x OFFSET 1 LIMIT 2, 3\n\nparses without complaint, and the `OFFSET 1` is lost. It should raise\n`ParseError` with \"Found multiple 'OFFSET' clauses. Line 1, Col: 30.\", and under\n`error_level=ErrorLevel.IGNORE` produce `SELECT a FROM x LIMIT 3 OFFSET 2`.",
+  "failing": [
+   "tests/test_parser.py::TestParser::test_multiple_query_modifiers"
+  ],
+  "cases": {
+   "tests/test_parser.py::TestParser::test_multiple_query_modifiers": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "9794193571",
+  "kind": "bug",
+  "title": "GROUP BY reorders CUBE, ROLLUP and GROUPING SETS",
+  "body": "    SELECT c1, c2, c3, c4 FROM t GROUP BY c3, CUBE (c1, c2), c4\n\ncomes back with the `CUBE` moved to a different position. The relative order of\nGROUP BY items must be preserved, for `ROLLUP` and `GROUPING SETS` too.",
+  "failing": [
+   "tests/dialects/test_spark.py::TestSpark::test_grouping_sets_as_group_by_element"
+  ],
+  "cases": {
+   "tests/dialects/test_spark.py::TestSpark::test_grouping_sets_as_group_by_element": [
+    "(sql=\"'SELECT COUNT(1), d, h FROM t GROUP BY GROUPING SETS ((d, h), (d))'\")",
+    "(sql=\"'SELECT COUNT(1), d, h FROM t GROUP BY d, h, GROUPING SETS ((d, h), (d))'\")",
+    "(sql=\"'SELECT a FROM t GROUP BY a, GROUPING SETS ((a)), GROUPING SETS ((a))'\")",
+    "(test)"
+   ]
+  },
+  "partial": [
+   "tests/dialects/test_spark.py::TestSpark::test_grouping_sets_as_group_by_element"
+  ]
+ },
+ {
+  "sha": "13a8b8db69",
+  "kind": "feature",
+  "title": "Exasol: transpile MySQL's SHOW DATABASES and SHOW SCHEMAS",
+  "body": "Exasol has no `SHOW DATABASES`. From MySQL, `SHOW DATABASES` and `SHOW SCHEMAS`\nshould transpile to `SELECT SCHEMA_NAME FROM SYS.EXA_SCHEMAS`.",
+  "failing": [
+   "tests/dialects/test_exasol.py::TestExasol::test_show_databases"
+  ],
+  "cases": {
+   "tests/dialects/test_exasol.py::TestExasol::test_show_databases": [
+    "[mysql -> SELECT SCHEMA_NAME FROM SYS.EXA_SCHEMAS]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "f743755e7b",
+  "kind": "feature",
+  "title": "Hive: support NAMED_STRUCT",
+  "body": "`named_struct(name1, val1, ...)` is a Hive built-in:\n\n    SELECT named_struct('a', 1, 'b', 'x')\n\nshould transpile to `SELECT STRUCT(1 AS a, 'x' AS b)` for Spark and Databricks,\nand `annotate_types` should know the struct's field types.",
+  "failing": [
+   "tests/dialects/test_spark.py::TestSpark::test_named_struct",
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_types"
+  ],
+  "cases": {
+   "tests/dialects/test_spark.py::TestSpark::test_named_struct": [
+    "[SELECT named_struct('a', 1, 'b', 'x') -> databricks]",
+    "[SELECT named_struct('a', 1, 'b', 'x') -> spark]"
+   ],
+   "tests/test_optimizer.py::TestOptimizer::test_annotate_types": [
+    "[32, NAMED_STRUCT('col', 1)]",
+    "[33, NAMED_STRUCT('col', 1, 'row', 2.5)]",
+    "[34, NAMED_STRUCT('col', 1, 'nested', NAMED_STRUCT('inner', 'x'))]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "faf15e65e9",
+  "kind": "bug",
+  "title": "FETCH FIRST ROWS ONLY without a count becomes a bare LIMIT",
+  "body": "`FETCH FIRST ROWS ONLY` selects one row. Dialects that write FETCH as LIMIT turn\nit into a bare `LIMIT`, which is invalid SQL and does not parse again. It should\nbecome `LIMIT 1` there, and stay `FETCH FIRST ROWS ONLY` where FETCH is kept.",
+  "failing": [
+   "tests/dialects/test_dialect.py::TestDialect::test_fetch_first_implicit_count"
+  ],
+  "cases": {
+   "tests/dialects/test_dialect.py::TestDialect::test_fetch_first_implicit_count": [
+    "(dialect=\"'bigquery'\")",
+    "(dialect=\"'duckdb'\")",
+    "(dialect=\"'mysql'\")",
+    "(dialect=\"'redshift'\")",
+    "(dialect=\"'spark'\")",
+    "(dialect=\"'sqlite'\")",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> bigquery]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> doris]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> duckdb]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> hive]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> mysql]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> redshift]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> spark]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> sqlite]",
+    "[SELECT * FROM t FETCH FIRST ROWS ONLY -> starrocks]"
+   ]
+  },
+  "partial": []
+ },
+ {
+  "sha": "169b8364b6",
+  "kind": "bug",
+  "title": "DuckDB: table alias misplaced next to time-travel syntax",
+  "body": "In DuckDB the alias comes before `AT (...)`:\n\n    SELECT * FROM t1 AS a AT (VERSION => 3) JOIN t2 AS b AT (TIMESTAMP => NOW() - INTERVAL '1' WEEK) ON a.id = b.id\n\nshould round-trip, and Snowflake's `FROM t1 AT (TIMESTAMP => ...) AS a` should\ntranspile to DuckDB with the alias in DuckDB's position.",
+  "failing": [
+   "tests/dialects/test_duckdb.py::TestDuckDB::test_duckdb"
+  ],
+  "cases": {
+   "tests/dialects/test_duckdb.py::TestDuckDB::test_duckdb": [
+    "(test)"
+   ]
+  },
+  "partial": []
+ }
+]

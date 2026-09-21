@@ -1,0 +1,54 @@
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+index 2ab295e..42888f4 100644
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -426,6 +426,9 @@ class Generator:
+     # The keyword to use when specifying the seed of a sample clause
+     TABLESAMPLE_SEED_KEYWORD = "SEED"
+ 
++    # Whether the historical data clause (AT ... / BEFORE ...) is generated after the table alias
++    HISTORICAL_DATA_POST_ALIAS = False
++
+     # Whether COLLATE is a function instead of a binary operator
+     COLLATE_IS_FUNC = False
+ 
+@@ -2423,7 +2426,10 @@ class Generator:
+ 
+         when = self.sql(expression, "when")
+         if when:
+-            table = f"{table} {when}"
++            if self.HISTORICAL_DATA_POST_ALIAS:
++                alias = f"{alias} {when}"
++            else:
++                table = f"{table} {when}"
+ 
+         changes = self.sql(expression, "changes")
+         changes = f" {changes}" if changes else ""
+diff --git a/sqlglot/generators/duckdb.py b/sqlglot/generators/duckdb.py
+index 99f3f65..4491861 100644
+--- a/sqlglot/generators/duckdb.py
++++ b/sqlglot/generators/duckdb.py
+@@ -1568,6 +1568,7 @@ class DuckDBGenerator(generator.Generator):
+     ARRAY_SIZE_DIM_REQUIRED: bool | None = False
+     NORMALIZE_EXTRACT_DATE_PARTS = True
+     SUPPORTS_LIKE_QUANTIFIERS = False
++    HISTORICAL_DATA_POST_ALIAS = True
+     SET_ASSIGNMENT_REQUIRES_VARIABLE_KEYWORD = True
+ 
+     TRANSFORMS = {
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index 26e4318..a55e2a2 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -4936,6 +4936,11 @@ class Parser:
+         if alias:
+             this.set("alias", alias)
+ 
++            # DuckDB requires the time-travel clause to come after the alias, e.g.
++            # SELECT * FROM t AS a AT (VERSION => 1)
++            if isinstance(this, exp.Table) and not this.args.get("when"):
++                this.set("when", self._parse_historical_data())
++
+         if self._match(TokenType.INDEXED_BY):
+             this.set("indexed", self._parse_table_parts())
+         elif self._match_text_seq("NOT", "INDEXED"):

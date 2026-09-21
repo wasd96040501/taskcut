@@ -35,11 +35,28 @@ def run(*args, cwd, env=None):
     subprocess.run(args, cwd=cwd, check=True, stdout=subprocess.DEVNULL, env={**os.environ, **(env or {})})
 
 
+def readable(case: str) -> str:
+    """A subtest label as a plain run prints it: pytest-xdist, which recorded
+    them, wraps a keyword argument's repr in another."""
+    return case.replace("'\"", '"').replace("\"'", '"').replace("\\'", "'")
+
+
+def failing_lines(issue: dict) -> list[str]:
+    """The tests an issue breaks. Where a test also holds cases another issue
+    breaks, the cases that are this issue's are named under it."""
+    lines = []
+    for test in issue["failing"]:
+        lines.append(f"    {test}")
+        if test in issue.get("partial", ()):
+            lines += [f"        case {readable(case)}" for case in issue["cases"][test]]
+    return lines
+
+
 def issues_markdown(issues: list[dict]) -> str:
     parts = [f"# Open issues\n\n{len(issues)} issues, to be worked through in order.\n"]
     for n, issue in enumerate(issues, 1):
-        failing = "\n".join(f"    {t}" for t in issue["failing"])
-        parts.append(f"## Issue {n}: {issue['title']}\n\n{issue['body'].strip()}\n\nFailing:\n\n{failing}\n")
+        failing = "\n".join(failing_lines(issue))
+        parts.append(f"## Issue {n}: {issue['title']}\n\n{issue['body'].strip(chr(10)).rstrip()}\n\nFailing:\n\n{failing}\n")
     return "\n".join(parts)
 
 

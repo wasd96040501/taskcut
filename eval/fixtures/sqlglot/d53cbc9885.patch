@@ -1,0 +1,16 @@
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index c4e5867..a2c6cc9 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -4378,6 +4378,11 @@ class Parser:
+                             expression.set("offset", None)
+ 
+                             if offset:
++                                if this.args.get("offset"):
++                                    self.raise_error(
++                                        "Found multiple 'OFFSET' clauses", token=modifier_token
++                                    )
++
+                                 offset = exp.Offset(expression=offset)
+                                 this.set("offset", offset)
+ 

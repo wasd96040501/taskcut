@@ -1,0 +1,15 @@
+diff --git a/sqlglot/transforms.py b/sqlglot/transforms.py
+index 78c4049..8599db4 100644
+--- a/sqlglot/transforms.py
++++ b/sqlglot/transforms.py
+@@ -799,8 +799,8 @@ def unqualify_pivot_fields(expression: exp.Expr) -> exp.Expr:
+ def remove_unique_constraints(expression: exp.Expr) -> exp.Expr:
+     assert isinstance(expression, exp.Create)
+     for constraint in expression.find_all(exp.UniqueColumnConstraint):
+-        if constraint.parent:
+-            constraint.parent.pop()
++        parent = constraint.parent
++        (parent if isinstance(parent, (exp.ColumnConstraint, exp.Constraint)) else constraint).pop()
+ 
+     return expression
+ 

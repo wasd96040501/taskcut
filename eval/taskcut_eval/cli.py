@@ -82,7 +82,9 @@ def cmd_run(args) -> int:
     # honest grade for a task that produced something, and it cannot be
     # recovered from the transcript afterwards.
     if w.checks:
-        verdicts = metrics.run_checks(w, space)
+        # A check may need a helper the session must not see; it lives with the
+        # fixtures, outside the workspace, and is found through this variable.
+        verdicts = metrics.run_checks(w, space, env={"EVAL_FIXTURES": str(EVAL_ROOT / "fixtures")})
         (results / f"{stem}.checks.json").write_text(
             json.dumps([vars(v) for v in verdicts], indent=1) + "\n"
         )

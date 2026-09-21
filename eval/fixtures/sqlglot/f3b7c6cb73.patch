@@ -1,0 +1,45 @@
+diff --git a/sqlglot/expressions/string.py b/sqlglot/expressions/string.py
+index 981df0d..9c5be21 100644
+--- a/sqlglot/expressions/string.py
++++ b/sqlglot/expressions/string.py
+@@ -478,7 +478,8 @@ class RegexpReplace(Expression, Func):
+ 
+ 
+ class RegexpSplit(Expression, Func):
+-    arg_types = {"this": True, "expression": True, "limit": False}
++    # "mode" is Dremio-specific, appended after "limit" for from_arg_list compat
++    arg_types = {"this": True, "expression": True, "limit": False, "mode": False}
+ 
+ 
+ class RegexpSubstr(Expression, Func):
+diff --git a/sqlglot/generators/dremio.py b/sqlglot/generators/dremio.py
+index 5cca365..4494344 100644
+--- a/sqlglot/generators/dremio.py
++++ b/sqlglot/generators/dremio.py
+@@ -70,6 +70,9 @@ class DremioGenerator(generator.Generator):
+         exp.DateAdd: _date_delta_sql("DATE_ADD"),
+         exp.DateSub: _date_delta_sql("DATE_SUB"),
+         exp.GenerateSeries: rename_func("ARRAY_GENERATE_RANGE"),
++        exp.RegexpSplit: lambda self, e: self.func(
++            "REGEXP_SPLIT", e.this, e.expression, e.args.get("mode"), e.args.get("limit")
++        ),
+     }
+ 
+     def version_sql(self, expression: exp.Version) -> str:
+diff --git a/sqlglot/parsers/dremio.py b/sqlglot/parsers/dremio.py
+index d8cac1b..236f260 100644
+--- a/sqlglot/parsers/dremio.py
++++ b/sqlglot/parsers/dremio.py
+@@ -104,6 +104,12 @@ class DremioParser(parser.Parser):
+         "DATE_FORMAT": build_formatted_time(exp.TimeToStr),
+         "DATE_SUB": build_date_delta_with_cast_interval(exp.DateSub),
+         "REGEXP_MATCHES": exp.RegexpLike.from_arg_list,
++        "REGEXP_SPLIT": lambda args: exp.RegexpSplit(
++            this=seq_get(args, 0),
++            expression=seq_get(args, 1),
++            mode=seq_get(args, 2),
++            limit=seq_get(args, 3),
++        ),
+         "REPEATSTR": exp.Repeat.from_arg_list,
+         "TO_CHAR": to_char_is_numeric_handler,
+         "TO_DATE": build_formatted_time(exp.TsOrDsToDate),

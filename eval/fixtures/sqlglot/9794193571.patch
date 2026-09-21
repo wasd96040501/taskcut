@@ -1,0 +1,84 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+index 82d33bb..a5d45a2 100644
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -624,7 +624,6 @@ class Group(Expression):
+     arg_types = {
+         "expressions": False,
+         "grouping_sets": False,
+-        "grouping_sets_as_group_by_element": False,
+         "cube": False,
+         "rollup": False,
+         "totals": False,
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+index 7b1b12a..8dde498 100644
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -2836,7 +2836,7 @@ class Generator:
+         ):
+             add_separator = True
+ 
+-            if grouping_sets and not expression.args.get("grouping_sets_as_group_by_element"):
++            if grouping_sets:
+                 if self.SUPPORTS_GROUPING_SETS_AS_SUFFIX:
+                     add_separator = False
+                 else:
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index d6d877f..9bbefee 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -5569,8 +5569,6 @@ class Parser:
+             elements["all"] = False
+ 
+         while True:
+-            index = self._index
+-
+             # Stop before consuming modifier tokens like LIMIT, OFFSET and WINDOW,
+             # which are also valid identifiers
+             if self._match_set(self.QUERY_MODIFIER_TOKENS, advance=False):
+@@ -5579,27 +5577,24 @@ class Parser:
+             elements["expressions"].extend(
+                 self._parse_csv(
+                     lambda: (
+-                        None
+-                        if self._match_set((TokenType.CUBE, TokenType.ROLLUP), advance=False)
+-                        else self._parse_disjunction()
++                        self._parse_grouping_sets()
++                        or self._parse_cube_or_rollup()
++                        or self._parse_disjunction()
+                     )
+                 )
+             )
+-            grouping_sets_as_group_by_element = (
+-                not elements["expressions"] or self._prev.token_type == TokenType.COMMA
+-            )
+ 
+             before_with_index = self._index
+-            with_prefix = self._match(TokenType.WITH)
+ 
+-            if cube_or_rollup := self._parse_cube_or_rollup(with_prefix=with_prefix):
++            if self._match(TokenType.WITH) and (
++                cube_or_rollup := self._parse_cube_or_rollup(with_prefix=True)
++            ):
+                 key = "rollup" if isinstance(cube_or_rollup, exp.Rollup) else "cube"
+                 elements[key].append(cube_or_rollup)
+             elif grouping_sets := self._parse_grouping_sets():
++                # Hive-style suffix syntax: GROUP BY a, b GROUPING SETS (...)
+                 elements["grouping_sets"].append(grouping_sets)
+-                elements["grouping_sets_as_group_by_element"] = grouping_sets_as_group_by_element
+-                if not grouping_sets_as_group_by_element:
+-                    break
++                break
+             elif self._match_text_seq("TOTALS"):
+                 elements["totals"] = True  # type: ignore
+ 
+@@ -5607,9 +5602,6 @@ class Parser:
+                 self._retreat(before_with_index)
+                 break
+ 
+-            if index == self._index:
+-                break
+-
+         return self.expression(exp.Group(**elements), comments=comments)  # type: ignore
+ 
+     def _parse_cube_or_rollup(self, with_prefix: bool = False) -> exp.Cube | exp.Rollup | None:

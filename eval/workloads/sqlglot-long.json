@@ -1,0 +1,289 @@
+{
+ "name": "sqlglot-long",
+ "description": "36 changes sqlglot shipped -- optimizer, parser, executor and dialect bugs and features -- reverted source-only and handed over in one message. Long enough to take a Sonnet 5 session past half its 1M window.",
+ "source": {
+  "kind": "git",
+  "url": "https://github.com/tobymao/sqlglot.git",
+  "ref": "8b6ff9386ddf4f6f8e3120a21f1991a384e60abd",
+  "prepare": "sqlglot_issues.py sqlglot-long.order"
+ },
+ "fixtures": [
+  "sqlglot/parser.py",
+  "ISSUES.md",
+  ".venv/bin/python"
+ ],
+ "files": [
+  "Column lineage breaks on chained PIVOT and UNPIVOT",
+  "Oracle rejects the PIVOT and UNPIVOT sqlglot generates",
+  "Dropping an unnamed UNIQUE constraint breaks the CREATE TABLE",
+  "Support INSERT ... REPLACE USING",
+  "SingleStore: NULL ordering inside percentile WITHIN GROUP",
+  "SQLite: DATE_ADD with a computed amount generates a broken modifier",
+  "Doris: reserved words are generated unquoted",
+  "normalize_identifiers folds names it should leave alone",
+  "The Python executor ignores DISTINCT inside aggregates",
+  "An expression's hash is stale after append()",
+  "Pipe syntax: generated __tmp CTEs collide with outer CTEs",
+  "StarRocks: parse REFRESH EXTERNAL TABLE",
+  "optimize_joins rewrites joins it cannot reorder safely",
+  "Decorrelating EXISTS over a grouped subquery duplicates rows",
+  "MySQL: key parts of UNIQUE and INDEX pick up NULLS FIRST",
+  "GROUPING() gets the wrong type in the Hive family",
+  "qualify_tables strips the parentheses of a function body",
+  "Snowflake: PUT with an unquoted file:// source is not parsed as PUT",
+  "Dremio: support the four-argument REGEXP_SPLIT",
+  "simplify changes the meaning of arithmetic when it collapses a CASE or IF",
+  "pushdown_projections prunes columns that a positional column list still names",
+  "pushdown_predicates loses precedence when it inlines an aliased expression",
+  "Spark: GROUPING SETS as a suffix and as a GROUP BY element are confused",
+  "Transpile Spark's CONCAT_WS over arrays to Trino",
+  "Druid: JSON_VALUE with RETURNING",
+  "The optimizer scopes subqueries inside DML and DDL wrongly",
+  "simplify's gen() gives two different expressions the same key",
+  "A qualified star exclusion removes the column from every source",
+  "ClickHouse: LAG and LEAD are generated as lagInFrame and leadInFrame",
+  "T-SQL: star over an UNPIVOT expands columns in the wrong order",
+  "A second OFFSET silently replaces the first",
+  "GROUP BY reorders CUBE, ROLLUP and GROUPING SETS",
+  "Exasol: transpile MySQL's SHOW DATABASES and SHOW SCHEMAS",
+  "Hive: support NAMED_STRUCT",
+  "FETCH FIRST ROWS ONLY without a count becomes a bare LIMIT",
+  "DuckDB: table alias misplaced next to time-travel syntax"
+ ],
+ "step_template": "{file}",
+ "task": "This is a checkout of sqlglot, the SQL parser and transpiler. ISSUES.md lists 36 open issues against it -- bug reports and feature requests. Each names the tests that fail because of it; the tests are the specification.\n\nWork through all of them, in the order ISSUES.md lists them, one at a time, without stopping to ask me anything. For each: make the change in sqlglot/, run its failing tests until they pass, and make sure you have not broken anything else. Never modify, skip or delete a test.\n\nRun tests with `.venv/bin/python -m pytest -q -p no:cacheprovider <test ids>`; the whole suite takes about a minute with `-n 8`. One test, tests/dialects/test_dialect.py::TestDialect::test_lazy_load, needs a `python` on the PATH and fails here whatever you do; it is not one of the issues.\n\nWhen you have worked through every issue, end your reply with the words ALL ISSUES DONE.",
+ "nudge": "Carry on with the remaining issues in ISSUES.md.",
+ "done_marker": "ALL ISSUES DONE",
+ "max_nudges": 10,
+ "checks": [
+  {
+   "id": "issue-01",
+   "kind": "solved",
+   "description": "issue 1: Column lineage breaks on chained PIVOT and UNPIVOT",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 1"
+  },
+  {
+   "id": "issue-02",
+   "kind": "solved",
+   "description": "issue 2: Oracle rejects the PIVOT and UNPIVOT sqlglot generates",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 2"
+  },
+  {
+   "id": "issue-03",
+   "kind": "solved",
+   "description": "issue 3: Dropping an unnamed UNIQUE constraint breaks the CREATE TABLE",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 3"
+  },
+  {
+   "id": "issue-04",
+   "kind": "solved",
+   "description": "issue 4: Support INSERT ... REPLACE USING",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 4"
+  },
+  {
+   "id": "issue-05",
+   "kind": "solved",
+   "description": "issue 5: SingleStore: NULL ordering inside percentile WITHIN GROUP",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 5"
+  },
+  {
+   "id": "issue-06",
+   "kind": "solved",
+   "description": "issue 6: SQLite: DATE_ADD with a computed amount generates a broken modifier",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 6"
+  },
+  {
+   "id": "issue-07",
+   "kind": "solved",
+   "description": "issue 7: Doris: reserved words are generated unquoted",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 7"
+  },
+  {
+   "id": "issue-08",
+   "kind": "solved",
+   "description": "issue 8: normalize_identifiers folds names it should leave alone",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 8"
+  },
+  {
+   "id": "issue-09",
+   "kind": "solved",
+   "description": "issue 9: The Python executor ignores DISTINCT inside aggregates",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 9"
+  },
+  {
+   "id": "issue-10",
+   "kind": "solved",
+   "description": "issue 10: An expression's hash is stale after append()",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 10"
+  },
+  {
+   "id": "issue-11",
+   "kind": "solved",
+   "description": "issue 11: Pipe syntax: generated __tmp CTEs collide with outer CTEs",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 11"
+  },
+  {
+   "id": "issue-12",
+   "kind": "solved",
+   "description": "issue 12: StarRocks: parse REFRESH EXTERNAL TABLE",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 12"
+  },
+  {
+   "id": "issue-13",
+   "kind": "solved",
+   "description": "issue 13: optimize_joins rewrites joins it cannot reorder safely",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 13"
+  },
+  {
+   "id": "issue-14",
+   "kind": "solved",
+   "description": "issue 14: Decorrelating EXISTS over a grouped subquery duplicates rows",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 14"
+  },
+  {
+   "id": "issue-15",
+   "kind": "solved",
+   "description": "issue 15: MySQL: key parts of UNIQUE and INDEX pick up NULLS FIRST",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 15"
+  },
+  {
+   "id": "issue-16",
+   "kind": "solved",
+   "description": "issue 16: GROUPING() gets the wrong type in the Hive family",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 16"
+  },
+  {
+   "id": "issue-17",
+   "kind": "solved",
+   "description": "issue 17: qualify_tables strips the parentheses of a function body",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 17"
+  },
+  {
+   "id": "issue-18",
+   "kind": "solved",
+   "description": "issue 18: Snowflake: PUT with an unquoted file:// source is not parsed as PUT",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 18"
+  },
+  {
+   "id": "issue-19",
+   "kind": "solved",
+   "description": "issue 19: Dremio: support the four-argument REGEXP_SPLIT",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 19"
+  },
+  {
+   "id": "issue-20",
+   "kind": "solved",
+   "description": "issue 20: simplify changes the meaning of arithmetic when it collapses a CASE or IF",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 20"
+  },
+  {
+   "id": "issue-21",
+   "kind": "solved",
+   "description": "issue 21: pushdown_projections prunes columns that a positional column list still names",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 21"
+  },
+  {
+   "id": "issue-22",
+   "kind": "solved",
+   "description": "issue 22: pushdown_predicates loses precedence when it inlines an aliased expression",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 22"
+  },
+  {
+   "id": "issue-23",
+   "kind": "solved",
+   "description": "issue 23: Spark: GROUPING SETS as a suffix and as a GROUP BY element are confused",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 23"
+  },
+  {
+   "id": "issue-24",
+   "kind": "solved",
+   "description": "issue 24: Transpile Spark's CONCAT_WS over arrays to Trino",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 24"
+  },
+  {
+   "id": "issue-25",
+   "kind": "solved",
+   "description": "issue 25: Druid: JSON_VALUE with RETURNING",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 25"
+  },
+  {
+   "id": "issue-26",
+   "kind": "solved",
+   "description": "issue 26: The optimizer scopes subqueries inside DML and DDL wrongly",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 26"
+  },
+  {
+   "id": "issue-27",
+   "kind": "solved",
+   "description": "issue 27: simplify's gen() gives two different expressions the same key",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 27"
+  },
+  {
+   "id": "issue-28",
+   "kind": "solved",
+   "description": "issue 28: A qualified star exclusion removes the column from every source",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 28"
+  },
+  {
+   "id": "issue-29",
+   "kind": "solved",
+   "description": "issue 29: ClickHouse: LAG and LEAD are generated as lagInFrame and leadInFrame",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 29"
+  },
+  {
+   "id": "issue-30",
+   "kind": "solved",
+   "description": "issue 30: T-SQL: star over an UNPIVOT expands columns in the wrong order",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 30"
+  },
+  {
+   "id": "issue-31",
+   "kind": "solved",
+   "description": "issue 31: A second OFFSET silently replaces the first",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 31"
+  },
+  {
+   "id": "issue-32",
+   "kind": "solved",
+   "description": "issue 32: GROUP BY reorders CUBE, ROLLUP and GROUPING SETS",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 32"
+  },
+  {
+   "id": "issue-33",
+   "kind": "solved",
+   "description": "issue 33: Exasol: transpile MySQL's SHOW DATABASES and SHOW SCHEMAS",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 33"
+  },
+  {
+   "id": "issue-34",
+   "kind": "solved",
+   "description": "issue 34: Hive: support NAMED_STRUCT",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 34"
+  },
+  {
+   "id": "issue-35",
+   "kind": "solved",
+   "description": "issue 35: FETCH FIRST ROWS ONLY without a count becomes a bare LIMIT",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 35"
+  },
+  {
+   "id": "issue-36",
+   "kind": "solved",
+   "description": "issue 36: DuckDB: table alias misplaced next to time-travel syntax",
+   "command": "python3 \"$EVAL_FIXTURES/sqlglot/check_issue.py\" 36"
+  },
+  {
+   "id": "tests-untouched",
+   "kind": "consistency",
+   "description": "no test was modified, skipped or deleted",
+   "command": "git diff --quiet HEAD -- tests/"
+  },
+  {
+   "id": "suite-passes",
+   "kind": "consistency",
+   "description": "the whole suite passes, but for the one test that needs `python` on the PATH",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider -n 8 tests --deselect tests/dialects/test_dialect.py::TestDialect::test_lazy_load"
+  }
+ ],
+ "probes": []
+}

@@ -1,0 +1,72 @@
+diff --git a/sqlglot/expressions/dml.py b/sqlglot/expressions/dml.py
+index 95763ec..49d386a 100644
+--- a/sqlglot/expressions/dml.py
++++ b/sqlglot/expressions/dml.py
+@@ -212,6 +212,7 @@ class Insert(Expression, DDL, DML):
+         "settings": False,
+         "source": False,
+         "default": False,
++        "using": False,
+     }
+ 
+     def with_(
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+index 2fa53d2..92a6ceb 100644
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -2283,6 +2283,8 @@ class Generator:
+         exists = " IF EXISTS" if expression.args.get("exists") else ""
+         where = self.sql(expression, "where")
+         where = f"{self.sep()}REPLACE WHERE {where}" if where else ""
++        using = self.expressions(expression, key="using", flat=True)
++        using = f"{self.sep()}REPLACE USING ({using})" if using else ""
+         expression_sql = f"{self.sep()}{self.sql(expression, 'expression')}"
+         on_conflict = self.sql(expression, "conflict")
+         on_conflict = f" {on_conflict}" if on_conflict else ""
+@@ -2303,7 +2305,7 @@ class Generator:
+         source = self.sql(expression, "source")
+         source = f"TABLE {source}" if source else ""
+ 
+-        sql = f"INSERT{hint}{alternative}{ignore}{this}{stored}{by_name}{exists}{partition_by}{settings}{where}{expression_sql}{source}"
++        sql = f"INSERT{hint}{alternative}{ignore}{this}{stored}{by_name}{exists}{partition_by}{settings}{where}{using}{expression_sql}{source}"
+         return self.prepend_ctes(expression, sql)
+ 
+     def introducer_sql(self, expression: exp.Introducer) -> str:
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index eac63e5..c43d9f9 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -3598,16 +3598,28 @@ class Parser:
+ 
+         returning = self._parse_returning()  # TSQL allows RETURNING before source
+ 
++        stored = self._match_text_seq("STORED") and self._parse_stored()
++        by_name = self._match_text_seq("BY", "NAME")
++        exists = self._parse_exists()
++        replace_where = None
++        replace_using = None
++
++        if self._match(TokenType.REPLACE):
++            if self._match(TokenType.WHERE):
++                replace_where = self._parse_disjunction()
++            elif self._match(TokenType.USING):
++                replace_using = self._parse_using_identifiers()
++
+         return self.expression(
+             exp.Insert(
+                 hint=hint,
+                 is_function=is_function,
+                 this=this,
+-                stored=self._match_text_seq("STORED") and self._parse_stored(),
+-                by_name=self._match_text_seq("BY", "NAME"),
+-                exists=self._parse_exists(),
+-                where=self._match_pair(TokenType.REPLACE, TokenType.WHERE)
+-                and self._parse_disjunction(),
++                stored=stored,
++                by_name=by_name,
++                exists=exists,
++                where=replace_where,
++                using=replace_using,
+                 partition=self._match(TokenType.PARTITION_BY) and self._parse_partitioned_by(),
+                 settings=self._match_text_seq("SETTINGS") and self._parse_settings_property(),
+                 default=self._match_text_seq("DEFAULT", "VALUES"),

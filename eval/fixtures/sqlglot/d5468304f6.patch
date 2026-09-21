@@ -1,0 +1,82 @@
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+index a5d45a2..82d33bb 100644
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -624,6 +624,7 @@ class Group(Expression):
+     arg_types = {
+         "expressions": False,
+         "grouping_sets": False,
++        "grouping_sets_as_group_by_element": False,
+         "cube": False,
+         "rollup": False,
+         "totals": False,
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+index 0616942..109e1e2 100644
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -353,6 +353,9 @@ class Generator:
+     # The separator for grouping sets and rollups
+     GROUPINGS_SEP = ","
+ 
++    # Whether GROUPING SETS can follow GROUP BY expressions without a comma
++    SUPPORTS_GROUPING_SETS_AS_SUFFIX = False
++
+     # The string used for creating an index on a table
+     INDEX_ON = "ON"
+ 
+@@ -2821,7 +2824,18 @@ class Generator:
+             and groupings
+             and groupings.strip() not in ("WITH CUBE", "WITH ROLLUP")
+         ):
+-            group_by = f"{group_by}{self.GROUPINGS_SEP}"
++            add_separator = True
++
++            if grouping_sets and not expression.args.get("grouping_sets_as_group_by_element"):
++                if self.SUPPORTS_GROUPING_SETS_AS_SUFFIX:
++                    add_separator = False
++                else:
++                    self.unsupported(
++                        "GROUPING SETS without a comma after GROUP BY expressions is not supported"
++                    )
++
++            if add_separator:
++                group_by = f"{group_by}{self.GROUPINGS_SEP}"
+ 
+         return f"{group_by}{groupings}"
+ 
+diff --git a/sqlglot/generators/hive.py b/sqlglot/generators/hive.py
+index 03eb446..fad89c3 100644
+--- a/sqlglot/generators/hive.py
++++ b/sqlglot/generators/hive.py
+@@ -223,6 +223,7 @@ class HiveGenerator(generator.Generator):
+     SELECT_KINDS: tuple[str, ...] = ()
+     TRY_SUPPORTED = False
+     SUPPORTS_UESCAPE = False
++    SUPPORTS_GROUPING_SETS_AS_SUFFIX = True
+     SUPPORTS_DECODE_CASE = False
+     LIMIT_FETCH = "LIMIT"
+     TABLESAMPLE_WITH_METHOD = False
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index 7efde98..d6d877f 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -5585,6 +5585,9 @@ class Parser:
+                     )
+                 )
+             )
++            grouping_sets_as_group_by_element = (
++                not elements["expressions"] or self._prev.token_type == TokenType.COMMA
++            )
+ 
+             before_with_index = self._index
+             with_prefix = self._match(TokenType.WITH)
+@@ -5594,6 +5597,9 @@ class Parser:
+                 elements[key].append(cube_or_rollup)
+             elif grouping_sets := self._parse_grouping_sets():
+                 elements["grouping_sets"].append(grouping_sets)
++                elements["grouping_sets_as_group_by_element"] = grouping_sets_as_group_by_element
++                if not grouping_sets_as_group_by_element:
++                    break
+             elif self._match_text_seq("TOTALS"):
+                 elements["totals"] = True  # type: ignore
+ 

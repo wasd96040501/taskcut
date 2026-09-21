@@ -281,7 +281,7 @@ class CheckResult:
     detail: str
 
 
-def run_checks(workload: Workload, workspace) -> list[CheckResult]:
+def run_checks(workload: Workload, workspace, env: dict | None = None) -> list[CheckResult]:
     """Runs each check in the finished workspace.
 
     This is not pure, and it is the only thing here that is not: a check has to
@@ -289,18 +289,20 @@ def run_checks(workload: Workload, workspace) -> list[CheckResult]:
     after the session, and its verdicts are stored beside the transcript so
     every later report is reading a record rather than re-running anything.
     """
+    import os
     import subprocess
 
+    environment = {**os.environ, **(env or {})}
     out = []
     for check in workload.checks:
         try:
             done = subprocess.run(
-                check.command, shell=True, cwd=str(workspace),
-                capture_output=True, text=True, timeout=300,
+                check.command, shell=True, cwd=str(workspace), env=environment,
+                capture_output=True, text=True, timeout=600,
             )
             passed = done.returncode == 0
             detail = (done.stdout + done.stderr).strip()[-400:]
         except subprocess.TimeoutExpired:
-            passed, detail = False, "timed out after 300s"
+            passed, detail = False, "timed out after 600s"
         out.append(CheckResult(check.id, check.description, check.kind, passed, detail))
     return out

@@ -1,0 +1,73 @@
+diff --git a/sqlglot/expressions/string.py b/sqlglot/expressions/string.py
+index 9c5be21..72b64a7 100644
+--- a/sqlglot/expressions/string.py
++++ b/sqlglot/expressions/string.py
+@@ -32,6 +32,7 @@ class Concat(Expression, Func):
+ 
+ 
+ class ConcatWs(Concat):
++    arg_types = {**Concat.arg_types, "flatten": False}
+     _sql_names = ["CONCAT_WS"]
+ 
+ 
+diff --git a/sqlglot/generators/trino.py b/sqlglot/generators/trino.py
+index 86cef65..f8b5789 100644
+--- a/sqlglot/generators/trino.py
++++ b/sqlglot/generators/trino.py
+@@ -52,6 +52,39 @@ class TrinoGenerator(PrestoGenerator):
+         exp.JSONPathSubscript,
+     }
+ 
++    def concatws_sql(self, expression: exp.ConcatWs) -> str:
++        if expression.args.get("flatten"):
++            arrays = []
++            has_array = False
++            has_unknown = False
++
++            for arg in expression.expressions[1:]:
++                if isinstance(arg, exp.Array) or arg.is_type(exp.DType.ARRAY):
++                    has_array = True
++                    arg = exp.func("COALESCE", exp.cast(arg, "ARRAY<TEXT>"), exp.array())
++                else:
++                    if (not arg.type or arg.is_type(exp.DType.UNKNOWN)) and not isinstance(
++                        arg, exp.CONSTANTS
++                    ):
++                        has_unknown = True
++
++                    arg = exp.array(exp.cast(arg, exp.DType.TEXT))
++
++                arrays.append(arg)
++
++            if has_unknown:
++                self.unsupported("Cannot transpile CONCAT_WS with unknown argument types to Trino.")
++
++            if has_array:
++                array = (
++                    exp.ArrayConcat(this=arrays[0], expressions=arrays[1:])
++                    if len(arrays) > 1
++                    else arrays[0]
++                )
++                return self.func("CONCAT_WS", expression.expressions[0], array)
++
++        return super().concatws_sql(expression)
++
+     def functionspecification_sql(self, expression: exp.FunctionSpecification) -> str:
+         characteristics = expression.args.get("characteristics")
+         characteristics_sql = (
+diff --git a/sqlglot/parsers/hive.py b/sqlglot/parsers/hive.py
+index 2ac5f81..020d282 100644
+--- a/sqlglot/parsers/hive.py
++++ b/sqlglot/parsers/hive.py
+@@ -71,6 +71,12 @@ class HiveParser(parser.Parser):
+         "BASE64": exp.ToBase64.from_arg_list,
+         "COLLECT_LIST": lambda args: exp.ArrayAgg(this=seq_get(args, 0), nulls_excluded=True),
+         "COLLECT_SET": exp.ArrayUniqueAgg.from_arg_list,
++        "CONCAT_WS": lambda args, dialect: exp.ConcatWs(
++            expressions=args,
++            safe=not dialect.STRICT_STRING_CONCAT,
++            coalesce=dialect.CONCAT_WS_COALESCE,
++            flatten=True,
++        ),
+         "DATE_ADD": lambda args: exp.TsOrDsAdd(
+             this=seq_get(args, 0), expression=seq_get(args, 1), unit=exp.Literal.string("DAY")
+         ),

@@ -1,0 +1,13 @@
+diff --git a/sqlglot/parsers/druid.py b/sqlglot/parsers/druid.py
+index 20f2cef..ecdb528 100644
+--- a/sqlglot/parsers/druid.py
++++ b/sqlglot/parsers/druid.py
+@@ -4,4 +4,7 @@ from sqlglot.parser import Parser
+ 
+ 
+ class DruidParser(Parser):
+-    pass
++    FUNCTION_PARSERS = {
++        **Parser.FUNCTION_PARSERS,
++        "JSON_VALUE": lambda self: self._parse_json_value(),
++    }
