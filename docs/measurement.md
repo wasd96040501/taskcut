@@ -23,6 +23,70 @@ wins some and loses others:
 * **work** -- whether what it built holds together, for the workloads that
   build something
 
+## The current version: taskcut decides when, Claude Code compacts
+
+Since 0.6, taskcut changes only *when* Claude Code compacts. Past the floor a
+small model judges each finished turn, and on `finished` taskcut runs the same
+compaction `/compact` does. Everything from "The runs" down measured versions up
+to 0.5, which built the compacted transcript themselves and, until 0.5, had the
+working model call `close_task` at every boundary. Those numbers describe a
+mechanism that no longer ships; they are kept because they are what led here.
+
+### The mechanism, end to end
+
+`make eval-mechanism`, one real session on Sonnet 5 with the floor at 5%:
+
+| turn | context at its end | taskcut |
+| --- | --- | --- |
+| `wc -l a.txt` | 38,480 | nothing: below the floor |
+| read a long file, then ask which section | 67,359 | judged **unfinished** (it ended in a question); kept |
+| "Section 3", answered | 67,649 | judged **finished**; compacted, 67,877 → 33,068 |
+| `cat b.txt` | 33,161 | nothing: below the floor again |
+| read another long file | 61,655 | judged **finished**; compacted |
+| read a third | 61,908 | judged **finished**; compacted |
+| list every task, no tools | 33,729 | all six results recalled, from the compacted conversation |
+
+The working model was never asked for anything: no tool, no reminder, no
+`ToolSearch`. Each compaction is recorded in the same transcript exactly as a
+typed `/compact` is -- `trigger: "manual"`, the same summary, the same
+preserved recent messages -- and took 21 to 25 seconds.
+
+### Twenty real changes, at a realistic floor
+
+`issues-long` again -- twenty changes click shipped, bugs and features -- with
+`floorPercent` 30, on Sonnet 5, each arm once:
+
+| | off | on |
+| --- | --- | --- |
+| Acceptance checks | **22/22** | **22/22** |
+| Cost at Sonnet list price, as recorded | $9.89 | $10.69 |
+| of which changes 1–19 | $9.30 | $10.32 |
+| of which change 20 | $0.54, 5 requests | $0.32, 11 requests |
+| Turns judged | — | 1, `finished` |
+| Compactions | 0 | 1, after change 19: 315,608 → 5,960 tokens, 80 s |
+| Context carried into change 20 | 285,735 | **37,646** |
+
+For nineteen changes taskcut did nothing: the context was below the floor, and
+not one judgement, tool call or request was added. The two arms still differ by
+$1.02 over that stretch, which is what two runs of identical work differ by --
+the noise is about ten percent, and it is larger than anything taskcut did.
+
+After change 19 the context passed 30%, the judge called the turn finished,
+and Claude Code compacted. Change 20 ran on 37,646 tokens instead of 285,735,
+went back to the source for what it needed -- eleven requests instead of five --
+and passed, for $0.32 against $0.54.
+
+Two costs are not in the table. The compaction's own request is not recorded in
+the transcript: reading 315,608 tokens and writing a 12,000-character summary
+is about $0.14 if it reads from the prompt cache and about $1 if it does not,
+and the transcript does not say which. The judgement is one `haiku` call of at
+most about 12,000 tokens, about a cent.
+
+What this does not show is the thing taskcut is for. At 29% of the window
+Sonnet 5 got every change right with or without it, so there was no damage for
+a compaction to prevent. That needs a session long enough, or a model sensitive
+enough, for the baseline to start doing worse work.
+
 ## The runs
 
 `synthetic` is ten generated modules that differ only where the probes look, so
@@ -401,13 +465,15 @@ cut. This is what produced 17 ledger messages for 9 closed sub-tasks.
 ## Reproducing
 
 ```bash
+make eval-mechanism
 make eval-run WORKLOAD=issues-long ARM=off MODEL=sonnet
-make eval-run WORKLOAD=issues-long ARM=boundary MODEL=sonnet
-make eval-run WORKLOAD=issues-long ARM=reply MODEL=sonnet
+make eval-run WORKLOAD=issues-long ARM=on MODEL=sonnet
 make eval-report
 ```
 
-Each of those is about forty minutes and $10 to $12. The three can run at once.
+The mechanism check is a few minutes and about a dollar. Each `issues-long` arm
+is about forty minutes and $10 to $11; they can run at once. Reproducing the
+sections for earlier versions means checking out the tag they measured.
 
 `eval/results/runs.json` holds the numbers above in machine-readable form.
 Transcripts are not committed: they are large and full of absolute paths.

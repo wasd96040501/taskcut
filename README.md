@@ -115,7 +115,8 @@ claude plugin marketplace remove taskcut
 | --- | --- |
 | **Below the floor** | Nothing. No model is asked, nothing is written, and the working model is never told taskcut exists. `make eval-mechanism` asserts it on a real session. |
 | **Each finished turn past the floor** | One call to `model` — `haiku` by default — reading at most about 12k tokens: your messages, the assistant's non-read-only tool calls, `CLAUDE.md` and the reply. Under two cents. |
-| **Each compaction** | Exactly what `/compact` costs, because it is `/compact`. On a 65k-token session it took 21–25 seconds. |
+| **Each compaction** | Exactly what `/compact` costs, because it is `/compact`. On a 65k-token session it took 21–25 seconds; at 315k, 80 seconds. |
+| **On real work** | Twenty real changes to click in one Sonnet 5 session, floor 30%: for nineteen, taskcut did nothing at all. After the nineteenth it judged the turn finished and compacted 315,608 tokens to a 5,960-token summary; the twentieth ran on 37,646 and passed. Both arms passed all 22 checks. |
 
 What it buys is the question the benchmark is for; see
 [docs/measurement.md](docs/measurement.md), which also records what earlier

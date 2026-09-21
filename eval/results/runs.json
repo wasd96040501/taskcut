@@ -35,6 +35,7 @@
      75919,
      76749
     ],
+    "cuts": 10,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -56,6 +57,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 12081,
     "output": 98241,
@@ -96,6 +99,7 @@
      127993,
      128133
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -117,6 +121,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 70342,
@@ -162,6 +168,7 @@
      59442,
      59475
     ],
+    "cuts": 10,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -183,6 +190,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 6978,
     "output": 36219,
@@ -224,6 +233,7 @@
      82122,
      82155
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -245,6 +255,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 36632,
@@ -282,6 +294,7 @@
      61597,
      62792
     ],
+    "cuts": 9,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -297,6 +310,8 @@
       "went_to_disk": 4
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 17,
     "ledger_tokens": 5872,
     "output": 18933,
@@ -330,6 +345,7 @@
      54087,
      55313
     ],
+    "cuts": 8,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -345,6 +361,8 @@
       "went_to_disk": 5
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 15,
     "ledger_tokens": 3090,
     "output": 13053,
@@ -378,6 +396,7 @@
      69850,
      69975
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -393,6 +412,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 3341,
@@ -434,8 +455,11 @@
      121248,
      133059
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 51462,
@@ -473,8 +497,11 @@
      141029,
      155702
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 63309,
@@ -512,8 +539,11 @@
      125864,
      136939
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 53672,
@@ -577,8 +607,11 @@
      267657,
      292546
     ],
+    "cuts": 1,
     "drift": {},
     "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 1,
     "ledger_tokens": 4336,
     "output": 130949,
@@ -586,8 +619,8 @@
     "weighted_input": 3179837
    },
    "off": {
-    "cache_read": 24735718,
-    "cache_write": 286710,
+    "cache_read": 23323775,
+    "cache_write": 280865,
     "checks": {
      "issue01": true,
      "issue02": true,
@@ -612,39 +645,106 @@
      "no_regressions": true,
      "tests_untouched": true
     },
-    "context_first": 38240,
-    "context_last": 294690,
-    "context_peak": 294690,
+    "context_first": 38274,
+    "context_last": 285735,
+    "context_peak": 285735,
     "context_series": [
-     38240,
-     38706,
-     46395,
-     66807,
-     79718,
-     92644,
-     115117,
-     134150,
-     144109,
-     158108,
-     171359,
-     184030,
-     192632,
-     215836,
-     239794,
-     246482,
-     251730,
-     261344,
-     267687,
-     280958,
-     294690
+     38274,
+     38431,
+     44266,
+     66291,
+     83484,
+     98598,
+     119576,
+     133080,
+     145872,
+     157255,
+     168494,
+     180119,
+     188121,
+     210938,
+     227045,
+     230987,
+     233633,
+     244505,
+     249469,
+     259584,
+     285735
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
-    "output": 125163,
-    "requests": 143,
-    "weighted_input": 2832283
+    "output": 122818,
+    "requests": 141,
+    "weighted_input": 2683781
+   },
+   "on": {
+    "cache_read": 24517883,
+    "cache_write": 320560,
+    "checks": {
+     "issue01": true,
+     "issue02": true,
+     "issue03": true,
+     "issue04": true,
+     "issue05": true,
+     "issue06": true,
+     "issue07": true,
+     "issue08": true,
+     "issue09": true,
+     "issue10": true,
+     "issue11": true,
+     "issue12": true,
+     "issue13": true,
+     "issue14": true,
+     "issue15": true,
+     "issue16": true,
+     "issue17": true,
+     "issue18": true,
+     "issue19": true,
+     "issue20": true,
+     "no_regressions": true,
+     "tests_untouched": true
+    },
+    "context_first": 38278,
+    "context_last": 37646,
+    "context_peak": 289821,
+    "context_series": [
+     38278,
+     38454,
+     46637,
+     68147,
+     82356,
+     96981,
+     116835,
+     138454,
+     153145,
+     167522,
+     180970,
+     189464,
+     197008,
+     222336,
+     246752,
+     256367,
+     260706,
+     272448,
+     280678,
+     289821,
+     37646
+    ],
+    "cuts": 1,
+    "drift": {},
+    "fidelity": {},
+    "judged": 1,
+    "judged_finished": 1,
+    "ledger_messages": 1,
+    "ledger_tokens": 3090,
+    "output": 142032,
+    "requests": 150,
+    "weighted_input": 2852826
    },
    "reply": {
     "cache_read": 26075024,
@@ -699,8 +799,11 @@
      272262,
      40294
     ],
+    "cuts": 1,
     "drift": {},
     "fidelity": {},
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 1,
     "ledger_tokens": 1084,
     "output": 135031,
@@ -738,6 +841,7 @@
      44635,
      44743
     ],
+    "cuts": 10,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -753,6 +857,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 1860,
     "output": 7394,
@@ -786,6 +892,7 @@
      51368,
      51513
     ],
+    "cuts": 10,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -801,6 +908,8 @@
       "went_to_disk": 3
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 19,
     "ledger_tokens": 3311,
     "output": 6902,
@@ -834,6 +943,7 @@
      107760,
      107857
     ],
+    "cuts": 0,
     "drift": {},
     "fidelity": {
      "headline": {
@@ -849,6 +959,8 @@
       "went_to_disk": 0
      }
     },
+    "judged": 0,
+    "judged_finished": 0,
     "ledger_messages": 0,
     "ledger_tokens": 0,
     "output": 2019,
