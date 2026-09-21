@@ -10,6 +10,7 @@ metric is computed from what it returns.
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -78,6 +79,8 @@ class Transcript:
     cuts: int = 0
     #: taskcut's own notices, one per judgement it made past the floor.
     judgements: list[str] = field(default_factory=list)
+    #: Wall-clock seconds from the first record to the last.
+    elapsed: float = 0.0
 
     @property
     def ledger_messages(self) -> int:
@@ -105,6 +108,16 @@ class Transcript:
         return answered[-1] if answered else matches[-1]
 
 
+def _seconds(stamp) -> float | None:
+    """An ISO timestamp as seconds since the epoch, or None when there is none."""
+    if not isinstance(stamp, str):
+        return None
+    try:
+        return datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
 def _text_of(message: dict) -> tuple[str, bool]:
     """The message's text, and whether it carried any tool_result block."""
     content = message.get("content")
@@ -122,6 +135,7 @@ def load(path: str | Path) -> Transcript:
     out = Transcript(path=path)
     seen: set[str] = set()
     current: Turn | None = None
+    first = last = None
 
     for line in path.read_text(errors="replace").splitlines():
         line = line.strip()
@@ -132,6 +146,10 @@ def load(path: str | Path) -> Transcript:
         except ValueError:
             continue
         message = record.get("message") or {}
+        stamp = _seconds(record.get("timestamp"))
+        if stamp is not None:
+            first = stamp if first is None else first
+            last = stamp
 
         if record.get("type") == "system":
             content = str(record.get("content") or "")
@@ -184,6 +202,8 @@ def load(path: str | Path) -> Transcript:
             )
         )
 
+    if first is not None and last is not None:
+        out.elapsed = max(0.0, last - first)
     return out
 
 

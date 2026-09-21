@@ -153,6 +153,9 @@ def _numbers(run) -> dict:
         "judged_finished": run.finished,
         "nudges": run.nudges,
         "continued": run.continued,
+        "request_context_peak": run.peak_request,
+        "request_context_mean": round(run.mean_request),
+        "elapsed_seconds": round(run.elapsed),
         "checks": {c.id: c.passed for c in run.checks},
         "drift": {
             d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,

@@ -238,6 +238,10 @@ class Run:
     #: that stopped early, and how often taskcut carried the work on itself.
     nudges: int = 0
     continued: int = 0
+    #: What the model carried at every request, not only the first of each
+    #: turn: a job handed over in one message is one turn, or a few.
+    requests: list[int] = field(default_factory=list)
+    elapsed: float = 0.0
     #: Filled in from the sidecar a run writes; empty for a workload with none.
     checks: list = field(default_factory=list)
 
@@ -252,6 +256,14 @@ class Run:
     @property
     def mean_context(self) -> float:
         return mean(self.prefix) if self.prefix else 0.0
+
+    @property
+    def peak_request(self) -> int:
+        return max(self.requests) if self.requests else 0
+
+    @property
+    def mean_request(self) -> float:
+        return mean(self.requests) if self.requests else 0.0
 
 
 def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
@@ -269,6 +281,8 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         finished=sum("is finished" in j for j in transcript.judgements),
         nudges=sum(t.prompt.strip() == workload.nudge for t in transcript.turns) if workload.nudge else 0,
         continued=sum(t.prompt.startswith(CONTINUE_OPENING) for t in transcript.turns),
+        requests=[r.read + r.write + r.plain for r in transcript.requests],
+        elapsed=transcript.elapsed,
     )
 
 

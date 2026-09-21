@@ -96,9 +96,6 @@ class Segmentation(unittest.TestCase):
         self.assertEqual(loaded.turn_for("what is it").answer, "fresh")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class WhatTaskcutDid(unittest.TestCase):
     """A cut and a judgement are recorded as system lines, not as messages."""
@@ -127,3 +124,20 @@ class WhatTaskcutDid(unittest.TestCase):
 
     def test_a_system_line_is_not_a_turn(self):
         self.assertEqual([t.prompt for t in self.loaded.turns], ["fix it", "next"])
+
+
+class Elapsed(unittest.TestCase):
+    def test_from_the_first_record_to_the_last(self):
+        loaded = transcript.load(write([
+            dict(user("go"), timestamp="2026-09-21T10:00:00.000Z"),
+            dict(assistant("req_1", [{"type": "text", "text": "done"}], USAGE), timestamp="2026-09-21T10:07:30.500Z"),
+            {"type": "last-prompt"},
+        ]))
+        self.assertAlmostEqual(loaded.elapsed, 450.5)
+
+    def test_no_timestamps_is_zero(self):
+        self.assertEqual(transcript.load(write([user("go")])).elapsed, 0.0)
+
+
+if __name__ == "__main__":
+    unittest.main()
