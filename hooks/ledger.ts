@@ -153,6 +153,33 @@ export function directedPrompt(opening: string, subTask: string, dropped: string
   ].join('\n')
 }
 
+/**
+ * Everything the assistant said since the last human turn, which is how `reply`
+ * mode fills an entry.
+ *
+ * A model working a sub-task narrates it and closes with what it found. That
+ * text has already been written and paid for; asking for the same thing again
+ * as a tool argument costs output, and telling the model the argument is all
+ * that survives makes it write an inventory rather than a conclusion.
+ *
+ * All of it, not only the last message. A model that answers and then calls
+ * close_task tends to end with a line like "Done." -- the last message alone
+ * would keep that and lose the answer.
+ */
+export function subtaskReply(messages: readonly SessionMessage[]): string {
+  let start = messages.length
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i]!
+    if (message.role === 'user' && (message.toolResults?.length ?? 0) === 0) break
+    start = i
+  }
+  return messages
+    .slice(start)
+    .filter((message) => message.role === 'assistant' && message.text?.trim())
+    .map((message) => message.text.trim())
+    .join('\n\n')
+}
+
 /** How long a ledger left behind by a session that never ended cleanly is kept. */
 export const STALE_LEDGER_MS = 7 * 24 * 60 * 60 * 1000
 

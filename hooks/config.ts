@@ -14,12 +14,13 @@ export type Config = {
   /**
    * Who writes a ledger entry. `outcome` keeps what the working model wrote at
    * `close_task`. `directed` discards it and has `foldModel` write the entry
-   * from the transcript the cut is dropping, aimed at the standing task.
+   * from the transcript the cut is dropping. `reply` asks for no conclusion at
+   * all and keeps the model's own last reply for the sub-task instead.
    */
   ledgerMode: LedgerMode
 }
 
-export type LedgerMode = 'outcome' | 'directed'
+export type LedgerMode = 'outcome' | 'directed' | 'reply'
 
 export const DEFAULTS: Config = {
   floorPercent: 40,
@@ -50,6 +51,9 @@ export function readConfig(options: PluginOptions): Config {
     recentHumanTurns: numberOr(options['recentHumanTurns'], DEFAULTS.recentHumanTurns, 0),
     ledgerVerbatim: numberOr(options['ledgerVerbatim'], DEFAULTS.ledgerVerbatim, 2),
     foldModel: typeof options['foldModel'] === 'string' && options['foldModel'] ? options['foldModel'] : DEFAULTS.foldModel,
-    ledgerMode: options['ledgerMode'] === 'directed' ? 'directed' : DEFAULTS.ledgerMode,
+    ledgerMode:
+      options['ledgerMode'] === 'directed' || options['ledgerMode'] === 'reply'
+        ? options['ledgerMode']
+        : DEFAULTS.ledgerMode,
   }
 }

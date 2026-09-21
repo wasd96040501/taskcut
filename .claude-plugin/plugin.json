@@ -46,12 +46,13 @@
     "ledgerMode": {
       "type": "string",
       "title": "Who writes a ledger entry",
-      "description": "\"outcome\" (default): the conclusion the working model writes when it calls close_task. \"directed\": that conclusion is replaced by one the fold model writes from the transcript the cut is dropping, aimed at the standing task. Directed costs one small-model call per cut and keeps less, on purpose.",
+      "description": "\"outcome\" (default): the conclusion the working model writes when it calls close_task. \"reply\": close_task only marks the boundary, and the model's own last reply for the sub-task is kept instead, which costs no extra output. \"directed\": a small model writes the entry from the dropped transcript; measured, it halves the ledger and doubles the re-reading.",
       "required": false,
       "default": "outcome",
       "options": [
         "outcome",
-        "directed"
+        "directed",
+        "reply"
       ]
     }
   }

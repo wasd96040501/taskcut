@@ -8,6 +8,7 @@ import {
   boundedHumanTurns,
   directedPrompt,
   droppedMessages,
+  subtaskReply,
   renderDropped,
   openingRequest,
   foldPrompt,
@@ -258,5 +259,35 @@ describe('directedPrompt', () => {
 
   test('says so when the standing task was never recorded', () => {
     assert.match(directedPrompt('', 'a sub-task', ''), /nothing was recorded/)
+  })
+})
+
+describe('subtaskReply', () => {
+  const said = (text: string) => ({ role: 'assistant', text, toolUses: [] }) as SessionMessage
+  const asked = (text: string) => ({ role: 'user', text, toolUses: [] }) as SessionMessage
+  const result = { role: 'user', text: 'output', toolUses: [], toolResults: [{ tool_use_id: 'x', text: 'output' }] } as unknown as SessionMessage
+
+  test('is everything the assistant said since the last human turn', () => {
+    const got = subtaskReply([said('old'), asked('fix issue 3'), said('the bug is X'), result, said('fixed: Y')])
+    assert.equal(got, 'the bug is X\n\nfixed: Y')
+  })
+
+  test('keeps the answer when the last message is only "Done."', () => {
+    // Answer, then close_task, then a closing line: the last message alone
+    // would keep "Done." and lose the answer.
+    const got = subtaskReply([asked('fix it'), said('the cause was an off-by-one in render'), said(''), said('Done.')])
+    assert.match(got, /off-by-one/)
+  })
+
+  test('a tool result is not a human turn, so it does not end the sub-task', () => {
+    assert.equal(subtaskReply([asked('go'), said('a'), result, said('b')]), 'a\n\nb')
+  })
+
+  test('never takes what the person said', () => {
+    assert.equal(subtaskReply([asked('please fix it')]), '')
+  })
+
+  test('is empty when there is nothing to take', () => {
+    assert.equal(subtaskReply([]), '')
   })
 })

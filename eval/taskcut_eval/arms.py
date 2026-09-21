@@ -53,6 +53,16 @@ ARMS: dict[str, Arm] = {
         config=_REALISTIC_FLOOR,
         closes_tasks=True,
     ),
+    "reply": Arm(
+        name="reply",
+        description=(
+            "close_task only marks the boundary; the model's own last reply for the sub-task is kept "
+            "instead of a conclusion written for the purpose."
+        ),
+        env={"TASKCUT": "1"},
+        config={**_REALISTIC_FLOOR, "ledgerMode": "reply"},
+        closes_tasks=True,
+    ),
     "directed": Arm(
         name="directed",
         description=(

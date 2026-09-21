@@ -45,8 +45,9 @@ describe('readConfig', () => {
 })
 
 describe('ledgerMode', () => {
-  test('takes the directed mode when it is asked for by name', () => {
+  test('takes each mode when it is asked for by name', () => {
     assert.equal(readConfig({ ledgerMode: 'directed' }).ledgerMode, 'directed')
+    assert.equal(readConfig({ ledgerMode: 'reply' }).ledgerMode, 'reply')
   })
 
   test('falls back to outcome for anything it does not recognise', () => {

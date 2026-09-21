@@ -27,6 +27,7 @@ import {
   droppedMessages,
   foldPrompt,
   foldedEntry,
+  subtaskReply,
   planFold,
   renderDropped,
   openingRequest,
@@ -146,6 +147,20 @@ async function directLastEntry(
   }
 }
 
+/**
+ * Fills the entry just closed from the model's own last reply for it. No model
+ * call, and no output spent on writing the conclusion a second time.
+ */
+async function replyLastEntry($: EngineInterface, all: readonly SessionMessage[]): Promise<Entry[]> {
+  const ledger = await readLedger($)
+  const last = ledger[ledger.length - 1]
+  const reply = subtaskReply(all)
+  if (last === undefined || !reply) return ledger
+  const filled = [...ledger.slice(0, -1), { ...last, outcome: reply }]
+  await writeLedger($, filled)
+  return filled
+}
+
 export const register: Register = (on, options) => {
   const config = readConfig(options)
 
@@ -167,7 +182,12 @@ export const register: Register = (on, options) => {
       // model write a usable conclusion, and under `directed` it would be a
       // lie that buys an inventory nobody reads.
       description:
-        config.ledgerMode === 'directed'
+        config.ledgerMode === 'reply'
+          ? 'Call this the moment a sub-task is finished and you are moving on to the next one. ' +
+            'Name the sub-task in one line. The working context of the sub-task is dropped ' +
+            'afterwards; your reply for it is what is kept, so end the sub-task by saying what ' +
+            'you did and what you found, as you normally would.'
+          : config.ledgerMode === 'directed'
           ? 'Call this the moment a sub-task is finished and you are moving on to the next one. ' +
             'Name what you finished and give the result in a line or two. The working context of ' +
             'the sub-task is dropped afterwards; what is kept in its place is written from the ' +
@@ -177,14 +197,23 @@ export const register: Register = (on, options) => {
             'is dropped from your context. Only the text you write in `outcome` survives, so write ' +
             'what the next sub-task will need: the decisions you made, the paths and names and ' +
             'numbers, and what is now known to be true.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          task: { type: 'string', description: 'The sub-task you are closing, in one line.' },
-          outcome: { type: 'string', description: 'Everything worth carrying forward.' },
-        },
-        required: ['task', 'outcome'],
-      },
+      // Under `reply` there is no conclusion to write: asking for one would
+      // spend output on what the reply already says.
+      inputSchema:
+        config.ledgerMode === 'reply'
+          ? {
+              type: 'object',
+              properties: { task: { type: 'string', description: 'The sub-task you are closing, in one line.' } },
+              required: ['task'],
+            }
+          : {
+              type: 'object',
+              properties: {
+                task: { type: 'string', description: 'The sub-task you are closing, in one line.' },
+                outcome: { type: 'string', description: 'Everything worth carrying forward.' },
+              },
+              required: ['task', 'outcome'],
+            },
     })
     await sweepStaleLedgers($)
     return result
@@ -192,7 +221,10 @@ export const register: Register = (on, options) => {
 
   on('tool.call', { tool: 'mcp__taskcut__close_task' }, async ($, e) => {
     const ledger = await readLedger($)
-    ledger.push({ task: String(e.task), outcome: String(e.outcome), at: await $.clock.now() })
+    // Under `reply` there is no outcome argument; the entry is filled from the
+    // reply when the cut happens.
+    const outcome = e.outcome === undefined ? '' : String(e.outcome)
+    ledger.push({ task: String(e.task), outcome, at: await $.clock.now() })
     const folded = await foldLedger($, ledger, config)
     await writeLedger($, folded)
     boundaryReached = true
@@ -236,7 +268,9 @@ export const register: Register = (on, options) => {
     const ledger =
       config.ledgerMode === 'directed'
         ? await directLastEntry($, e.messages, kept, config)
-        : await readLedger($)
+        : config.ledgerMode === 'reply'
+          ? await replyLastEntry($, e.messages)
+          : await readLedger($)
     const summary: SessionMessage = { role: 'user', text: renderLedger(ledger), toolUses: [] }
     // No `next(e)`: the cut is deterministic, so no summariser runs and the
     // messages kept carry their engine handles, standing exactly as recorded.
