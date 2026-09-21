@@ -151,7 +151,7 @@ class Session:
         mine = [p for p in self.transcripts.glob("*.jsonl") if p not in self.earlier]
         return sum(p.read_text(errors="replace").count('"subtype":"turn_duration"') for p in mine)
 
-    def ask(self, text: str, timeout: float = 1800, settle: float = 5.0) -> bool:
+    def ask(self, text: str, timeout: float = 1800, settle: float = 8.0) -> bool:
         """Sends one prompt and waits for its turn to end.
 
         The end of a turn is read from the transcript, not the screen. A model

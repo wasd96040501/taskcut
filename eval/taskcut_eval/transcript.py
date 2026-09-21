@@ -64,7 +64,8 @@ class Turn:
 class Transcript:
     path: Path
     turns: list[Turn] = field(default_factory=list)
-    #: Every ledger message seen, in order. A cut rewrites the whole message
+    #: Every compaction summary seen, in order -- taskcut's own ledger before
+    #: 0.6.0, the engine's summary since. A cut rewrites the whole message
     #: list, so an earlier cut's message is recorded again by the next one: the
     #: count is an upper bound on the number of cuts, not the number itself.
     #: The last one is the ledger as it finally stood.
@@ -141,7 +142,9 @@ def load(path: str | Path) -> Transcript:
             if has_result:
                 continue  # the answer half of a tool call, not a human turn
             text = text.strip()
-            if text.startswith(LEDGER_OPENINGS):
+            # What a compaction put in place of the conversation: taskcut's own
+            # ledger before 0.6.0, the engine's summary since.
+            if record.get("isCompactSummary") or text.startswith(LEDGER_OPENINGS):
                 out.ledgers.append(text)
                 continue
             current = Turn(prompt=text)

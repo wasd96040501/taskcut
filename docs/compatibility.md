@@ -33,6 +33,7 @@ installed, and `TASKCUT=0` remains a kill switch either way.
 
 | taskcut | Claude Code |
 | --- | --- |
+| 0.6.x | 2.1.278 and newer |
 | 0.5.x | 2.1.278 and newer |
 | 0.4.x | 2.1.278 and newer |
 
@@ -65,8 +66,7 @@ For a plugin, the public surface that a major version protects is:
 
 * the `userConfig` keys and their meanings;
 * the `TASKCUT` switch;
-* under the `outcome` setting, the name and input schema of the `close_task` tool;
-* the shape of the ledger stored under `~/.claude/plugins/store/`.
+* that a compaction taskcut triggers is Claude Code's own, as `/compact` runs it.
 
-Changing the transcript the cut produces is a minor-version change, not a major
-one: it is the point of the plugin, and it is governed by the settings above.
+Changing when taskcut judges a turn finished is a minor-version change: it is
+the point of the plugin, and it is governed by the settings above.

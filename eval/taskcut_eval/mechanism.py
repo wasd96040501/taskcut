@@ -12,7 +12,7 @@ the things that have to hold every time:
 * crossing again cuts again;
 * what was cut can still be recalled from the ledger.
 
-It costs a few minutes and well under a dollar a variant, and needs a terminal
+It costs a few minutes and around a dollar, and needs a terminal
 and credentials, so it is not in CI.
 """
 
@@ -31,12 +31,7 @@ from .arms import Arm
 #: the ledger do not know what the floor is, only whether it has been passed.
 FLOOR = 5
 
-VARIANTS = {
-    "plain": Arm(name="mechanism-plain", description="", env={"TASKCUT": "1"}, config={"floorPercent": FLOOR}),
-    "outcome": Arm(
-        name="mechanism-outcome", description="", env={"TASKCUT": "1"}, config={"floorPercent": FLOOR, "outcome": True}
-    ),
-}
+ARM = Arm(name="mechanism", description="", env={"TASKCUT": "1"}, config={"floorPercent": FLOOR})
 
 #: A file of about fifteen thousand tokens, so that reading two of them moves a
 #: million-token window across five percent.
@@ -118,7 +113,10 @@ class Turn:
         return bool(self.verdicts or self.cuts or self.closes or self.searches or self.reminders)
 
 
-def _is_prompt(content) -> str | None:
+def _is_prompt(record: dict) -> str | None:
+    if record.get("isCompactSummary"):
+        return None
+    content = (record.get("message") or {}).get("content")
     if isinstance(content, str):
         return content
     blocks = [b for b in content or [] if isinstance(b, dict)]
@@ -139,7 +137,7 @@ def turns(path: Path) -> list[Turn]:
             continue
         kind, message = record.get("type"), record.get("message") or {}
         if kind == "user":
-            prompt = _is_prompt(message.get("content"))
+            prompt = _is_prompt(record)
             if prompt is not None:
                 out.append(Turn(prompt=prompt))
             elif out and REMINDER_WORDS in json.dumps(message.get("content")):
@@ -153,9 +151,7 @@ def turns(path: Path) -> list[Turn]:
             turn.reminders += 1
         elif kind == "system" and record.get("subtype") == "compact_boundary":
             turn.cuts.append(int((record.get("compactMetadata") or {}).get("preTokens") or 0))
-        elif kind == "system" and str(record.get("content") or "").startswith("taskcut:") and "context at" in str(
-            record.get("content")
-        ):
+        elif kind == "system" and str(record.get("content") or "").startswith("taskcut:"):
             turn.verdicts.append(str(record.get("content")))
         elif kind == "assistant":
             usage, request = message.get("usage") or {}, record.get("requestId") or message.get("id")
@@ -178,7 +174,8 @@ def turns(path: Path) -> list[Turn]:
     return out
 
 
-#: Words from the outcome reminder, to find it wherever it was attached.
+#: Words from the reminder 0.5.0 attached for close_task: a guard that nothing
+#: like it comes back.
 REMINDER_WORDS = "context window is filling up"
 
 
@@ -189,10 +186,9 @@ class Result:
     detail: str
 
 
-def check(path: Path, variant: str, window: int) -> list[Result]:
+def check(path: Path, window: int) -> list[Result]:
     """Every property the mechanism promises, asserted against one transcript."""
-    all_turns = turns(path)
-    work = [t for t in all_turns if t.contexts]  # turns that ran, not re-emitted copies
+    work = [t for t in turns(path) if t.contexts]  # turns that ran, not re-emitted copies
     floor = window * FLOOR / 100
     # A whole percentage, compared as the plugin compares it: allow a point of
     # rounding either side rather than assert on the boundary itself.
@@ -205,8 +201,9 @@ def check(path: Path, variant: str, window: int) -> list[Result]:
     wanted = ["3", SECTION_3_FIRST, "epsilon", *LAST_LINES.values()]
     cuts = [c for t in work for c in t.cuts]
     finished = [t for t in work if any("is finished" in v for v in t.verdicts)]
-
-    results = [
+    skipped = [v for t in work for v in t.verdicts if "skipped" in v]
+    closes = [c for t in work for c in t.closes]
+    return [
         Result(
             "quiet below the floor",
             not any(t.active for t in below),
@@ -223,45 +220,21 @@ def check(path: Path, variant: str, window: int) -> list[Result]:
             "; ".join(question.verdicts) if question else "step not found",
         ),
         Result(
-            "a finished turn is cut",
-            bool(finished) and all(t.cuts for t in finished) and answered in finished,
-            f"{len(finished)} judged finished, {sum(bool(t.cuts) for t in finished)} cut",
+            "a finished turn is compacted",
+            bool(finished) and all(t.cuts for t in finished) and answered in finished and not skipped,
+            f"{len(finished)} judged finished, {sum(bool(t.cuts) for t in finished)} compacted, {len(skipped)} skipped",
         ),
-        Result("nothing is cut below the floor", all(c >= floor for c in cuts), f"cuts at {cuts}"),
-        Result("crossing again cuts again", len(cuts) >= 2, f"{len(cuts)} cut(s)"),
+        Result("nothing is compacted below the floor", all(c >= floor for c in cuts), f"compactions at {cuts}"),
+        Result("crossing again compacts again", len(cuts) >= 2, f"{len(cuts)} compaction(s)"),
         Result(
-            "what was cut can be recalled",
+            "what was compacted can be recalled",
             all(w in recall for w in wanted),
             "missing: " + ", ".join(w for w in wanted if w not in recall) if any(w not in recall for w in wanted) else "all six",
         ),
+        Result(
+            "the working model is never asked for anything",
+            not closes and not any(t.searches or t.reminders for t in work),
+            f"{len(closes)} close_task, {sum(t.searches for t in work)} ToolSearch, "
+            f"{sum(t.reminders for t in work)} reminder(s)",
+        ),
     ]
-    closes = [c for t in work for c in t.closes]
-    if variant == "plain":
-        results.append(
-            Result(
-                "the working model is never asked for anything",
-                not closes and not any(t.searches or t.reminders for t in work),
-                f"{len(closes)} close_task, {sum(t.searches for t in work)} ToolSearch, "
-                f"{sum(t.reminders for t in work)} reminder(s)",
-            )
-        )
-    else:
-        ledgers = " ".join(t.prompt for t in all_turns if t.prompt.startswith("[taskcut]"))
-        written = [str(c.get("outcome", "")) for c in closes if c.get("outcome")]
-        results.append(
-            Result(
-                "close_task is offered past the floor only",
-                not any(t.closes or t.reminders for t in below) and bool(closes),
-                f"{len(closes)} close_task call(s), none below the floor"
-                if closes and not any(t.closes for t in below)
-                else f"{len(closes)} call(s)",
-            )
-        )
-        results.append(
-            Result(
-                "a written outcome is what the ledger keeps",
-                bool(written) and any(w[:60] in ledgers for w in written),
-                f"{len(written)} outcome(s) written",
-            )
-        )
-    return results

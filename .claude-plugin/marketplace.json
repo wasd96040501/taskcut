@@ -1,19 +1,24 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "taskcut",
-  "description": "Compaction at sub-task boundaries for Claude Code",
+  "description": "Compaction at the end of a sub-task, not when the window fills, for Claude Code",
   "owner": {
     "name": "Yangze Luo"
   },
   "plugins": [
     {
       "name": "taskcut",
-      "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished; if it is, taskcut replaces its working context with a ledger of what was asked and answered, keeping the human turns verbatim and spending no summarizer call. Below the floor it does nothing and costs nothing.",
+      "description": "Compacts at the end of a sub-task instead of when the context window fills. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished, from the same inputs auto mode's permission classifier reads; if it is, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
       "author": {
         "name": "Yangze Luo"
       },
       "category": "productivity",
-      "keywords": ["context", "compaction", "long-running", "function-hooks"],
+      "keywords": [
+        "context",
+        "compaction",
+        "long-running",
+        "function-hooks"
+      ],
       "license": "Apache-2.0",
       "homepage": "https://github.com/wasd96040501/taskcut",
       "source": "./"

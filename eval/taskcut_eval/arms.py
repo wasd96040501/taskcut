@@ -4,9 +4,9 @@ An arm is the independent variable. It carries the environment and the plugin
 settings for one session and nothing else: it names no workload, and no metric
 reads it. Adding an arm is adding an entry here.
 
-Earlier versions compared ways of writing the ledger at a `close_task` the
-model was told to call (`boundary`, `reply`, `directed`). The plugin no longer
-works that way; those results stay in `results/runs.json` and
+Earlier versions compared ways of writing a ledger of their own at a
+`close_task` the model was told to call (`boundary`, `reply`, `directed`). The
+plugin no longer writes one; those results stay in `results/runs.json` and
 docs/measurement.md, and running them again means checking out v0.4.0.
 """
 
@@ -45,15 +45,9 @@ ARMS: dict[str, Arm] = {
     ),
     "on": Arm(
         name="on",
-        description="taskcut as shipped: past the floor, a finished turn is cut and its answer kept.",
+        description="taskcut as shipped: past the floor, a turn judged finished is compacted.",
         env={"TASKCUT": "1"},
         config=_REALISTIC_FLOOR,
-    ),
-    "outcome": Arm(
-        name="outcome",
-        description="As `on`, and past the floor the model is asked to write a conclusion with close_task.",
-        env={"TASKCUT": "1"},
-        config={**_REALISTIC_FLOOR, "outcome": True},
     ),
 }
 

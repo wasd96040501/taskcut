@@ -1,5 +1,5 @@
 {
-  "description": "Once the context window is past the configured floor, judges at the end of each turn, with one small-model call reading the request and the answer, whether the work asked for is finished. If it is, a session.compact hook replaces the transcript with the human turns plus a ledger of finished work, without asking a summarizer. Below the floor nothing runs. The engine's own threshold compaction is left in place as the safety net, with the ledger passed to it as instructions.",
+  "description": "Once the context window is past the configured floor, judges at the end of each turn, with one small-model call reading what the permission classifier reads, whether the work asked for is finished. If it is, calls $.session.compact(), the same compaction /compact runs. Below the floor nothing runs.",
   "modules": [
     "./register.ts"
   ]

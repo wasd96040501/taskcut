@@ -169,21 +169,20 @@ def _numbers(run) -> dict:
 
 def cmd_mechanism(args) -> int:
     """One short real session at a low floor, and every property it must show."""
-    arm = mechanism.VARIANTS[args.variant]
     work = Path(args.work)
     model = models.get(args.model)
-    space = mechanism.materialise(_workspace(work, "mechanism", arm.name, model.alias))
-    plugin = driver.prepare_plugin(arm, REPO_ROOT, work / "plugins" / arm.name)
-    mechanism.drive(space, plugin, arm, model.alias)
+    space = mechanism.materialise(_workspace(work, "mechanism", mechanism.ARM.name, model.alias))
+    plugin = driver.prepare_plugin(mechanism.ARM, REPO_ROOT, work / "plugins" / mechanism.ARM.name)
+    mechanism.drive(space, plugin, mechanism.ARM, model.alias)
 
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    stem = f"mechanism--{args.variant}--{model.alias}"
+    stem = f"mechanism--{model.alias}"
     destination = results / f"{stem}.jsonl"
     destination.write_bytes(transcript.find(PROJECTS, space).read_bytes())
     print(f"transcript -> {destination}")
 
-    verdicts = mechanism.check(destination, args.variant, model.window)
+    verdicts = mechanism.check(destination, model.window)
     (results / f"{stem}.checks.json").write_text(json.dumps([vars(v) for v in verdicts], indent=1) + "\n")
     for v in verdicts:
         print(f"  {'PASS' if v.passed else 'FAIL'}  {v.name}: {v.detail}")
@@ -206,7 +205,6 @@ def main(argv=None) -> int:
     run.set_defaults(func=cmd_run)
 
     mech = sub.add_parser("mechanism", help="check the mechanism end to end in one short real session")
-    mech.add_argument("--variant", choices=sorted(mechanism.VARIANTS), default="plain")
     mech.add_argument("--model", default="sonnet", help=f"one of {', '.join(models.MODELS)}, or any --model alias")
     mech.set_defaults(func=cmd_mechanism)
 

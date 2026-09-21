@@ -61,8 +61,7 @@ make eval-report
 make eval-test            # the harness's own tests
 ```
 
-There are three arms: `off`, `on` (taskcut as shipped) and `outcome` (with the
-`outcome` setting), all at a floor of 30%.
+There are two arms, `off` and `on` (taskcut as shipped), both at a floor of 30%.
 
 `make eval-run` materialises the workspace, bakes the arm's settings into a
 copy of the plugin, drives the session, and copies the transcript into
@@ -81,14 +80,12 @@ twice, and asserts from the transcript:
 
 * below the floor, nothing -- no judgement, no tool, no reminder;
 * past it, every finished turn is judged, a turn that ends in a question is
-  kept, and a finished one is cut;
-* nothing is cut below the floor, and crossing again cuts again;
-* what was cut can be recalled from the ledger, value for value;
-* without `outcome`, the working model is never asked for anything; with it
-  (`VARIANT=outcome`), `close_task` appears only past the floor and what it
-  writes is what the ledger keeps.
+  kept, and a finished one is compacted, none skipped;
+* nothing is compacted below the floor, and crossing again compacts again;
+* what was compacted can still be recalled, value for value;
+* the working model is never asked for anything.
 
-It exits non-zero if any fails. Each assertion was also run against a 0.4.0
+It exits non-zero if any fails. The assertions were also run against a 0.4.0
 transcript, where the ones that should fail do.
 
 ## Workloads

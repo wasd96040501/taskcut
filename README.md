@@ -7,24 +7,23 @@ A [Claude Code](https://claude.com/claude-code) plugin that compacts the
 conversation when a sub-task ends, instead of when the context window fills.
 
 ```
-              before                                  after
-  ────────────────────────────────      ────────────────────────────────
-  you:       "do sub-task A"            you:       "do sub-task A"
-  assistant: reads 9 files              you:       "do sub-task C"
-  you:        tool results              you:       [ledger]
-  assistant: runs 4 commands                       1. [CLOSED] sub-task A
-  you:        tool results                            <what it established>
-  assistant: two dead ends                         2. [CLOSED] sub-task B
-  you:       "do sub-task B"                          <what it established>
-  assistant: reads 6 more files
-  ...  ~40 more messages  ...
-  you:       "do sub-task C"
+  without taskcut                          with taskcut
+  ───────────────────────────────────      ───────────────────────────────────
+  you:  "do A"   ... A's work ...          you:  "do A"   ... A's work ...
+  you:  "do B"   ... B's work ...                         A is done
+  you:  "do C"   ... C's work, half-way                   ── compacted ──
+                 ── window full ──         you:  "do B"   ... B's work ...
+                 ── compacted ──                          B is done
+                 C's live detail                          ── compacted ──
+                 summarised away           you:  "do C"   ... C's work ...
 ```
 
-Your own turns are kept **word for word**. Everything the model did for a
-finished sub-task is replaced by the answer it gave for it. No summariser runs,
-so nothing that is kept is paraphrased. And until the context is actually
-filling up, taskcut does nothing at all and costs nothing.
+taskcut changes **when** Claude Code compacts, not how. Once the context is
+past a floor, a small model judges at the end of each turn whether the work
+you asked for is finished — reading what auto mode's permission classifier
+reads. If it is, taskcut runs Claude Code's own compaction, the one `/compact`
+runs. Below the floor it does nothing at all and costs nothing, and nothing in
+your prompts has to mention it.
 
 ## Try it in two minutes
 
@@ -56,11 +55,11 @@ Run `cat b.txt` and tell me the last word.
 Without running any tool: list every task I have given you, with its result.
 ```
 
-After each of the first two, a dim line says what taskcut decided:
-`taskcut: context at 4%, the work is finished; dropping its working context`.
-The third answer comes back complete — both tasks, with their results — even
-though the work that produced them is no longer in the conversation. Nothing
-in the prompts mentions taskcut: it needs nothing from you or from the model.
+After each of the first two, a dim line says what taskcut decided —
+`taskcut: context at 4%, the work is finished; compacting` — and Claude Code
+compacts, as `/compact` would. The third answer comes back complete, both tasks
+with their results, from the compacted conversation. Nothing in the prompts
+mentions taskcut: it needs nothing from you or from the model.
 
 Throw the trial away with `cd .. && rm -rf taskcut-trial`.
 
@@ -76,11 +75,8 @@ the middle of a sub-task, summarising away detail that is still live while
 keeping detail from work that finished an hour ago.
 
 A long job is a sequence of shorter ones, and the moment when *what still
-matters* has a clean answer is the end of a sub-task. taskcut cuts there
-instead: once the context is past a floor, a small model reads what you asked
-and what the assistant answered at the end of each turn, and judges whether
-that piece of work is finished — the way auto mode has a classifier judge each
-action.
+matters* has a clean answer is the end of a sub-task. taskcut compacts there
+instead, and leaves what a compaction keeps to Claude Code.
 
 ## Install it for real
 
@@ -115,62 +111,50 @@ claude plugin marketplace remove taskcut
 
 ## What it costs
 
-Measured against the same work with the plugin off, over five workloads
-including two that build something and are graded by running it
-([docs/measurement.md](docs/measurement.md)):
-
-| | what was measured |
+| | |
 | --- | --- |
-| **Context stops climbing** | ten sub-tasks ended at 44,743 tokens of context instead of 107,857 — **59% less**, every probe still answered, without going back to disk once |
-| **How much less varies** | the same ten sub-tasks against real framework source saved **10%**, because a real module needs far more said about it and the ledger grew accordingly |
-| **Accuracy never moved** | across sixteen runs, no arm ever answered wrongly or failed an acceptance check. What a cut costs is re-reading, not correctness |
-| **A cut is not free** | with the floor forced to zero, **$0.41 to $2.04** more per run, 1.4× to 2.7× — which is exactly what the floor exists to avoid |
-| **Still unproven** | nothing yet shows the *baseline* doing worse work. taskcut reliably does what it says to the context; whether that buys anything is open. [What would settle it](docs/measurement.md#6-what-has-not-been-shown) |
-| **On a 1M window it waits a long time** | twenty real changes to click — bugs and features, forty minutes of work in one session — peaked at 294,690 tokens, 29% of Sonnet 5's window, with every change correct. At the default floor of 40% taskcut does not act until 400,000. It is for sessions that genuinely get that long |
-| **Closing a task costs a round-trip** | each `close_task` is one more request, which re-reads the context from the cache: **about +10%** over those twenty changes ($11.50 against $10.37), paid whether or not anything is cut |
+| **Below the floor** | Nothing. No model is asked, nothing is written, and the working model is never told taskcut exists. `make eval-mechanism` asserts it on a real session. |
+| **Each finished turn past the floor** | One call to `model` — `haiku` by default — reading at most about 12k tokens: your messages, the assistant's non-read-only tool calls, `CLAUDE.md` and the reply. Under two cents. |
+| **Each compaction** | Exactly what `/compact` costs, because it is `/compact`. On a 65k-token session it took 21–25 seconds. |
 
-One run per cell, on Sonnet. These show the shape of a difference, not its size.
+What it buys is the question the benchmark is for; see
+[docs/measurement.md](docs/measurement.md), which also records what earlier
+versions — which built their own compacted transcript — measured.
+
+On a 1M window the default floor of 40% is 400,000 tokens, and twenty real
+changes in one Sonnet 5 session reached 29%. taskcut is for sessions that
+genuinely get that long.
 
 ## Settings
 
-Every setting has a working default. Set one at install time with
-`--config KEY=VALUE`, repeatable, or change it later from a session with
-`/plugin`.
+Both have a working default. Set one at install time with `--config KEY=VALUE`,
+or change it later from a session with `/plugin`.
 
 | Setting | Default | What it controls |
 | --- | --- | --- |
-| `floorPercent` | `40` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is cut. A cut re-caches the kept set at full price, measured at 12k–15k tokens, so below the floor it costs more than it saves. `0` judges every turn. |
-| `recentHumanTurns` | `2` | How many of your most recent turns are kept beside the first one. Your turns are unbounded on a long run, so keeping all of them only moves the growth. |
-| `ledgerVerbatim` | `12` | How many finished pieces of work stay in the model's own words. Past this, the oldest fold into one rolled-up entry. |
-| `model` | `haiku` | The small model taskcut asks: whether a turn's work is finished, and to fold the ledger. An alias or a full id, resolved the way a `--model` value is. |
-| `outcome` | `false` | Whether the working model is asked to write a conclusion for each sub-task. Off, its own answer is what is kept and taskcut costs it nothing. On, past the floor it is offered a `close_task` tool: that costs output tokens and one request per call, and the tool stays for the rest of the session. |
+| `floorPercent` | `40` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so below the floor it costs more than it saves. `0` judges every turn. |
+| `model` | `haiku` | The model that judges whether a turn's work is finished. An alias or a full id, resolved the way a `--model` value is. |
 
 ## How it works
 
-Nothing happens until the context is past `floorPercent`. From then on, at the
-end of each turn that the model finished, taskcut makes one small-model call:
-it shows `model` what you asked and what the assistant answered — a few
-thousand characters, never the transcript — and asks whether that work is
-finished. A reply that asks you something, waits for a decision or reports
-partial progress is not; the context is kept.
+Nothing happens until the context is past `floorPercent`, read from the same
+figure the status line shows. From then on, at the end of each turn the model
+finished, taskcut makes one call to `model` with `$.model.classify`, the hooks
+API's classifier. It sees what auto mode's permission classifier sees — every
+message you sent, every tool call the assistant made except read-only lookups,
+and `CLAUDE.md`, with all tool output stripped — plus the reply the assistant
+just stopped on, and it answers `finished` or `unfinished`.
 
-When it is finished, a `session.compact` hook answers with a transcript it
-builds itself:
-
-* your first turn, and your most recent `recentHumanTurns`, **verbatim** by
-  their engine handles — nothing you said is ever paraphrased. The first is
-  always kept because nothing else records what the job is for;
-* one message holding the ledger: every request since the last cut, with the
-  answer the model gave it, after the ones earlier cuts recorded.
-
-That hook never calls `next`, so no summariser runs and the cut is a
-deterministic function of the transcript. After it the context is back below
-the floor, and taskcut is silent again until it fills.
+A reply that asks you something, waits for a decision or reports partial
+progress is `unfinished`, and nothing happens. On `finished`, taskcut calls
+`$.session.compact()` — the same call `/compact` makes — and Claude Code
+compacts as it always does. The context drops back below the floor, and taskcut
+is silent again until it fills.
 
 | File | Role |
 | --- | --- |
-| `hooks/register.ts` | Every hook, and every call on the engine interface. |
-| `hooks/ledger.ts` | The ledger, the keep-set rule and what the judge reads, as pure functions. |
+| `hooks/register.ts` | The two hooks, and every call on the engine interface. |
+| `hooks/judge.ts` | What the judge reads, as a pure function. |
 | `hooks/activation.ts` | Whether taskcut runs at all, as a pure rule. |
 | `hooks/config.ts` | Settings, with defaults for anything unset. |
 | `eval/` | The benchmark. `make eval-list`. |
@@ -185,20 +169,16 @@ everything that can be reasoned about as plain data lives beside it.
 * **Interactive sessions only.** `claude -p` and the SDK transport cannot
   compact at all, so taskcut logs and does nothing there. A terminal session or
   `claude --bg` works.
-* **The ledger is only as good as the answers.** taskcut keeps what the model
-  answered, exactly; it does not check that it is sufficient. A model that ends
-  a long job with "Done." leaves a thin record.
-* **Only answers survive a cut.** The model's narration, its tool calls and
-  their output go; its answer to each request stays, in the ledger. A detail it
-  saw but never said has to be looked up again.
-* **The judge sees the request and the answer, not the work.** It can call a
-  turn finished that the model only claimed to finish. A wrong call costs
-  re-reading, not a lost request: your turns and the answers survive.
-* **Cuts happen between turns.** A single turn that runs for hours is not cut
-  until it ends; the engine's own compaction, told what the ledger already
-  settled, remains the safety net for it.
-* **Under `outcome`, the tool cannot be taken back.** Claude Code has no way to
-  unregister a tool, so once `close_task` has been offered it stays offered.
+* **The judge sees what was done, not what came of it.** Like the permission
+  classifier, it never reads tool output, so it can call a turn finished that
+  the model only claimed to finish. A wrong call costs a compaction a turn
+  early, which is what Claude Code would have done at the threshold anyway.
+* **Compaction happens between turns.** A single turn that runs for hours is
+  not compacted until it ends; Claude Code's own threshold compaction remains
+  the safety net inside it.
+* **A prompt typed while the judge runs wins.** Compaction cannot start once the
+  next turn has, so it is skipped and noted; the next finished turn is judged
+  again.
 * **One session per process.** Module state assumes Claude Code loads a hooks
   module once per session, which holds today but the API does not guarantee.
 * **Early access.** The function-hooks API may change between Claude Code
@@ -207,11 +187,11 @@ everything that can be reasoned about as plain data lives beside it.
 
 ## Documentation
 
-* [docs/measurement.md](docs/measurement.md) — what the benchmark found: what a
-  cut costs, what it keeps, and what has not been shown.
+* [docs/measurement.md](docs/measurement.md) — what the benchmark found, for
+  this version and the ones before it.
 * [eval/README.md](eval/README.md) — the benchmark itself.
-* [docs/design.md](docs/design.md) — why the cut is shaped this way, and the
-  constraints that produced each rule.
+* [docs/design.md](docs/design.md) — why taskcut decides only when, and the
+  designs it replaced.
 * [docs/troubleshooting.md](docs/troubleshooting.md) — what to check when
   nothing is being compacted.
 * [docs/compatibility.md](docs/compatibility.md) — what a Claude Code upgrade

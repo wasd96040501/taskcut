@@ -1,7 +1,7 @@
 {
   "name": "taskcut",
-  "version": "0.5.0",
-  "description": "Compacts the conversation at sub-task boundaries instead of at the context limit. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished; if it is, taskcut replaces its working context with a ledger of what was asked and answered, keeping the human turns verbatim and spending no summarizer call. Below the floor it does nothing and costs nothing.",
+  "version": "0.6.0",
+  "description": "Compacts at the end of a sub-task instead of when the context window fills. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished, from the same inputs auto mode's permission classifier reads; if it is, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
   "author": {
     "name": "Yangze Luo"
   },
@@ -17,38 +17,17 @@
   "userConfig": {
     "floorPercent": {
       "type": "number",
-      "title": "Compact above this context fill",
-      "description": "Below this context fill taskcut does nothing at all: no model is asked and nothing is cut. A cut invalidates the prompt cache, and the kept set is re-cached at full price, measured at 12k-15k tokens, so it is only worth making once the window has actually filled. Set to 0 to judge every turn.",
+      "title": "Only past this context fill",
+      "description": "Below this context fill taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so it is only worth making once the window has actually filled. Set to 0 to judge every turn.",
       "required": false,
       "default": 40
     },
-    "recentHumanTurns": {
-      "type": "number",
-      "title": "Recent human turns kept verbatim",
-      "description": "Human turns are kept word for word, but they are unbounded on a long run. The turn that set the standing task is always kept; this is how many of the most recent ones are kept beside it.",
-      "required": false,
-      "default": 2
-    },
-    "ledgerVerbatim": {
-      "type": "number",
-      "title": "Ledger entries kept verbatim",
-      "description": "The ledger is the one thing a cut never shrinks. Past this many finished pieces of work the oldest are folded into a single rolled-up entry by one small-model call, made only when a cut happens.",
-      "required": false,
-      "default": 12
-    },
     "model": {
       "type": "string",
-      "title": "Small model taskcut asks",
-      "description": "Judges, at the end of a turn past the floor, whether the work asked for is finished, from the request and the answer alone; and folds the ledger. Alias or full id, resolved the way a --model value is.",
+      "title": "Model that judges",
+      "description": "Judges, at the end of a turn past the floor, whether the work asked for is finished. Alias or full id, resolved the way a --model value is.",
       "required": false,
       "default": "haiku"
-    },
-    "outcome": {
-      "type": "boolean",
-      "title": "Ask for a written conclusion",
-      "description": "Off (default): the model's own answer for each piece of work is what the ledger keeps, and taskcut costs the working model nothing. On: once the context is past the floor, the model is offered a close_task tool and asked to write what the next sub-task needs; that costs output tokens and one request per call, and the tool stays available for the rest of the session.",
-      "required": false,
-      "default": false
     }
   }
 }

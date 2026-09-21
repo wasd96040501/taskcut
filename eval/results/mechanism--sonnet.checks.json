@@ -15,33 +15,28 @@
   "detail": "taskcut: context at 7%, the work is not finished; keeping it"
  },
  {
-  "name": "a finished turn is cut",
+  "name": "a finished turn is compacted",
   "passed": true,
-  "detail": "3 judged finished, 3 cut"
+  "detail": "3 judged finished, 3 compacted, 0 skipped"
  },
  {
-  "name": "nothing is cut below the floor",
+  "name": "nothing is compacted below the floor",
   "passed": true,
-  "detail": "cuts at [69190, 69057, 68684]"
+  "detail": "compactions at [67877, 61938, 61958]"
  },
  {
-  "name": "crossing again cuts again",
+  "name": "crossing again compacts again",
   "passed": true,
-  "detail": "3 cut(s)"
+  "detail": "3 compaction(s)"
  },
  {
-  "name": "what was cut can be recalled",
+  "name": "what was compacted can be recalled",
   "passed": true,
   "detail": "all six"
  },
  {
-  "name": "close_task is offered past the floor only",
+  "name": "the working model is never asked for anything",
   "passed": true,
-  "detail": "2 close_task call(s), none below the floor"
- },
- {
-  "name": "a written outcome is what the ledger keeps",
-  "passed": true,
-  "detail": "2 outcome(s) written"
+  "detail": "0 close_task, 0 ToolSearch, 0 reminder(s)"
  }
 ]

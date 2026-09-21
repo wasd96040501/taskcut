@@ -69,34 +69,31 @@ judge every turn, set `floorPercent` to `0` with `/plugin`, or reinstall with
 Past the floor, every turn the model finished ends with a dim line:
 
 ```
-taskcut: context at 43%, the work is finished; dropping its working context
+taskcut: context at 43%, the work is finished; compacting
 taskcut: context at 43%, the work is not finished; keeping it
 ```
 
 No line at all past the floor means the turn was not judged: it was a
 subagent's, or it was interrupted or failed. `not finished` on a turn you
-consider done usually means the answer ended by proposing more work or asking
-a question; the judge reads only the request and the answer.
+consider done usually means the reply ended by proposing more work or asking a
+question. The judge reads what auto mode's permission classifier reads -- your
+messages, the assistant's non-read-only tool calls and `CLAUDE.md` -- plus the
+reply, and never any tool output.
 
-## The model redid work that was already finished
+## It compacts on every turn
 
-Check that the ledger is keyed by session:
+The context after a compaction -- the summary, the recent messages Claude Code
+keeps, the system prompt and tool definitions -- is still past `floorPercent`,
+so the next finished turn is judged and compacted again. It happens only with a
+floor lower than what a compaction leaves, typically a few percent: raise
+`floorPercent`. At `0`, compacting at every finished turn is what was asked for.
 
-```bash
-python3 -c "import json,glob;[print(list(json.load(open(f)).keys())) for f in glob.glob('$HOME/.claude/plugins/store/taskcut*.json')]"
-```
+## Something was lost in a compaction
 
-Every key should read `ledger:<session-uuid>`. A bare `ledger` key means an older
-build is installed, and two sessions on this machine are sharing one ledger.
-Reinstall from a current checkout.
-
-## A ledger entry came out too thin
-
-taskcut keeps the answer the model gave for each request exactly as written; it
-does not judge whether the text is sufficient. An answer that says only "Done."
-leaves a thin entry. The lever is what you ask for -- a request that says what
-the answer should report -- or the `outcome` setting, which has the model write
-a conclusion for the purpose, at the cost of output tokens and a round-trip.
+What a compaction keeps is Claude Code's, exactly as for `/compact`; taskcut
+only chose the moment. If the moment was wrong -- the judge called a turn
+finished that was not -- the dim line for that turn says `finished`. The judge
+never reads tool output, so a reply that claims more than was done can fool it.
 
 ## After upgrading Claude Code
 

@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-21
+
+### Changed
+
+- **taskcut decides when to compact, and Claude Code decides what is kept.**
+  When the judge calls a turn finished, taskcut runs `$.session.compact()`, the
+  same call `/compact` makes, and the compaction is Claude Code's own: same
+  transcript, same summary, recorded as a typed `/compact` is. taskcut no
+  longer builds a transcript of its own, keeps no ledger and writes nothing to
+  the plugin store.
+- The judge reads what auto mode's permission classifier reads: every message
+  you sent, every tool call except read-only lookups, and `CLAUDE.md`, with all
+  tool output stripped -- plus the reply being judged.
+
+### Removed
+
+- The `outcome` setting and `close_task`. Asking the working model for a
+  conclusion meant writing it before anything had judged the work finished,
+  and Claude Code's compaction already writes one after.
+- The `recentHumanTurns` and `ledgerVerbatim` settings, with the ledger they
+  shaped. Two settings are left: `floorPercent` and `model`.
+
+**Upgrading:** earlier versions kept ledgers in the plugin store, and this one
+no longer sweeps them. Any left behind are safe to delete:
+`rm -f ~/.claude/plugins/store/taskcut*`.
+
 ## [0.5.0] - 2026-09-21
 
 ### Changed
