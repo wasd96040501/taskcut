@@ -1,0 +1,87 @@
+commit 18d29196c508b249ef1111f1f29c9133e0a8b097
+Author: Stephen Rosen <sirosen@globus.org>
+Date:   Thu Sep 25 13:02:10 2025 -0500
+
+    Ensure that 'type_cast_value' never gets 'UNSET'
+    
+    In order to ensure that user-defined `type_cast_value` hooks are never
+    called with a value of `UNSET`, it is necessary to intercept `UNSET`
+    values and, in the particular cases in which `UNSET` needs special
+    handling, preempt any call to `type_cast_value()`.
+    
+    `process_value()` is updated to check before calling `type_cast_value`
+    and to skip the call entirely if an `UNSET` value is detected. Passing
+    a value of `None` would not have the same effect for `click.Option`,
+    which previously had logic which is specific to the `value is UNSET`
+    case, and which cannot be reliably detected if a `None` value is
+    passed in.
+    
+    This means that `type_cast_value()` is no longer guaranteed to be called
+    during argument processing, but when it is called, it's guaranteed not to
+    see an `UNSET` value. New tests explore this only from the perspective of
+    checking if `UNSET` is ever passed, not in terms of pinning down when/if
+    the hook gets called.
+    
+    resolves #3069
+
+diff --git a/src/click/core.py b/src/click/core.py
+index 5f47287..184870a 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -2338,7 +2338,7 @@ class Parameter:
+         """Convert and validate a value against the parameter's
+         :attr:`type`, :attr:`multiple`, and :attr:`nargs`.
+         """
+-        if value in (None, UNSET):
++        if value is None:
+             if self.multiple or self.nargs == -1:
+                 return ()
+             else:
+@@ -2421,7 +2421,16 @@ class Parameter:
+ 
+         :meta private:
+         """
+-        value = self.type_cast_value(ctx, value)
++        # shelter `type_cast_value` from ever seeing an `UNSET` value by handling the
++        # cases in which `UNSET` gets special treatment explicitly at this layer
++        #
++        # Refs:
++        # https://github.com/pallets/click/issues/3069
++        if value is UNSET:
++            if self.multiple or self.nargs == -1:
++                value = ()
++        else:
++            value = self.type_cast_value(ctx, value)
+ 
+         if self.required and self.value_is_missing(value):
+             raise MissingParameter(ctx=ctx, param=self)
+@@ -3256,13 +3265,22 @@ class Option(Parameter):
+ 
+         return value, source
+ 
+-    def type_cast_value(self, ctx: Context, value: t.Any) -> t.Any:
+-        if self.is_flag and not self.required:
+-            if value is UNSET:
+-                if self.is_bool_flag:
+-                    # If the flag is a boolean flag, we return False if it is not set.
+-                    value = False
+-        return super().type_cast_value(ctx, value)
++    def process_value(self, ctx: Context, value: t.Any) -> t.Any:
++        # process_value has to be overridden on Options in order to capture
++        # `value == UNSET` cases before `type_cast_value()` gets called.
++        #
++        # Refs:
++        # https://github.com/pallets/click/issues/3069
++        if self.is_flag and not self.required and self.is_bool_flag and value is UNSET:
++            value = False
++
++            if self.callback is not None:
++                value = self.callback(ctx, self, value)
++
++            return value
++
++        # in the normal case, rely on Parameter.process_value
++        return super().process_value(ctx, value)
+ 
+ 
+ class Argument(Parameter):

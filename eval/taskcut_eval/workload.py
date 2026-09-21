@@ -203,10 +203,13 @@ def materialise(workload: Workload, root: Path, generators: Path) -> Path:
                     check=True,
                 )
         if workload.source.prepare:
-            script = generators / workload.source.prepare
+            # "script.py arg ..." -- the arguments let one prepare script serve
+            # several workloads rather than being copied for each.
+            name, *extra = workload.source.prepare.split()
+            script = generators / name
             if not script.exists():
                 raise FileNotFoundError(f"prepare script not found: {script}")
-            subprocess.run(["python3", str(script), str(root)], check=True)
+            subprocess.run(["python3", str(script), str(root), *extra], check=True)
     elif workload.source.kind == "generated":
         script = generators / workload.source.generator
         if not script.exists():

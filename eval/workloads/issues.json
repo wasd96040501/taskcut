@@ -5,7 +5,7 @@
   "kind": "git",
   "url": "https://github.com/pallets/click.git",
   "ref": "6aabf099bfdd4c1e75fe8d0e0d4241372b988ab1",
-  "prepare": "click_issues.py"
+  "prepare": "click_issues.py issues.order"
  },
  "fixtures": [
   "src/click/core.py",
