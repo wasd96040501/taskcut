@@ -1,0 +1,26 @@
+commit a3321c9ca14ddb951f04ac981f275b0de2f46208
+Author: Ben Falk <bfalk@stsci.edu>
+Date:   Mon May 18 10:14:33 2026 -0700
+
+    Implement Unix line endings for shell completion output to ensure compatibility with Windows (#3277)
+
+diff --git a/src/click/shell_completion.py b/src/click/shell_completion.py
+index 7235f10..9a4b80d 100644
+--- a/src/click/shell_completion.py
++++ b/src/click/shell_completion.py
+@@ -43,12 +43,13 @@ def shell_complete(
+ 
+     comp = comp_cls(cli, ctx_args, prog_name, complete_var)
+ 
++    # Write bytes, otherwise Windows text stdout translates LF to CRLF and breaks.
+     if instruction == "source":
+-        echo(comp.source())
++        echo(comp.source().encode(), nl=False)
+         return 0
+ 
+     if instruction == "complete":
+-        echo(comp.complete())
++        echo(comp.complete().encode())
+         return 0
+ 
+     return 1

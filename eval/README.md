@@ -96,6 +96,15 @@ model afterwards that matters: the grade is whether the package imports, parses
 the fixture, aggregates it correctly, passes its own tests and runs from the
 command line.
 
+**`issues`** -- nine bugs click really shipped and really fixed, reverted
+source-only at a pinned commit so each still has the regression test its
+original author wrote. Handed out one at a time as a symptom plus the failing
+tests, never the fix. Four are in `core.py`, so the work keeps returning to the
+same large file. Graded by the tests: each issue's own, the whole suite for
+regressions, and `git diff` to confirm no test was touched. This is the one
+that looks like real work -- exploration, dead ends, re-running the suite --
+and so the one whose context actually fills with what taskcut exists to clear.
+
 **`audit`** -- five steps researching a real Flask checkout, then five building
 a standard-library tool that finds configuration key reads, run against that
 same checkout. The answer is exact and computable -- 30 keys, 42 reads, under a

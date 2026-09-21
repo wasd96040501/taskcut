@@ -1,0 +1,23 @@
+commit 399919f740bfd26cb30d544877fafd03cfcd9091
+Author: Kevin Deldycke <kevin@deldycke.com>
+Date:   Fri May 29 16:48:26 2026 +0200
+
+    Support incremental output in the pager
+    
+    Closes #3242 and #2542
+
+diff --git a/src/click/termui.py b/src/click/termui.py
+index 91ef6e1..9bc88db 100644
+--- a/src/click/termui.py
++++ b/src/click/termui.py
+@@ -346,6 +346,10 @@ def echo_via_pager(
+     with get_pager_file(color=color) as pager:
+         for text in itertools.chain(text_generator, "\n"):
+             pager.write(text)
++            # Flush after each write so a slow generator streams to the pager
++            # incrementally rather than staying invisible until the pipe buffer
++            # fills (~8 KB).
++            pager.flush()
+ 
+ 
+ @t.overload

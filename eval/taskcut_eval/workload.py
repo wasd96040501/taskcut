@@ -98,6 +98,10 @@ class Source:
     url: str = ""
     ref: str = ""
     generator: str = ""
+    #: Run after a clone, with the workspace as its argument. A workload built
+    #: on a real repository usually needs one: an environment to run the tests
+    #: in, and whatever it does to the checkout to create the work.
+    prepare: str = ""
 
 
 @dataclass(frozen=True)
@@ -140,6 +144,7 @@ def load(path: str | Path) -> Workload:
             url=src.get("url", ""),
             ref=src.get("ref", ""),
             generator=src.get("generator", ""),
+            prepare=src.get("prepare", ""),
         ),
         files=tuple(raw["files"]),
         step_template=raw["step_template"],
@@ -180,12 +185,28 @@ def materialise(workload: Workload, root: Path, generators: Path) -> Path:
     root.mkdir(parents=True, exist_ok=True)
     if workload.source.kind == "git":
         if not (root / ".git").exists():
-            subprocess.run(
-                ["git", "clone", "--quiet", "--depth", "1", workload.source.url, str(root)],
-                check=True,
-            )
-        if workload.source.ref:
-            subprocess.run(["git", "-C", str(root), "checkout", "--quiet", workload.source.ref], check=True)
+            if workload.source.ref:
+                # Pinned: fetch exactly that commit and nothing else. A shallow
+                # clone of the default branch would move under the benchmark as
+                # upstream moves, and the same workload would stop being the
+                # same work.
+                subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+                subprocess.run(["git", "-C", str(root), "remote", "add", "origin", workload.source.url], check=True)
+                subprocess.run(
+                    ["git", "-C", str(root), "fetch", "--quiet", "--depth", "1", "origin", workload.source.ref],
+                    check=True,
+                )
+                subprocess.run(["git", "-C", str(root), "checkout", "--quiet", "FETCH_HEAD"], check=True)
+            else:
+                subprocess.run(
+                    ["git", "clone", "--quiet", "--depth", "1", workload.source.url, str(root)],
+                    check=True,
+                )
+        if workload.source.prepare:
+            script = generators / workload.source.prepare
+            if not script.exists():
+                raise FileNotFoundError(f"prepare script not found: {script}")
+            subprocess.run(["python3", str(script), str(root)], check=True)
     elif workload.source.kind == "generated":
         script = generators / workload.source.generator
         if not script.exists():

@@ -1,0 +1,49 @@
+commit 4d3db84b251518e97299a38a5ca4bab3d01873a2
+Author: Iain-S <25081046+Iain-S@users.noreply.github.com>
+Date:   Thu May 21 10:26:28 2026 +0100
+
+    handle empty bytes in echo
+
+diff --git a/src/click/utils.py b/src/click/utils.py
+index 223d6b8..67922b8 100644
+--- a/src/click/utils.py
++++ b/src/click/utils.py
+@@ -232,7 +232,7 @@ class KeepOpenFile:
+ 
+ 
+ def echo(
+-    message: t.Any | None = None,
++    message: object = None,
+     file: t.IO[t.Any] | None = None,
+     nl: bool = True,
+     err: bool = False,
+@@ -287,14 +287,15 @@ def echo(
+         if file is None:
+             return
+ 
+-    # Convert non bytes/text into the native string type.
+-    if message is not None and not isinstance(message, (str, bytes, bytearray)):
+-        out: str | bytes | bytearray | None = str(message)
+-    else:
+-        out = message
++    match message:
++        case str() | bytes() | bytearray():
++            out = message
++        case None:
++            out = ""
++        case _:
++            out = str(message)
+ 
+     if nl:
+-        out = out or ""
+         if isinstance(out, str):
+             out += "\n"
+         else:
+@@ -310,7 +311,6 @@ def echo(
+     # would expect. Eg: you can write to StringIO for other cases.
+     if isinstance(out, (bytes, bytearray)):
+         binary_file = _find_binary_writer(file)
+-
+         if binary_file is not None:
+             file.flush()
+             binary_file.write(out)

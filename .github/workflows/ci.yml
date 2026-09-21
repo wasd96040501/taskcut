@@ -105,8 +105,8 @@ jobs:
           for name, w in loaded.items():
               if not w.files:
                   print(f"::error::{name} names no files"); failed = True
-              if not w.probes:
-                  print(f"::error::{name} has no probes"); failed = True
+              if not w.probes and not w.checks:
+                  print(f"::error::{name} has neither probes nor checks, so nothing grades it"); failed = True
               for probe in w.probes:
                   if probe.kind not in KINDS:
                       print(f"::error::{name}/{probe.id} has unknown kind {probe.kind!r}"); failed = True

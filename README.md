@@ -3,261 +3,157 @@
 [![CI](https://github.com/wasd96040501/taskcut/actions/workflows/ci.yml/badge.svg)](https://github.com/wasd96040501/taskcut/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-A [Claude Code](https://claude.com/claude-code) mod that compacts the
-conversation at sub-task boundaries instead of at the context limit.
-
-## The problem
-
-Claude Code compacts when the context window fills. On a job that runs for hours
-or days, that threshold almost never lines up with the shape of the work. It
-fires in the middle of a sub-task, summarising away detail that is still live
-while keeping detail from work that finished an hour ago. The moment when "what
-still matters" has a clean answer — the end of a sub-task — passes without
-anything happening.
-
-A long job is a sequence of shorter ones. Once a piece of work is done, the files
-that were read for it, the commands that were run, and the approaches that were
-abandoned are dead weight. What has to survive is the conclusion.
-
-## What taskcut does
-
-It gives the model a tool, `close_task`, and asks it to call the tool when a
-sub-task is finished. The argument is the conclusion, and it is the only thing
-that survives.
-
-At the end of that turn, if the context window has filled past a configurable
-floor, taskcut compacts the conversation itself. The replacement transcript is:
-
-* the human turns it keeps, **verbatim** by their engine handles — nothing the
-  person said is ever paraphrased. The first one is always among them, because
-  nothing else records what the job is for, and so are the most recent
-  `recentHumanTurns`; the rest are dropped, because human turns are unbounded
-  on a long run and keeping all of them only moves the growth;
-* one message holding the ledger of closed sub-tasks and their conclusions.
-
-No summariser runs. The cut is a deterministic function of the transcript, so it
-costs no model call and loses nothing it claims to keep.
+A [Claude Code](https://claude.com/claude-code) plugin that compacts the
+conversation when a sub-task ends, instead of when the context window fills.
 
 ```
-before                              after
-──────────────────────────────      ──────────────────────────────
-user: "do sub-task A"               user: "do sub-task A"        (verbatim)
-assistant: reads 9 files            user: "do sub-task C"        (verbatim)
-user:      tool results             user: [ledger]
-assistant: runs 4 commands                1. [CLOSED] sub-task A
-user:      tool results                      -> a.txt is the manifest; ...
-assistant: close_task(...)                2. [CLOSED] sub-task B
-user:      tool result                       -> the retry path was the bug; ...
-assistant: "done"
-user: "do sub-task B"
-... 30 more messages ...
+              before                                  after
+  ────────────────────────────────      ────────────────────────────────
+  you:       "do sub-task A"            you:       "do sub-task A"
+  assistant: reads 9 files              you:       "do sub-task C"
+  you:        tool results              you:       [ledger]
+  assistant: runs 4 commands                       1. [CLOSED] sub-task A
+  you:        tool results                            <what it established>
+  assistant: two dead ends                         2. [CLOSED] sub-task B
+  you:       "do sub-task B"                          <what it established>
+  assistant: reads 6 more files
+  ...  ~40 more messages  ...
+  you:       "do sub-task C"
 ```
 
-The engine's own threshold compaction stays in place as the safety net for a
-sub-task too large to reach a boundary. taskcut does not intercept it; it only
-hands the summariser the ledger, so the model is not asked to re-derive what is
-already settled.
+Your own turns are kept **word for word**. Everything the model did for a
+finished sub-task is replaced by the conclusion the model itself wrote. No
+summariser runs, so nothing that is kept is paraphrased.
 
-## What it is worth
+## Try it in two minutes
 
-Measured against the same work with the plugin switched off
-([docs/measurement.md](docs/measurement.md)):
-
-* **Context stops climbing.** Ten sub-tasks of generated modules ended at 44,743
-  tokens of context instead of 107,857 — 59% less, with every probe still
-  answered correctly and without going back to disk once.
-* **How much less depends entirely on how compressible the work is.** The same
-  ten sub-tasks against real framework source saved 10%, because a real module
-  needs a great deal more said about it and the ledger grew accordingly. This is
-  not a property of taskcut; it is a property of the job.
-* **Accuracy never moved.** Across six runs and two workloads, no arm ever
-  answered a probe wrongly. What a cut costs is re-reading, not correctness.
-* **A cut is not free.** With the floor forced to zero it cost 1.34× to 2.47×
-  the baseline — which is exactly the case the floor exists to avoid.
-* **The benefit has not been demonstrated.** Across five workloads, including
-  two that build something and are graded by running it, no measurement found
-  the baseline doing worse work: every acceptance check, every standing rule,
-  every superseded value came out the same on both arms, at up to 64% of the
-  window. taskcut reliably does what it says to the context. Whether that buys
-  anything is still open, and
-  [docs/measurement.md](docs/measurement.md#6-what-has-not-been-shown) says
-  what would settle it.
-
-One run per cell, on Sonnet. These show the shape of a difference, not its size.
-
-## Requirements
-
-* Claude Code **2.1.278** or newer.
-* An **interactive** session. `$.session.compact` is unavailable in a headless
-  one, so `claude -p` and the stream-json SDK transport cannot compact. A
-  terminal session and a `claude --bg` session both qualify. See
-  [docs/design.md](docs/design.md#where-taskcut-can-run) for the measurements.
-* While function hooks are in early access, `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.
-  This is Claude Code's own flag, not taskcut's, and it will go away when the
-  feature graduates. taskcut's behaviour does not depend on it; see
-  [docs/compatibility.md](docs/compatibility.md).
-
-## Install
+Needs Claude Code **2.1.278 or newer** (`claude --version`).
 
 ```bash
-claude plugin marketplace add wasd96040501/taskcut
-claude plugin install taskcut@taskcut --scope project   # this repository
-claude plugin install taskcut@taskcut --scope user      # your machine
-```
+mkdir taskcut-trial && cd taskcut-trial && git init -q
+printf 'alpha\nbeta\ngamma\n' > a.txt
+printf 'delta\nepsilon\n'     > b.txt
 
-Updating is `claude plugin update taskcut@taskcut`; removing is
-`claude plugin uninstall taskcut@taskcut`. `--scope` takes `user`, `project`
-(recorded in `.claude/settings.json`, shared with the team) or `local`
-(`.claude/settings.local.json`, just you). A private repository works the same
-way: the clone uses your git credentials.
-
-From a checkout instead — for a private or air-gapped copy, where the
-marketplace has to come from a local path:
-
-```bash
-git clone https://github.com/wasd96040501/taskcut.git
-cd taskcut && ./scripts/install.sh
-```
-
-Installing does not make taskcut do anything yet. It is inert until a session
-opts in.
-
-## Try it in five minutes
-
-In a scratch directory, so nothing on your machine changes outside it:
-
-```bash
-mkdir /tmp/taskcut-demo && cd /tmp/taskcut-demo
-printf 'alpha\nbeta\ngamma\n' > notes.txt
-printf 'one\ntwo\n' > data.txt
-
-claude plugin marketplace add wasd96040501/taskcut --scope local
-claude plugin install taskcut@taskcut --scope local --config floorPercent=0
-touch .taskcut
+claude plugin marketplace add wasd96040501/taskcut --scope project
+claude plugin install taskcut@taskcut --scope project --config floorPercent=0
 
 CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 ```
 
-`floorPercent=0` is the part that matters for a demo. The default is 40: below
-that, taskcut records the conclusion and leaves the transcript alone, because a
-cut costs more prompt cache than it saves until the window has actually filled.
-A five-minute trial never gets near 40%, so without this you would see nothing
-happen and reasonably conclude it was broken. It is also the setting under which
-taskcut measurably loses money — see
-[docs/measurement.md](docs/measurement.md). Use it to watch the mechanism work,
-not as a default.
-
-Then, in the session, one sub-task at a time:
+Answer **yes** to the folder-trust prompt, then paste these three, one at a time:
 
 ```
-> Count the lines in notes.txt and cat it. Then call close_task.
-> Count the lines in data.txt and cat it. Then call close_task.
-> Without running any tool: what do you have about the earlier sub-tasks, and
-  can you still see the raw wc and cat output?
+Sub-task 1: run `wc -l a.txt` and tell me the number. Then call close_task.
+```
+```
+Sub-task 2: run `cat b.txt` and tell me the last word. Then call close_task.
+```
+```
+Without running any tool: list every sub-task you have closed.
 ```
 
-After each `close_task` the transcript is replaced and the status line shows
-`Conversation compacted`. By the third message the model has the conclusions and
-not the tool output it drew them from. `ctx` stays where it started instead of
-climbing.
+The third answer comes back complete — both sub-tasks, with what each
+established — even though the work that produced them is no longer in the
+conversation. Watch `ctx N%` in the status line: it does not climb.
 
-Undo it:
+Throw the trial away with `cd .. && rm -rf taskcut-trial`.
+
+> `floorPercent=0` is for the demo only. It makes taskcut cut at **every**
+> boundary so you can see it work. The default is `40`, which is the setting
+> you actually want — see [What it costs](#what-it-costs).
+
+## The problem it solves
+
+Claude Code compacts when the window fills. On a job that runs for hours or
+days, that moment almost never lines up with the shape of the work: it fires in
+the middle of a sub-task, summarising away detail that is still live while
+keeping detail from work that finished an hour ago.
+
+A long job is a sequence of shorter ones, and the moment when *what still
+matters* has a clean answer is the end of a sub-task. taskcut gives the model a
+tool, `close_task`, and cuts there instead.
+
+## Install it for real
+
+Pick where it should run. That is the only decision.
 
 ```bash
-claude plugin uninstall taskcut@taskcut --scope local
-claude plugin marketplace remove taskcut --scope local
-rm -rf /tmp/taskcut-demo
+# this repository, for everyone who clones it
+claude plugin marketplace add wasd96040501/taskcut --scope project
+claude plugin install taskcut@taskcut --scope project
+
+# this repository, for you alone (not committed)
+claude plugin marketplace add wasd96040501/taskcut --scope local
+claude plugin install taskcut@taskcut --scope local
+
+# every session on this machine
+claude plugin marketplace add wasd96040501/taskcut
+claude plugin install taskcut@taskcut --scope user
 ```
 
-## Turning it on
+Then start a session with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, and ask
+for `close_task` when a piece of work is done — in the prompt, or once in the
+project's `CLAUDE.md`:
 
-taskcut defaults to **opt-in**: installed but inert, in every session, until
-something says otherwise. Three things can say otherwise, in this order of
-precedence:
+```markdown
+Call close_task when you finish a sub-task and move on to the next.
+```
 
-| | Scope | |
-| --- | --- | --- |
-| `TASKCUT=0` | one session | Off, whatever else says. The kill switch. |
-| `TASKCUT=1` | one session | On, for that session only. |
-| `activation` = `always` | wherever installed | On in every session. |
-| `.taskcut` at the project root | one repository | On in that repository. |
+**Switching it off for one session:** `TASKCUT=0 claude`. That outranks
+everything.
 
-The usual way is the marker file, because the repository then carries the
-decision and a reviewer can see it:
+**Removing it:**
 
 ```bash
-cd ~/src/the-repo
-touch .taskcut
-git add .taskcut && git commit -m "chore: enable taskcut"
+claude plugin uninstall taskcut@taskcut
+claude plugin marketplace remove taskcut
 ```
 
-For one session, without changing anything on disk:
+## What it costs
 
-```bash
-TASKCUT=1 claude
-```
+Measured against the same work with the plugin off, over five workloads
+including two that build something and are graded by running it
+([docs/measurement.md](docs/measurement.md)):
 
-And to run it everywhere, if that is what you want:
-
-```bash
-claude plugin install taskcut@taskcut --scope user --config activation=always
-```
-
-### Why taskcut owns this instead of leaving it to the platform
-
-Claude Code gates every hooks module behind `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`
-today, and that flag is off by default. It would be easy to treat it as taskcut's
-safety switch, and wrong: it is an early-access flag, so it will default to on or
-disappear when function hooks graduate. A plugin whose inertness rested on it
-would go from inert to active everywhere, silently, on an unrelated Claude Code
-release.
-
-So the decision is taskcut's own, and it is deny by default. The state before
-`session.start` has run is inert, which means a session where that hook never
-fires does nothing rather than everything. `TASKCUT=0` outranks every other
-input. Both are covered by tests in `test/activation.test.ts`.
-
-### What it touches when it is on
-
-| | |
+| | what was measured |
 | --- | --- |
-| Adds to the model's tools | `mcp__taskcut__close_task` |
-| Reads | the project root, `TASKCUT`, the session id, the context-fill percentage, its own store |
-| Writes | its own plugin store, under `~/.claude/plugins/store/` |
-| Changes | the transcript, at a boundary, once the context is past `floorPercent` |
-| Never touches | your files, your settings, the network |
+| **Context stops climbing** | ten sub-tasks ended at 44,743 tokens of context instead of 107,857 — **59% less**, every probe still answered, without going back to disk once |
+| **How much less varies** | the same ten sub-tasks against real framework source saved **10%**, because a real module needs far more said about it and the ledger grew accordingly |
+| **Accuracy never moved** | across ten runs, no arm ever answered wrongly or failed an acceptance check. What a cut costs is re-reading, not correctness |
+| **A cut is not free** | with the floor forced to zero, **$0.41 to $2.04** more per run, 1.4× to 2.7× — which is exactly what the floor exists to avoid |
+| **Still unproven** | nothing yet shows the *baseline* doing worse work. taskcut reliably does what it says to the context; whether that buys anything is open. [What would settle it](docs/measurement.md#6-what-has-not-been-shown) |
 
-That is not a promise, it is the output of a static scan. Check it yourself:
+One run per cell, on Sonnet. These show the shape of a difference, not its size.
 
-```bash
-claude plugin validate .
-```
-
-It prints every engine call the module can make, including through helpers, and
-every environment variable it reads. A hooks module has no filesystem, network or
-process access of its own; everything goes through that interface.
-
-## Configuration
+## Settings
 
 Every setting has a working default. Set one at install time with
-`--config KEY=VALUE`, repeatable:
-
-```bash
-claude plugin install taskcut@taskcut --scope user --config floorPercent=30
-```
-
-or change it later from a session with `/plugin`, which is the interactive
-form of the same thing.
+`--config KEY=VALUE`, repeatable, or change it later from a session with
+`/plugin`.
 
 | Setting | Default | What it controls |
 | --- | --- | --- |
-| `floorPercent` | `40` | Context fill, as a percentage, below which a closed sub-task is recorded but no cut is made. A cut re-caches the kept set at full price, measured at 12k–15k tokens, so below the floor it costs more than it saves. Set to `0` to cut at every boundary. |
-| `recentHumanTurns` | `2` | How many of the most recent human turns are kept beside the first one. Human turns are unbounded on a long run, so keeping all of them only moves the growth. |
-| `ledgerVerbatim` | `12` | How many closed sub-tasks stay in the model's own words. Past this, the oldest are folded into one rolled-up entry. |
+| `floorPercent` | `40` | Context fill, as a percentage, below which a closed sub-task is recorded but no cut is made. A cut re-caches the kept set at full price, measured at 12k–15k tokens, so below the floor it costs more than it saves. `0` cuts at every boundary. |
+| `recentHumanTurns` | `2` | How many of your most recent turns are kept beside the first one. Your turns are unbounded on a long run, so keeping all of them only moves the growth. |
+| `ledgerVerbatim` | `12` | How many closed sub-tasks stay in the model's own words. Past this, the oldest fold into one rolled-up entry. |
 | `foldModel` | `haiku` | The model that folds them. An alias or a full id, resolved the way a `--model` value is. |
-| `ledgerMode` | `outcome` | Who writes a ledger entry. `outcome` keeps the conclusion the working model wrote at `close_task`. `directed` throws that away and has `foldModel` write the entry from the transcript being dropped: one small-model call per cut, out of band. Measured, `directed` halves the ledger and doubles the re-reading — it is off by default for that reason. See [docs/measurement.md](docs/measurement.md). |
+| `ledgerMode` | `outcome` | Who writes a ledger entry. `directed` hands the job to `foldModel`; measured, it halves the ledger and doubles the re-reading, so it is off by default. |
 
-## How it is put together
+## How it works
+
+At `session.start` taskcut registers one tool, `close_task`. Its argument is the
+conclusion, and it is the only thing that survives. When the model calls it,
+the conclusion goes into a session-keyed ledger. At the end of that turn, if the
+window has filled past `floorPercent`, a `session.compact` hook answers with a
+transcript it builds itself:
+
+* your first turn, and your most recent `recentHumanTurns`, **verbatim** by
+  their engine handles — nothing you said is ever paraphrased. The first is
+  always kept because nothing else records what the job is for;
+* one message holding the ledger of closed sub-tasks.
+
+That hook never calls `next`, so no summariser runs and the cut is a
+deterministic function of the transcript.
 
 | File | Role |
 | --- | --- |
@@ -265,7 +161,7 @@ form of the same thing.
 | `hooks/ledger.ts` | The ledger and the keep-set rule, as pure functions. |
 | `hooks/activation.ts` | Whether taskcut runs at all, as a pure rule. |
 | `hooks/config.ts` | Settings, with defaults for anything unset. |
-| `test/` | Unit tests for the three modules above. `./scripts/test.sh`. |
+| `eval/` | The benchmark. `make eval-list`. |
 
 The split is not stylistic. A hooks module may pass `$` only to a function
 declared in the same file; the loader refuses a module that passes it across an
@@ -274,44 +170,39 @@ everything that can be reasoned about as plain data lives beside it.
 
 ## Limitations
 
-* **Interactive sessions only.** See Requirements.
+* **Interactive sessions only.** `claude -p` and the SDK transport cannot
+  compact at all, so taskcut logs and does nothing there. A terminal session or
+  `claude --bg` works.
 * **The conclusion is only as good as what the model wrote.** taskcut keeps the
-  `outcome` text exactly; it does not check that the text is sufficient. A thin
-  conclusion produces a thin context.
-* **No assistant message survives a cut.** The kept set is human turns and the
-  ledger. After a cut the model cannot see what it said in the turn that just
-  ended, so a follow-up phrased as *the approach you just described* has nothing
-  to resolve against. On a long autonomous run this is the point; in a
-  conversation it is a cost, and it is the reason the floor is not zero.
-* **One session per process.** The activation decision and the pending-boundary
-  flag are module state. Claude Code loads a hooks module once per session
-  process, so this holds today, but it is an assumption the API does not
-  guarantee.
-* **A boundary costs an extra round-trip.** `close_task` is a registered tool,
-  and the model spends a `ToolSearch` call loading its schema before each use —
-  at every boundary, because the cut discards the message that carried it. One
-  extra request per sub-task. See [docs/measurement.md](docs/measurement.md).
+  `outcome` text exactly; it does not check that it is sufficient.
+* **No assistant message survives a cut.** After a cut the model cannot see what
+  it said in the turn that just ended, so a follow-up phrased as *the approach
+  you just described* has nothing to resolve against. On a long autonomous run
+  this is the point; in a conversation it is a cost.
+* **A boundary costs an extra round-trip.** The model spends a `ToolSearch` call
+  loading `close_task`'s schema before each use — at every boundary, because the
+  cut discards the message that carried it.
+* **One session per process.** Module state assumes Claude Code loads a hooks
+  module once per session, which holds today but the API does not guarantee.
 * **Early access.** The function-hooks API may change between Claude Code
-  releases without notice. Re-run `scripts/validate.sh` after upgrading; it
-  reports anything the engine would refuse before a session loads the plugin.
-  See [docs/compatibility.md](docs/compatibility.md).
+  releases. `./scripts/validate.sh` reports anything the engine would refuse
+  before a session loads the plugin.
 
 ## Documentation
 
-* [docs/design.md](docs/design.md) — why the cut is shaped this way, what was
-  measured, and the constraints that produced each rule.
-* [docs/measurement.md](docs/measurement.md) — what the benchmark has found:
-  what a cut costs, what it keeps, and where it starts paying.
-* [eval/README.md](eval/README.md) — the benchmark itself. `make eval-list`.
+* [docs/measurement.md](docs/measurement.md) — what the benchmark found: what a
+  cut costs, what it keeps, and what has not been shown.
+* [eval/README.md](eval/README.md) — the benchmark itself.
+* [docs/design.md](docs/design.md) — why the cut is shaped this way, and the
+  constraints that produced each rule.
 * [docs/troubleshooting.md](docs/troubleshooting.md) — what to check when
   nothing is being compacted.
-* [docs/compatibility.md](docs/compatibility.md) — what taskcut depends on, what
-  a Claude Code upgrade can break, and what semantic versioning covers here.
+* [docs/compatibility.md](docs/compatibility.md) — what a Claude Code upgrade
+  can break.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports and pull requests are
-welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` runs everything CI runs.
 
 ## License
 

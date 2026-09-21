@@ -1,0 +1,97 @@
+{
+ "name": "issues",
+ "description": "Nine real bugs click shipped and fixed, reverted source-only so each has its original regression test. Graded by the test suite.",
+ "source": {
+  "kind": "git",
+  "url": "https://github.com/pallets/click.git",
+  "ref": "6aabf099bfdd4c1e75fe8d0e0d4241372b988ab1",
+  "prepare": "click_issues.py"
+ },
+ "fixtures": [
+  "src/click/core.py",
+  "tests/test_commands.py",
+  ".venv/bin/python"
+ ],
+ "files": [
+  "`echo_via_pager` with a generator shows nothing until the generator is exhausted. Each chunk should reach the pager as it is produced, so long output starts appearing immediately.\n\nFailing:\n  tests/test_termui.py::test_echo_via_pager_streams_each_write",
+  "`click.echo` misbehaves when given empty bytes and a custom file.\n\nFailing:\n  tests/test_utils/test_echo.py::test_echo_custom_file",
+  "The shell completion source scripts come out with platform line endings. They have to use LF everywhere, or the shells reject them.\n\nFailing:\n  tests/test_shell_completion.py::test_source_uses_lf_line_endings",
+  "An optional `Choice` or `DateTime` argument is shown with doubled brackets in the usage synopsis.\n\nFailing:\n  tests/test_basic.py::test_choice_argument_optional_metavar\n  tests/test_basic.py::test_datetime_argument_optional_metavar",
+  "When a group can be invoked without a subcommand, its usage line still presents the subcommand as required. It should be marked optional.\n\nFailing:\n  tests/test_commands.py::test_subcommand_metavar_marks_optional",
+  "The progress bar does not land on its final position when it finishes -- the last render stops short.\n\nFailing:\n  tests/test_termui.py::test_progressbar_lands_on_final_position",
+  "`get_help_option_names` does not preserve the order the help option names were declared in.\n\nFailing:\n  tests/test_commands.py::test_get_help_option_names",
+  "A deprecated command with empty help renders its deprecation label with a stray leading space.\n\nFailing:\n  tests/test_commands.py::test_deprecated_empty_help_no_leading_space\n  tests/test_options.py::test_deprecated_empty_help_no_leading_space",
+  "`HelpFormatter.write_usage` produces spurious characters when there are no arguments.\n\nFailing:\n  tests/test_formatting.py::test_command_write_usage_no_args\n  tests/test_formatting.py::test_help_formatter_write_usage_without_args_styled_prefix\n  tests/test_formatting.py::test_help_formatter_write_usage"
+ ],
+ "briefing": "This is a checkout of click, the command-line library. Nine issues have been reported against it and I am going to hand them to you one at a time. Each comes with the tests that fail because of it.\n\nRun tests with `.venv/bin/python -m pytest`. The suite takes a few seconds.\n\nFor every issue: find the cause in src/click and fix it there. Never modify, skip or delete a test to make it pass. Do not break anything that currently works.\n\nAcknowledge and wait for the first issue.",
+ "step_template": "Issue {n} of {total}.\n\n{file}",
+ "checks": [
+  {
+   "id": "issue1",
+   "kind": "consistency",
+   "description": "issue 1 fixed: Support incremental output in the pager",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_echo_via_pager_streams_each_write"
+  },
+  {
+   "id": "issue2",
+   "kind": "consistency",
+   "description": "issue 2 fixed: handle empty bytes in echo",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_utils/test_echo.py::test_echo_custom_file"
+  },
+  {
+   "id": "issue3",
+   "kind": "consistency",
+   "description": "issue 3 fixed: Implement Unix line endings for shell completion output to ensure comp",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_shell_completion.py::test_source_uses_lf_line_endings"
+  },
+  {
+   "id": "issue4",
+   "kind": "consistency",
+   "description": "issue 4 fixed: Fix double-bracketing of choices in synopsis",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_basic.py::test_choice_argument_optional_metavar tests/test_basic.py::test_datetime_argument_optional_metavar"
+  },
+  {
+   "id": "issue5",
+   "kind": "consistency",
+   "description": "issue 5 fixed: Mark commands as optional in the synopsis",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_commands.py::test_subcommand_metavar_marks_optional"
+  },
+  {
+   "id": "issue6",
+   "kind": "consistency",
+   "description": "issue 6 fixed: Land the progress bar on its final position",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_progressbar_lands_on_final_position"
+  },
+  {
+   "id": "issue7",
+   "kind": "consistency",
+   "description": "issue 7 fixed: Preserve declaration order of help option names",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_commands.py::test_get_help_option_names"
+  },
+  {
+   "id": "issue8",
+   "kind": "consistency",
+   "description": "issue 8 fixed: Fix deprecated label formatting",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_commands.py::test_deprecated_empty_help_no_leading_space tests/test_options.py::test_deprecated_empty_help_no_leading_space"
+  },
+  {
+   "id": "issue9",
+   "kind": "consistency",
+   "description": "issue 9 fixed: Fix `HelpFormatter.write_usage` producing spurious characters",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_formatting.py::test_command_write_usage_no_args tests/test_formatting.py::test_help_formatter_write_usage_without_args_styled_prefix tests/test_formatting.py::test_help_formatter_write_usage"
+  },
+  {
+   "id": "no_regressions",
+   "kind": "completeness",
+   "description": "the whole suite passes -- nothing else was broken on the way",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider"
+  },
+  {
+   "id": "tests_untouched",
+   "kind": "rule",
+   "description": "no test was modified, skipped or deleted to make it pass",
+   "command": "git diff --quiet HEAD -- tests"
+  }
+ ],
+ "probes": []
+}

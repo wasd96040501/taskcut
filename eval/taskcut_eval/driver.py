@@ -51,11 +51,12 @@ INHERITED = (
 #: Reading is enough for a workload that only inspects. One that builds needs
 #: to write and to run what it wrote, so the set is wider and the workspace is
 #: per arm and per model, thrown away between runs.
-TOOLS = (
-    "Bash(cat:*),Bash(grep:*),Bash(sed:*),Bash(head:*),Bash(tail:*),Bash(wc:*),"
-    "Bash(awk:*),Bash(find:*),Bash(ls:*),Bash(mkdir:*),Bash(python3:*),Bash(pytest:*),"
-    "Read,Grep,Glob,Write,Edit,mcp__taskcut__close_task"
-)
+#: Bash is allowed outright rather than by a list of commands. A workload built
+#: on a real repository runs that repository's own tooling -- a virtual
+#: environment's interpreter, its test runner -- and a permission denial the
+#: benchmark did not intend would be measured as the model failing. The
+#: workspace is a throwaway copy, per arm and per model.
+TOOLS = "Bash,Read,Grep,Glob,Write,Edit,mcp__taskcut__close_task"
 
 
 def prepare_plugin(arm: Arm, source: Path, destination: Path) -> Path:

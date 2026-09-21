@@ -1,0 +1,35 @@
+commit 047adef258fc25566163ffc3efd14effc0ef7352
+Author: Kevin Deldycke <kevin@deldycke.com>
+Date:   Fri Jul 31 15:02:01 2026 +0400
+
+    Preserve declaration order of help option names
+    
+    Co-authored-by: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+
+diff --git a/src/click/core.py b/src/click/core.py
+index f29dc46..de129ec 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -1175,11 +1175,18 @@ class Command:
+         return rv
+ 
+     def get_help_option_names(self, ctx: Context) -> list[str]:
+-        """Returns the names for the help option."""
+-        all_names = set(ctx.help_option_names)
++        """Returns the names for the help option.
++
++        Drops duplicates and names already reserved by another parameter. Order of
++        :attr:`Context.help_option_names` is preserved, so the result is stable.
++
++        .. versionchanged:: 8.5.0
++            Names keep their declaration order.
++        """
++        all_names = dict.fromkeys(ctx.help_option_names)
+         for param in self.params:
+-            all_names.difference_update(param.opts)
+-            all_names.difference_update(param.secondary_opts)
++            for name in (*param.opts, *param.secondary_opts):
++                all_names.pop(name, None)
+         return list(all_names)
+ 
+     def get_help_option(self, ctx: Context) -> Option | None:

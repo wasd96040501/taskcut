@@ -30,10 +30,12 @@ class Arm:
     closes_tasks: bool = False
 
 
-#: The floor exists to keep taskcut off short runs. A benchmark that respects it
-#: measures nothing, so every cutting arm forces it to zero and the cost of doing
-#: so is reported rather than hidden.
-_FORCE_EVERY_BOUNDARY = {"floorPercent": 0}
+#: The floor a cutting arm runs at. Zero would cut at every boundary and make
+#: the mechanism easy to see, but it is not a setting anyone would use and it
+#: measures taskcut at its most expensive. Thirty is a figure a real session
+#: reaches, and it is below the shipped default of forty, so a benchmark run
+#: reaches it without being contrived.
+_REALISTIC_FLOOR = {"floorPercent": 30}
 
 
 ARMS: dict[str, Arm] = {
@@ -41,14 +43,14 @@ ARMS: dict[str, Arm] = {
         name="off",
         description="Baseline. The plugin is loaded but switched off, so the transcript grows as usual.",
         env={"TASKCUT": "0"},
-        config=_FORCE_EVERY_BOUNDARY,
+        config=_REALISTIC_FLOOR,
         closes_tasks=False,
     ),
     "boundary": Arm(
         name="boundary",
         description="taskcut as shipped: the conclusion the model writes at close_task is all that survives.",
         env={"TASKCUT": "1"},
-        config=_FORCE_EVERY_BOUNDARY,
+        config=_REALISTIC_FLOOR,
         closes_tasks=True,
     ),
     "directed": Arm(
@@ -58,7 +60,7 @@ ARMS: dict[str, Arm] = {
             "the dropped work. It halves the ledger and doubles the re-reading. Not in the default sweep."
         ),
         env={"TASKCUT": "1"},
-        config={**_FORCE_EVERY_BOUNDARY, "ledgerMode": "directed"},
+        config={**_REALISTIC_FLOOR, "ledgerMode": "directed"},
         closes_tasks=True,
         default=False,
     ),

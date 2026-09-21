@@ -1,0 +1,29 @@
+commit 665736bc85a19a7a2357c071394b4a545617faa3
+Author: Kevin Deldycke <kevin@deldycke.com>
+Date:   Sat May 23 07:30:13 2026 +0200
+
+    Mark commands as optional in the synopsis
+    
+    Closes #3059
+
+diff --git a/src/click/core.py b/src/click/core.py
+index f104fee..b422bd4 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -1623,8 +1623,15 @@ class Group(Command):
+         self.invoke_without_command = invoke_without_command
+ 
+         if subcommand_metavar is None:
++            # When the group can run without a subcommand, the leading command
++            # token is optional, so wrap it in brackets to reflect that.
+             if chain:
+-                subcommand_metavar = "COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]..."
++                if invoke_without_command:
++                    subcommand_metavar = "[COMMAND1] [ARGS]... [COMMAND2 [ARGS]...]..."
++                else:
++                    subcommand_metavar = "COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]..."
++            elif invoke_without_command:
++                subcommand_metavar = "[COMMAND] [ARGS]..."
+             else:
+                 subcommand_metavar = "COMMAND [ARGS]..."
+ 
