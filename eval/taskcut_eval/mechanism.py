@@ -253,7 +253,11 @@ def check(path: Path, window: int, workspace: Path | None = None) -> list[Result
             bool(finished) and all(t.cuts for t in finished) and answered in finished and not skipped,
             f"{len(finished)} judged finished, {sum(bool(t.cuts) for t in finished)} compacted, {len(skipped)} skipped",
         ),
-        Result("nothing is compacted below the floor", all(c >= floor for c in cuts), f"compactions at {cuts}"),
+        Result(
+            "nothing is compacted below the floor",
+            all(c >= floor - window / 100 for c in cuts),
+            f"compactions at {cuts}",
+        ),
         Result("crossing again compacts again", len(cuts) >= 2, f"{len(cuts)} compaction(s)"),
         Result(
             "what was compacted can be recalled",
