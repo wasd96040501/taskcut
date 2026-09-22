@@ -2,9 +2,8 @@
 
 ## Supported versions
 
-| Version | Supported |
-| --- | --- |
-| 0.1.x | Yes |
+Only the latest release is supported: fixes land on `main` and ship in the
+next release.
 
 ## Reporting a vulnerability
 
@@ -25,16 +24,19 @@ filesystem, network, or process access of its own; every side effect goes throug
 the engine interface, and `claude plugin validate .` prints the full list of what
 this plugin calls. Reports that matter most:
 
-* a path by which the ledger of one session is read by another;
-* a transcript the cut can produce that leaks content the person did not intend
-  to keep, or that drops content they did;
-* anything that lets the `outcome` text a model writes change taskcut's behaviour
-  rather than only its stored text.
+* a path by which taskcut ends a turn, submits a prompt, or compacts where it
+  should do nothing: with `TASKCUT=0`, below the floor, in a `claude -p` or SDK
+  session, or in a subagent's loop;
+* a prompt taskcut submits that is anything other than `Continue.`;
+* a path by which the judge is sent more than it is documented to read -- tool
+  output, or files other than the `CLAUDE.md` files already in the context.
 
 ## What is out of scope
 
 * The function-hooks API itself, and the Claude Code binary. Report those to
   [anthropics/claude-code](https://github.com/anthropics/claude-code/issues).
-* Losing context you wanted to keep because a conclusion was written too thinly.
-  taskcut keeps what the model wrote; judging sufficiency is not something it
-  claims to do.
+* What a compaction keeps. It is Claude Code's own compaction, the one
+  `/compact` runs.
+* A judge that calls a step finished too early or too late. It never sees tool
+  output, so a reply that claims more than was done can fool it; the cost is a
+  compaction at the wrong moment, as the README's limitations say.

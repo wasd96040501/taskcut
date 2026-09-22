@@ -52,9 +52,12 @@ jobs:
       - name: Unit tests
         run: node --test "test/**/*.test.ts"
 
+      # Installed beside the checkout rather than through `npx -p`, whose
+      # packages a plain `node -e` cannot require.
       - name: Parse every hooks module
         run: |
-          npx --yes -p typescript node -e "
+          npm install --silent --prefix "$RUNNER_TEMP/ts" typescript@5
+          NODE_PATH="$RUNNER_TEMP/ts/node_modules" node -e "
             const ts = require('typescript');
             const fs = require('fs');
             let failed = false;
@@ -117,8 +120,8 @@ jobs:
               ids = [p.id for p in w.probes] + [c.id for c in w.checks]
               if len(set(ids)) != len(ids):
                   print(f"::error::{name} has duplicate probe or check ids"); failed = True
-              if w.checks and not w.briefing:
-                  print(f"::error::{name} has checks but no briefing to state the contract"); failed = True
+              if w.checks and not (w.briefing or w.task):
+                  print(f"::error::{name} has checks but no briefing or task to state the contract"); failed = True
               print(f"ok  {name}: {len(w.files)} steps, {len(w.probes)} probes, {len(w.checks)} checks")
           for name, arm in arms.ARMS.items():
               print(f"ok  arm {name}")
