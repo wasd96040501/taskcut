@@ -19,7 +19,7 @@
         "long-running",
         "function-hooks"
       ],
-      "license": "Apache-2.0",
+      "license": "MIT",
       "homepage": "https://github.com/wasd96040501/taskcut",
       "source": "./"
     }

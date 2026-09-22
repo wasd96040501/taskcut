@@ -1,7 +1,7 @@
 # taskcut
 
 [![CI](https://github.com/wasd96040501/taskcut/actions/workflows/ci.yml/badge.svg)](https://github.com/wasd96040501/taskcut/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A [Claude Code](https://claude.com/claude-code) plugin that compacts the
 conversation when a sub-task ends, instead of when the context window fills.
@@ -179,4 +179,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` runs everything CI runs.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

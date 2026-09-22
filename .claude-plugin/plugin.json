@@ -7,7 +7,7 @@
   },
   "homepage": "https://github.com/wasd96040501/taskcut",
   "repository": "https://github.com/wasd96040501/taskcut",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": [
     "context",
     "compaction",
