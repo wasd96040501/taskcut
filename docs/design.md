@@ -121,7 +121,7 @@ transcript that was not a problem yet. The default leans high.
 figure the status line shows, read off the last response for nothing. Below the
 floor nothing runs at all.
 
-On a 1M window a floor of 40% is 400,000 tokens. Twenty real changes in one
+On a 1M window a floor of 35% is 350,000 tokens. Twenty real changes in one
 Sonnet 5 session reached 29%. taskcut is for sessions that genuinely get that
 long.
 

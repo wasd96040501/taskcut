@@ -70,13 +70,14 @@ the next, as a plain promise, and the engine skipped the hook for running past
 its 10-second budget; the judgement now runs inside the step's own dispatch,
 beside its tools.
 
-### Thirty-six real changes in one message, with the shipped settings
+### Thirty-six real changes in one message, with 0.7.0's shipped settings
 
 `sqlglot-long`: thirty-six changes sqlglot shipped -- optimizer, parser,
 executor, lineage and sixteen dialects -- reverted at a pinned commit, listed
 in ISSUES.md and handed over in **one message**: work through all of them in
 order, without stopping to ask. `off` against `default`, taskcut exactly as
-installed (a floor of 40%, judged by `sonnet`), on Sonnet 5, each arm once:
+0.7.0 installed it (a floor of 40%, judged by `sonnet`), on Sonnet 5, each arm
+once:
 
 | | off | default |
 | --- | --- | --- |

@@ -10,7 +10,7 @@ export type Config = {
 }
 
 export const DEFAULTS: Config = {
-  floorPercent: 40,
+  floorPercent: 35,
   model: 'sonnet',
 }
 

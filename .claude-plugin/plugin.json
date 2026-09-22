@@ -1,6 +1,6 @@
 {
   "name": "taskcut",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Compacts at the end of a sub-task instead of when the context window fills, including in the middle of a long turn. Once the context is past a floor, a model judges each step, from the same inputs auto mode's permission classifier reads, for whether it finished a piece of the work; if it did, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
   "author": {
     "name": "Yangze Luo"
@@ -20,7 +20,7 @@
       "title": "Only past this context fill",
       "description": "Below this context fill taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so it is only worth making once the window has actually filled. Set to 0 to judge every turn.",
       "required": false,
-      "default": 40
+      "default": 35
     },
     "model": {
       "type": "string",

@@ -41,7 +41,7 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 The install notes that options are "not yet set". That is fine: unset, each
 takes its default.
 
-Then work as usual. Nothing happens until the context passes 40% — the `ctx`
+Then work as usual. Nothing happens until the context passes 35% — the `ctx`
 figure in the status line. From then on, when a piece of work is finished, a
 dim line says so and Claude Code compacts exactly as `/compact` would:
 
@@ -105,10 +105,10 @@ Past the floor is a short stretch: a compaction takes the context back under
 it, and judging stops until it fills again.
 
 Thirty-six real sqlglot changes, handed to Sonnet 5 in one message and left
-to run: with taskcut as installed, it compacted once inside the turn, after
-issue 20, from 431,567 tokens to 10,511, and carried on. The peak context fell
-from 71% of the window to 43%, and the cost by about a fifth; both runs solved
-all thirty-six. Whether compacting at boundaries makes long sessions *work*
+to run: with taskcut at 0.7.0's shipped floor of 40%, it compacted once inside
+the turn, after issue 20, from 431,567 tokens to 10,511, and carried on. The
+peak context fell from 71% of the window to 43%, and the cost by about a fifth;
+both runs solved all thirty-six. Whether compacting at boundaries makes long sessions *work*
 better is what the benchmark is for: [docs/measurement.md](docs/measurement.md).
 
 ## Settings
@@ -121,7 +121,7 @@ installed with.
 
 | Setting | Default | What it controls |
 | --- | --- | --- |
-| `floorPercent` | `40` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so below the floor it costs more than it saves. `0` judges every turn. |
+| `floorPercent` | `35` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so below the floor it costs more than it saves. `0` judges every turn. |
 | `model` | `sonnet` | The model that judges whether a step finished a piece of the work — the model auto mode's permission classifier uses by default. `haiku` costs about a third and misses more boundaries. An alias or a full id, resolved the way a `--model` value is. |
 
 ## How it works

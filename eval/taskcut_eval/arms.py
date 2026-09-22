@@ -31,7 +31,7 @@ class Arm:
 #: The floor a cutting arm runs at. Zero would judge every turn and make the
 #: mechanism easy to see, but it is not a setting anyone would use and it
 #: measures taskcut at its most expensive. Thirty is a figure a real session
-#: reaches, and it is below the shipped default of forty, so a benchmark run
+#: reaches, and it is below the shipped default of thirty-five, so a benchmark run
 #: reaches it without being contrived.
 _REALISTIC_FLOOR = {"floorPercent": 30}
 
@@ -50,10 +50,10 @@ ARMS: dict[str, Arm] = {
         config=_REALISTIC_FLOOR,
     ),
     # Nothing overridden: what someone who installs taskcut and changes nothing
-    # gets. For a workload long enough to pass the shipped floor of forty.
+    # gets. For a workload long enough to pass the shipped floor of thirty-five.
     "default": Arm(
         name="default",
-        description="taskcut exactly as installed, with its shipped settings: a floor of 40, judged by sonnet.",
+        description="taskcut exactly as installed, with its shipped settings: a floor of 35, judged by sonnet.",
         env={"TASKCUT": "1"},
     ),
 }

@@ -58,7 +58,7 @@ Neither can compact. Use a terminal session or `claude --bg`. See
 
 ### 4. Is the context still below the floor?
 
-`floorPercent` defaults to 40. Below that taskcut does nothing at all, because a
+`floorPercent` defaults to 35. Below that taskcut does nothing at all, because a
 cut re-caches the kept set at full price and that costs more than a small
 transcript saves. The status line's `ctx N%` is the figure being compared, and
 `/plugin` shows the floor in force. It is one value for the whole machine:

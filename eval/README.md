@@ -64,7 +64,7 @@ make eval-test            # the harness's own tests
 ```
 
 There are three arms: `off` and `on`, both at a floor of 30%, and `default`,
-taskcut exactly as installed -- a floor of 40%, judged by `sonnet` -- for a
+taskcut exactly as installed -- a floor of 35%, judged by `sonnet` -- for a
 workload long enough to pass it.
 
 `make eval-run` materialises the workspace, bakes the arm's settings into a
