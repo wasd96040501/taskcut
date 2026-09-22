@@ -105,11 +105,11 @@ Past the floor is a short stretch: a compaction takes the context back under
 it, and judging stops until it fills again.
 
 Thirty-six real sqlglot changes, handed to Sonnet 5 in one message and left
-to run: with taskcut at 0.7.0's shipped floor of 40%, it compacted once inside
-the turn, after issue 20, from 431,567 tokens to 10,511, and carried on. The
-peak context fell from 71% of the window to 43%, and the cost by about a fifth;
-both runs solved all thirty-six. Whether compacting at boundaries makes long sessions *work*
-better is what the benchmark is for: [docs/measurement.md](docs/measurement.md).
+to run: taskcut compacted once inside the turn, after issue 20, from 431,567
+tokens to 10,511, and carried on. The peak context fell from 71% of the window
+to 43%, and the cost by about a fifth; both runs solved all thirty-six.
+Whether compacting at boundaries makes long sessions *work* better is what the
+benchmark is for: [docs/measurement.md](docs/measurement.md).
 
 ## Settings
 
@@ -164,8 +164,7 @@ reasoning, and the designs this one replaced.
 
 ## Documentation
 
-* [docs/measurement.md](docs/measurement.md) — what the benchmark found, for
-  this version and the ones before it.
+* [docs/measurement.md](docs/measurement.md) — what the benchmark found.
 * [eval/README.md](eval/README.md) — the benchmark itself.
 * [docs/design.md](docs/design.md) — why taskcut decides only when, and the
   designs it replaced.
