@@ -34,8 +34,8 @@ claude -p ok --debug-file /tmp/taskcut.log >/dev/null
 grep 'taskcut@taskcut' /tmp/taskcut.log
 ```
 
-`hooks module taskcut@taskcut loaded` means it is running; no line at all means
-the flag was not set for that launch.
+`hooks module taskcut@taskcut loaded` means it is running. `not loaded:` is
+followed by the reason; without the flag, it says the rollout flag is off.
 
 ### 2. Is the plugin loaded?
 
