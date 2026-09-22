@@ -41,6 +41,17 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude
 The install notes that options are "not yet set". That is fine: unset, each
 takes its default.
 
+`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` is needed on every launch while function
+hooks are in early access. Without it the plugin is listed as installed but never
+runs, and nothing says so. To set it once, put
+`"CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"` under `env` in
+`~/.claude/settings.json`. To check that taskcut loads:
+
+```bash
+CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude -p ok --debug-file /tmp/taskcut.log >/dev/null
+grep 'taskcut@taskcut loaded' /tmp/taskcut.log
+```
+
 Then work as usual. Nothing happens until the context passes 35% — the `ctx`
 figure in the status line. From then on, when a piece of work is finished, a
 dim line says so and Claude Code compacts exactly as `/compact` would:
