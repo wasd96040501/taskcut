@@ -26,6 +26,17 @@ is not loaded at all — the plugin still appears in `claude plugin list`, and n
 of its hooks run. This is Claude Code's flag, not taskcut's, and it will stop
 being needed when the feature graduates.
 
+Whether the module loaded is in Claude Code's debug log, whatever the context
+fill:
+
+```bash
+claude -p ok --debug-file /tmp/taskcut.log >/dev/null
+grep 'taskcut@taskcut' /tmp/taskcut.log
+```
+
+`hooks module taskcut@taskcut loaded` means it is running. `not loaded:` is
+followed by the reason; without the flag, it says the rollout flag is off.
+
 ### 2. Is the plugin loaded?
 
 ```bash
