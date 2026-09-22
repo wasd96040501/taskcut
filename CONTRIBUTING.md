@@ -99,4 +99,4 @@ participating, you are expected to uphold it.
 ## License
 
 By contributing, you agree that your contributions will be licensed under the
-Apache License 2.0, the same license that covers this project.
+MIT License, the same license that covers this project.

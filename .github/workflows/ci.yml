@@ -153,7 +153,7 @@ jobs:
       - name: Required files are present
         run: |
           missing=0
-          for file in README.md LICENSE NOTICE CHANGELOG.md CONTRIBUTING.md \
+          for file in README.md LICENSE CHANGELOG.md CONTRIBUTING.md \
                       CODE_OF_CONDUCT.md SECURITY.md SUPPORT.md \
                       .github/CODEOWNERS .claude-plugin/marketplace.json \
                       docs/design.md docs/troubleshooting.md docs/compatibility.md \
