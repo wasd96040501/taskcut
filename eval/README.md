@@ -169,6 +169,22 @@ all thirty-six real fixes put back, every check passes. Two changes only apply
 on top of an older one's; both stay separate issues, and the cases that need
 both belong to the later.
 
+**`click-zh`** -- the twenty click changes of `issues-long`, handed over in
+**one message, in Chinese**, the way the job taskcut is for is given in real
+use: keep a task list, fix the issues in the order ISSUES.md lists them, and
+commit after each one. It exists because every boundary the judge had been
+measured on came from `sqlglot-long` -- one repository, one prompt, one way of
+saying "Issue 12 done; now 13" -- and from sessions that never kept a task list
+or committed, where real ones do both: a commit is the most common thing a step
+does between one piece and the next, and it is wrapping up, not moving on.
+Graded by the same per-issue tests and the whole suite. Because the session
+commits as it goes, `git diff HEAD` no longer shows what it changed, so the
+workspace's broken state is tagged `eval-start` and the checks diff against
+that; one more check asks that the work was committed, a commit per issue at
+least. Verified both ways: in the broken state every issue check fails, with
+the twenty real fixes committed one by one every check passes, and a test
+edited and committed fails `tests_untouched`.
+
 **`audit`** -- five steps researching a real Flask checkout, then five building
 a standard-library tool that finds configuration key reads, run against that
 same checkout. The answer is exact and computable -- 30 keys, 42 reads, under a

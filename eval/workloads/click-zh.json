@@ -1,0 +1,183 @@
+{
+ "name": "click-zh",
+ "description": "The twenty click changes of issues-long, handed over in one message in Chinese, with a task list to keep and a commit to make after every issue: a second repository for the one-message case, in the language and the habits of real use.",
+ "source": {
+  "kind": "git",
+  "url": "https://github.com/pallets/click.git",
+  "ref": "6aabf099bfdd4c1e75fe8d0e0d4241372b988ab1",
+  "prepare": "click_issues.py issues-long.order click-zh.json"
+ },
+ "fixtures": [
+  "src/click/core.py",
+  "ISSUES.md",
+  ".venv/bin/python"
+ ],
+ "files": [
+  "Bug report.\n\n`click.echo` misbehaves when it is given empty bytes and a custom file.\n\nFailing:\n  tests/test_utils/test_echo.py::test_echo_custom_file",
+  "Bug report.\n\n**`KeyboardInterrupt` during `click.prompt()` can race** (upstream #3802)\n\nWhen a user presses Ctrl-C during `click.prompt()`, this may cause an unhandled exception instead of a clean abort. Seen in CI on an Ubuntu 22.04 arm runner; the same test passed on x64, macOS and Windows, so it is likely a race that does not show up every time. The traceback runs through `Command.main`, `invoke` and `make_context`.\n\nFailing:\n  tests/test_abort_interrupt.py::test_interrupt_while_exiting_after_success\n  tests/test_abort_interrupt.py::test_interrupt_while_reporting_abort\n  tests/test_abort_interrupt.py::test_interrupt_while_reporting_error",
+  "Bug report.\n\nAn optional `Choice` or `DateTime` argument is shown with doubled brackets in the usage synopsis.\n\nFailing:\n  tests/test_basic.py::test_choice_argument_optional_metavar\n  tests/test_basic.py::test_datetime_argument_optional_metavar",
+  "Feature request.\n\n**Support pathlib.Path in edit filename** (upstream #2869)\n\n`click.edit(filename=some_path)` with a `pathlib.Path` is rejected by the type checker -- `filename` is typed `str | None` -- and the workaround is `click.edit(filename=str(path))`. It would be nice not to need the `str`. It should actually work at runtime too, not only type-check.\n\nFailing:\n  tests/test_termui.py::test_edit_pathlib",
+  "Bug report.\n\n**help not resolving automatically** (upstream #2819)\n\nThe docs say the help parameter performs automatic conflict resolution: if a command itself implements a parameter with the same name, the default help parameter stops accepting it. That does not happen when a command has an argument or option named `help` -- parsing goes wrong. Click should also warn when an argument's name collides with another parameter.\n\nFailing:\n  tests/test_basic.py::test_param_named_help\n  tests/test_basic.py::test_param_squatting_help_option_name\n  tests/test_info_dict.py::test_command\n  tests/test_info_dict.py::test_context\n  tests/test_options.py::test_argument_sharing_param_name_warning",
+  "Bug report.\n\nThe shell completion source scripts come out with platform line endings. They have to use LF everywhere, or the shells reject them.\n\nFailing:\n  tests/test_shell_completion.py::test_source_uses_lf_line_endings",
+  "Feature request.\n\nFeature request: a `custom_version_option` decorator, exported from `click`, for building a version option with custom behaviour -- so that `version_option` itself can stay as it is. The failing tests show the expected interface.\n\nFailing:\n  tests/test_basic.py::test_custom_version_option\n  tests/test_basic.py::test_custom_version_option_receives_context",
+  "Bug report.\n\n**Sentinel available in context during option callbacks** (upstream #3136)\n\nClick's internal `UNSET` sentinel is an implementation detail that is not meant to be exposed, but inside an option callback `ctx.params.get(...)` returns it for parameters that have not been given. A callback should see `None` there, not the sentinel.\n\nFailing:\n  tests/test_context.py::test_hiding_of_unset_sentinel_in_callbacks",
+  "Bug report.\n\nThe progress bar does not land on its final position when it finishes -- the last render stops short.\n\nFailing:\n  tests/test_termui.py::test_progressbar_lands_on_final_position",
+  "Bug report.\n\nWhen a command's name is generated from its function name, a conventional suffix such as `_command` or `_group` should be dropped from it. It is kept instead. The failing tests show the exact rule.\n\nFailing:\n  tests/test_command_decorators.py::test_generate_name\n  tests/test_commands.py::test_other_command_invoke_with_defaults",
+  "Bug report.\n\nWhen a group can be invoked without a subcommand, its usage line still presents the subcommand as required. It should be marked optional.\n\nFailing:\n  tests/test_commands.py::test_subcommand_metavar_marks_optional",
+  "Bug report.\n\nWhen `PAGER` is set with its own arguments, click does not forward all of them to the pager, and decides whether the pager handles raw control codes by looking at the wrong thing -- it should parse the option tokens. `less.exe` on Windows is not recognised as `less` either.\n\nFailing:\n  tests/test_termui.py::test_pipepager_less_detection_case_insensitive_on_windows\n  tests/test_termui.py::test_pipepager_less_detection_matches_stem\n  tests/test_termui.py::test_pipepager_less_raw_mode_detection\n  tests/test_termui.py::test_tempfile_pager_passes_pager_params",
+  "Bug report.\n\nA user-defined `type_cast_value` on a custom parameter class can be called with click's internal `UNSET` sentinel. User code must never see `UNSET`.\n\nFailing:\n  tests/test_arguments.py::test_argument_custom_class_can_override_type_cast_value_and_never_sees_unset\n  tests/test_options.py::test_option_custom_class_can_override_type_cast_value_and_never_sees_unset",
+  "Feature request.\n\n`echo_via_pager` with a generator shows nothing until the generator is exhausted. Each chunk should reach the pager as it is produced, so that long output starts appearing immediately.\n\nFailing:\n  tests/test_termui.py::test_echo_via_pager_streams_each_write",
+  "Bug report.\n\n`get_help_option_names` does not preserve the order the help option names were declared in.\n\nFailing:\n  tests/test_commands.py::test_get_help_option_names",
+  "Feature request.\n\n**Deprecate `isolated_filesystem()`** (upstream #3700)\n\nNowadays you can use `pytest` directly for this, or `tempfile.TemporaryDirectory()`; it would not be added today, and was added before Python 3 and pytest were in common use. It should emit a deprecation warning, and its limits should be documented.\n\nFailing:\n  tests/test_deprecations.py::test_isolated_filesystem_deprecated",
+  "Feature request.\n\nThe progress bar should be able to show the item currently being processed, through `item_show_func`. The failing test shows the expected behaviour.\n\nFailing:\n  tests/test_termui.py::test_progressbar_item_show_func",
+  "Bug report.\n\nA deprecated command with empty help renders its deprecation label with a stray leading space.\n\nFailing:\n  tests/test_commands.py::test_deprecated_empty_help_no_leading_space\n  tests/test_options.py::test_deprecated_empty_help_no_leading_space",
+  "Feature request.\n\nImporting click should not import `typing_extensions` at runtime. The typing of `prompt` and `ParamType` currently relies on it; make that typing work without the runtime import.\n\nFailing:\n  tests/test_imports.py::test_light_imports",
+  "Bug report.\n\n`HelpFormatter.write_usage` produces spurious characters when there are no arguments.\n\nFailing:\n  tests/test_formatting.py::test_command_write_usage_no_args\n  tests/test_formatting.py::test_help_formatter_write_usage_without_args_styled_prefix\n  tests/test_formatting.py::test_help_formatter_write_usage"
+ ],
+ "step_template": "{file}",
+ "task": "这是 click（Python 的命令行库）的一个 checkout。ISSUES.md 里列了 20 个待解决的问题，有 bug 也有新功能，每个都写明了因为它而失败的测试；测试就是需求。\n\n请按 ISSUES.md 的顺序把它们全部做完，一次做一个，中间不用停下来问我。开始前先用任务列表把 20 个问题列出来，做的过程中随时更新。每个问题：在 src/click 里改代码，跑它的失败测试直到通过，确认没有弄坏别的测试，然后单独提交一次 git commit，提交信息写明是第几个问题。不要修改、跳过或删除任何测试。\n\n跑测试用 `.venv/bin/python -m pytest`，整个测试集几秒钟就能跑完。\n\n全部做完后，用中文简单总结一下，回复的最后写上 ALL ISSUES DONE。",
+ "nudge": "继续处理 ISSUES.md 里剩下的问题。",
+ "done_marker": "ALL ISSUES DONE",
+ "max_nudges": 10,
+ "probes": [],
+ "checks": [
+  {
+   "id": "issue01",
+   "kind": "consistency",
+   "description": "bug 1: handle empty bytes in echo",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_utils/test_echo.py::test_echo_custom_file"
+  },
+  {
+   "id": "issue02",
+   "kind": "consistency",
+   "description": "bug 2: Fix race condition on `KeyboardInterrupt` arriving in `Command.main()`",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_abort_interrupt.py::test_interrupt_while_exiting_after_success tests/test_abort_interrupt.py::test_interrupt_while_reporting_abort tests/test_abort_interrupt.py::test_interrupt_while_reporting_error"
+  },
+  {
+   "id": "issue03",
+   "kind": "consistency",
+   "description": "bug 3: Fix double-bracketing of choices in synopsis",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_basic.py::test_choice_argument_optional_metavar tests/test_basic.py::test_datetime_argument_optional_metavar"
+  },
+  {
+   "id": "issue04",
+   "kind": "consistency",
+   "description": "feature 4: Add support of `pathlib.Path` to `edit`",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_edit_pathlib"
+  },
+  {
+   "id": "issue05",
+   "kind": "consistency",
+   "description": "bug 5: Warn when an argument name collide with other parameters",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_basic.py::test_param_named_help tests/test_basic.py::test_param_squatting_help_option_name tests/test_info_dict.py::test_command tests/test_info_dict.py::test_context tests/test_options.py::test_argument_sharing_param_name_warning"
+  },
+  {
+   "id": "issue06",
+   "kind": "consistency",
+   "description": "bug 6: Implement Unix line endings for shell completion output to ensure compat",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_shell_completion.py::test_source_uses_lf_line_endings"
+  },
+  {
+   "id": "issue07",
+   "kind": "consistency",
+   "description": "feature 7: Add `@custom_version_option`, freeze `@version_option`",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_basic.py::test_custom_version_option tests/test_basic.py::test_custom_version_option_receives_context"
+  },
+  {
+   "id": "issue08",
+   "kind": "consistency",
+   "description": "bug 8: Temporarily provide a fake context to the callback to hide `UNSET` value",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_context.py::test_hiding_of_unset_sentinel_in_callbacks"
+  },
+  {
+   "id": "issue09",
+   "kind": "consistency",
+   "description": "bug 9: Land the progress bar on its final position",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_progressbar_lands_on_final_position"
+  },
+  {
+   "id": "issue10",
+   "kind": "consistency",
+   "description": "bug 10: remove suffixes from generated command name",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_command_decorators.py::test_generate_name tests/test_commands.py::test_other_command_invoke_with_defaults"
+  },
+  {
+   "id": "issue11",
+   "kind": "consistency",
+   "description": "bug 11: Mark commands as optional in the synopsis",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_commands.py::test_subcommand_metavar_marks_optional"
+  },
+  {
+   "id": "issue12",
+   "kind": "consistency",
+   "description": "bug 12: Forwards all user's parameters set in `PAGER`",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_pipepager_less_detection_case_insensitive_on_windows tests/test_termui.py::test_pipepager_less_detection_matches_stem tests/test_termui.py::test_pipepager_less_raw_mode_detection tests/test_termui.py::test_tempfile_pager_passes_pager_params"
+  },
+  {
+   "id": "issue13",
+   "kind": "consistency",
+   "description": "bug 13: Ensure that 'type_cast_value' never gets 'UNSET'",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_arguments.py::test_argument_custom_class_can_override_type_cast_value_and_never_sees_unset tests/test_options.py::test_option_custom_class_can_override_type_cast_value_and_never_sees_unset"
+  },
+  {
+   "id": "issue14",
+   "kind": "consistency",
+   "description": "feature 14: Support incremental output in the pager",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_echo_via_pager_streams_each_write"
+  },
+  {
+   "id": "issue15",
+   "kind": "consistency",
+   "description": "bug 15: Preserve declaration order of help option names",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_commands.py::test_get_help_option_names"
+  },
+  {
+   "id": "issue16",
+   "kind": "consistency",
+   "description": "feature 16: Deprecate `isolated_filesystem` and document its limits",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_deprecations.py::test_isolated_filesystem_deprecated"
+  },
+  {
+   "id": "issue17",
+   "kind": "consistency",
+   "description": "feature 17: progress bar shows current item",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_termui.py::test_progressbar_item_show_func"
+  },
+  {
+   "id": "issue18",
+   "kind": "consistency",
+   "description": "bug 18: Fix deprecated label formatting",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_commands.py::test_deprecated_empty_help_no_leading_space tests/test_options.py::test_deprecated_empty_help_no_leading_space"
+  },
+  {
+   "id": "issue19",
+   "kind": "consistency",
+   "description": "feature 19: Make `prompt`/`ParamType` typing work without runtime `typing_extensions",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_imports.py::test_light_imports"
+  },
+  {
+   "id": "issue20",
+   "kind": "consistency",
+   "description": "bug 20: Fix `HelpFormatter.write_usage` producing spurious characters",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_formatting.py::test_command_write_usage_no_args tests/test_formatting.py::test_help_formatter_write_usage_without_args_styled_prefix tests/test_formatting.py::test_help_formatter_write_usage"
+  },
+  {
+   "id": "no_regressions",
+   "kind": "completeness",
+   "description": "the whole suite passes -- nothing else was broken on the way",
+   "command": ".venv/bin/python -m pytest -q -p no:cacheprovider"
+  },
+  {
+   "id": "tests_untouched",
+   "kind": "rule",
+   "description": "no test was modified, skipped or deleted to make it pass",
+   "command": "git diff --quiet eval-start -- tests"
+  },
+  {
+   "id": "committed",
+   "kind": "rule",
+   "description": "the work was committed as it went: a commit per issue at least, and nothing left uncommitted in src",
+   "command": "test \"$(git rev-list --count eval-start..HEAD)\" -ge 20 && git diff --quiet HEAD -- src"
+  }
+ ]
+}
