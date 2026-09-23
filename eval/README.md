@@ -217,6 +217,15 @@ comparison.
 counters together -- the number people usually quote -- bills cached tokens at
 full price and overstates a long session several times over. Both are printed.
 
+The `judge` columns are taskcut's own calls, in the same units for the judge's
+model. They are in neither the transcript nor Claude Code's cost ledger, so the
+harness runs every session with `--debug-file`, sums the record at the end of
+each judgement line (`[judge sonnet: in=… cache_read=… cache_write=… out=…
+ms=…]`) and keeps the sums in `results/<run>.judging.json`, beside the
+transcript. A `-` there is a run recorded before taskcut logged them, not a
+run that made none. The debug log itself stays in the scratch directory: it is
+large and full of absolute paths.
+
 `context carried into each turn` is `cache_read + cache_write` on the first
 request of a turn. It has to be both: a cut invalidates the cache past the tool
 definitions, so most of what an arm that cuts carries arrives as a write, and

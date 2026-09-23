@@ -25,6 +25,24 @@ def _workspace(work: Path, name: str, arm: str, model: str) -> Path:
     return work / "workspaces" / f"{name}--{arm}--{model}"
 
 
+def _debug_file(work: Path, stem: str) -> Path:
+    # Outside the results: a debug log is large and full of absolute paths.
+    # What the report needs from it is summed into a sidecar.
+    path = work / "debug" / f"{stem}.log"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.unlink(missing_ok=True)
+    return path
+
+
+def _write_judging(debug: Path, destination: Path) -> None:
+    """What the judge spent, summed from the session's debug log into a sidecar
+    beside the transcript. The judge's calls are in neither the transcript nor
+    Claude Code's cost ledger."""
+    spent = metrics.judging(debug.read_text(errors="replace") if debug.exists() else "")
+    destination.write_text(json.dumps(vars(spent), indent=1) + "\n")
+    print(f"judge: {spent.calls} calls, {spent.plain + spent.read + spent.write:,} tokens in, {spent.output:,} out -> {destination}")
+
+
 def cmd_list(args) -> int:
     loaded = workload.load_all(WORKLOADS)
     print("workloads:")
@@ -67,16 +85,18 @@ def cmd_run(args) -> int:
     if problems:
         raise SystemExit("workload is not answerable:\n  " + "\n  ".join(problems))
 
+    stem = f"{w.name}--{arm.name}--{model.alias}"
     plugin = driver.prepare_plugin(arm, REPO_ROOT, work / "plugins" / arm.name)
-    driver.run(w, arm, space, plugin, model.alias)
+    debug = _debug_file(work, stem)
+    driver.run(w, arm, space, plugin, model.alias, debug_file=debug)
 
     path = transcript.find(PROJECTS, space)
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    stem = f"{w.name}--{arm.name}--{model.alias}"
     destination = results / f"{stem}.jsonl"
     destination.write_bytes(path.read_bytes())
     print(f"transcript -> {destination}")
+    _write_judging(debug, results / f"{stem}.judging.json")
 
     # While the workspace is still as the session left it. A check is the only
     # honest grade for a task that produced something, and it cannot be
@@ -112,6 +132,9 @@ def cmd_report(args) -> int:
         sidecar = path.with_suffix("").with_suffix(".checks.json")
         if sidecar.exists():
             run.checks.extend(metrics.CheckResult(**v) for v in json.loads(sidecar.read_text()))
+        spent = path.with_suffix("").with_suffix(".judging.json")
+        if spent.exists():
+            run.judging = metrics.Judging(**json.loads(spent.read_text()))
         grouped.setdefault((name, model), []).append(run)
 
     if not grouped:
@@ -155,6 +178,7 @@ def _numbers(run) -> dict:
         "request_context_mean": round(run.mean_request),
         "elapsed_seconds": round(run.elapsed),
         "checks": {c.id: c.passed for c in run.checks},
+        "judging": vars(run.judging) if run.judging else None,
         "drift": {
             d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,
                    "per_step": list(d.per_step)}
@@ -178,14 +202,16 @@ def cmd_mechanism(args) -> int:
     model = models.get(args.model)
     space = mechanism.materialise(_workspace(work, "mechanism", mechanism.ARM.name, model.alias))
     plugin = driver.prepare_plugin(mechanism.ARM, REPO_ROOT, work / "plugins" / mechanism.ARM.name)
-    mechanism.drive(space, plugin, mechanism.ARM, model.alias)
+    stem = f"mechanism--{model.alias}"
+    debug = _debug_file(work, stem)
+    mechanism.drive(space, plugin, mechanism.ARM, model.alias, debug_file=debug)
 
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    stem = f"mechanism--{model.alias}"
     destination = results / f"{stem}.jsonl"
     destination.write_bytes(transcript.find(PROJECTS, space).read_bytes())
     print(f"transcript -> {destination}")
+    _write_judging(debug, results / f"{stem}.judging.json")
 
     verdicts = mechanism.check(destination, model.window, space)
     (results / f"{stem}.checks.json").write_text(json.dumps([vars(v) for v in verdicts], indent=1) + "\n")

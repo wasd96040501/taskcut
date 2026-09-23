@@ -87,7 +87,8 @@ def prepare_plugin(arm: Arm, source: Path, destination: Path) -> Path:
 
 
 class Session:
-    def __init__(self, cwd: Path, plugin: Path | None, env: dict, model: str, cols: int = 120, rows: int = 40):
+    def __init__(self, cwd: Path, plugin: Path | None, env: dict, model: str, cols: int = 120, rows: int = 40,
+                 debug_file: Path | None = None):
         # A workspace reused across runs keeps the transcripts of the earlier
         # ones, under the same project directory. This session's is the one
         # that was not there before it started.
@@ -103,10 +104,13 @@ class Session:
         environment["TERM"] = "xterm-256color"
         environment["COLUMNS"], environment["LINES"] = str(cols), str(rows)
         environment.update(env)
+        # The debug log is the only record of what taskcut's judge spent: its
+        # calls are in neither the transcript nor Claude Code's cost ledger.
+        debug = ["--debug-file", str(debug_file)] if debug_file else []
         self.process = subprocess.Popen(
             # No plugin directory is a session with whatever is installed, the way
             # a person would start one.
-            [_binary(), *(["--plugin-dir", str(plugin)] if plugin else []), "--model", model, "--allowedTools", TOOLS, "--disallowedTools", DENIED],
+            [_binary(), *(["--plugin-dir", str(plugin)] if plugin else []), "--model", model, "--allowedTools", TOOLS, "--disallowedTools", DENIED, *debug],
             cwd=str(cwd),
             env=environment,
             stdin=slave,
@@ -247,9 +251,11 @@ def _one_message(session: Session, workload: Workload, log) -> None:
         log(f"  nudge {n}/{workload.max_nudges} settled={session.ask(workload.nudge, timeout=LONG_TURN_TIMEOUT)}")
 
 
-def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str, log=_log) -> None:
-    """Drives one workload under one arm. Results are read from the transcript."""
-    session = Session(workspace, plugin, dict(arm.env), model)
+def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str, log=_log,
+        debug_file: Path | None = None) -> None:
+    """Drives one workload under one arm. Results are read from the transcript,
+    and what the judge spent from the debug log."""
+    session = Session(workspace, plugin, dict(arm.env), model, debug_file=debug_file)
     try:
         session.read_until_quiet(quiet=3.0, timeout=120)
         if session.accept_trust_prompt():

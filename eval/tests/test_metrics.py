@@ -1,8 +1,13 @@
 """The numbers, checked against hand-computed values."""
 
+import shutil
+import subprocess
 import unittest
+from pathlib import Path
 
 from taskcut_eval import metrics, transcript, workload
+
+REPO = Path(__file__).resolve().parents[2]
 
 
 def turn(prompt, requests, texts=(), tools=()):
@@ -35,6 +40,48 @@ class Context(unittest.TestCase):
     def test_a_turn_with_no_request_is_skipped(self):
         t = transcript.Transcript(path=None, turns=[turn("unanswered", [])])
         self.assertEqual(metrics.prefix_series(t), [])
+
+
+LOG = """\
+2026-09-23T14:22:26.120Z [DEBUG] [taskcut] $.ui.log (to debug): context at 36%, step judged the same work [judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]
+2026-09-23T14:22:27.001Z [DEBUG] something else entirely: in=999 out=999
+2026-09-23T14:22:31.120Z [DEBUG] [taskcut] $.ui.log (to debug): context at 37%, step judged a new piece [judge sonnet: in=2001 cache_read=100 cache_write=40 out=61 ms=1800]
+2026-09-23T14:22:40.120Z [DEBUG] [taskcut] $.ui.log (to debug): context at 37%, could not judge the step (api-error 429 rate_limit) [judge sonnet: in=0 cache_read=0 cache_write=0 out=0 ms=300]
+2026-09-23T14:22:41.120Z [DEBUG] [taskcut] $.ui.log (to debug): context at 38%, step judged the same work
+"""
+
+
+class Judging(unittest.TestCase):
+    def test_every_call_is_summed_answered_or_not(self):
+        j = metrics.judging(LOG)
+        self.assertEqual((j.calls, j.moved_on, j.unanswered), (3, 1, 1))
+        self.assertEqual((j.plain, j.read, j.write, j.output, j.ms), (3835, 100, 40, 113, 4240))
+        self.assertEqual(j.model, "sonnet")
+
+    def test_weighted_like_the_session_is(self):
+        j = metrics.judging(LOG)
+        self.assertAlmostEqual(j.weighted, 3835 + 1.25 * 40 + 0.1 * 100)
+
+    def test_a_line_without_a_record_is_not_a_call_it_can_price(self):
+        # A Claude Code that reported no cost: the line is there, the numbers are not.
+        self.assertEqual(metrics.judging(LOG.splitlines()[-1]).calls, 0)
+
+    def test_no_log_is_nothing_judged(self):
+        self.assertEqual(metrics.judging("").calls, 0)
+
+    @unittest.skipUnless(shutil.which("node"), "node runs the plugin's own formatter")
+    def test_reads_what_the_plugin_writes(self):
+        # The format is a contract between hooks/spend.ts and this parser:
+        # render a line with the plugin's own code and read it back here.
+        script = (
+            "import { judgementLine } from './hooks/spend.ts';"
+            "console.log(judgementLine(52, 'step judged a new piece', 'claude-sonnet-5',"
+            " { input_tokens: 7, output_tokens: 8, cache_read_input_tokens: 9, cache_creation_input_tokens: 10 }, 11.6))"
+        )
+        line = subprocess.run(["node", "--input-type=module", "-e", script], cwd=REPO, capture_output=True, text=True, check=True).stdout
+        j = metrics.judging(f"2026 [DEBUG] [taskcut] $.ui.log (to debug): {line}")
+        self.assertEqual((j.calls, j.moved_on, j.model), (1, 1, "claude-sonnet-5"))
+        self.assertEqual((j.plain, j.output, j.read, j.write, j.ms), (7, 8, 9, 10, 12))
 
 
 class Fidelity(unittest.TestCase):
