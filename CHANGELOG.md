@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - taskcut is released under the MIT License, in place of Apache-2.0.
 
+### Fixed
+
+- **Nothing was compacted on Claude Code 2.1.280.** `$.model.complete` now
+  resolves `{ isAnswered, text, usage }` rather than the reply's text; taskcut
+  read the object as text, every judgement failed, and the failure was logged
+  only to the debug log. The reply is now read in either shape, so 2.1.278
+  keeps working, and a failed call is logged with its reason.
+
 ## [0.8.0] - 2026-09-22
 
 ### Changed
