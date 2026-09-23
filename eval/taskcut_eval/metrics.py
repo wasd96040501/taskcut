@@ -57,6 +57,52 @@ def cost(transcript: Transcript) -> Cost:
     )
 
 
+#: One judgement as taskcut writes it to the debug log (hooks/spend.ts,
+#: judgementLine). The judge's calls are in neither the transcript nor Claude
+#: Code's own cost ledger, so this line is the only record of them.
+JUDGEMENT_LINE = re.compile(
+    r"context at (?P<percent>\d+)%, (?P<verdict>.*?) \[judge (?P<model>\S+): in=(?P<plain>\d+) "
+    r"cache_read=(?P<read>\d+) cache_write=(?P<write>\d+) out=(?P<output>\d+) ms=(?P<ms>\d+)\]\s*$"
+)
+
+
+@dataclass(frozen=True)
+class Judging:
+    """What taskcut's judge cost in a run: every call, answered or not."""
+
+    calls: int
+    moved_on: int
+    unanswered: int
+    model: str
+    read: int
+    write: int
+    plain: int
+    output: int
+    ms: int
+
+    @property
+    def weighted(self) -> float:
+        """Input cost in base-input-token equivalents of the judge's own model."""
+        return self.plain + CACHE_WRITE_MULTIPLIER * self.write + CACHE_READ_MULTIPLIER * self.read
+
+
+def judging(log: str) -> Judging:
+    """Sums the judgement lines of a debug log. Lines of any other kind are
+    not in it, and neither is a judgement whose cost the engine did not report."""
+    found = [m for m in (JUDGEMENT_LINE.search(line) for line in log.splitlines()) if m]
+    return Judging(
+        calls=len(found),
+        moved_on=sum(m["verdict"] == "step judged a new piece" for m in found),
+        unanswered=sum(m["verdict"].startswith("could not judge") for m in found),
+        model=",".join(sorted({m["model"] for m in found})),
+        read=sum(int(m["read"]) for m in found),
+        write=sum(int(m["write"]) for m in found),
+        plain=sum(int(m["plain"]) for m in found),
+        output=sum(int(m["output"]) for m in found),
+        ms=sum(int(m["ms"]) for m in found),
+    )
+
+
 def prefix_series(transcript: Transcript) -> list[int]:
     """What the model carried into each turn, turn by turn.
 
@@ -241,6 +287,9 @@ class Run:
     elapsed: float = 0.0
     #: Filled in from the sidecar a run writes; empty for a workload with none.
     checks: list = field(default_factory=list)
+    #: What the judge cost, from the run's sidecar. None for a run recorded
+    #: before taskcut logged it, which is not the same as a run that judged nothing.
+    judging: Judging | None = None
 
     @property
     def fidelity(self) -> dict[str, Fidelity]:

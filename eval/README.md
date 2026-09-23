@@ -169,12 +169,97 @@ all thirty-six real fixes put back, every check passes. Two changes only apply
 on top of an older one's; both stay separate issues, and the cases that need
 both belong to the later.
 
+**`click-zh`** -- the twenty click changes of `issues-long`, handed over in
+**one message, in Chinese**, the way the job taskcut is for is given in real
+use: keep a task list, fix the issues in the order ISSUES.md lists them, and
+commit after each one. It exists because every boundary the judge had been
+measured on came from `sqlglot-long` -- one repository, one prompt, one way of
+saying "Issue 12 done; now 13" -- and from sessions that never kept a task list
+or committed, where real ones do both: a commit is the most common thing a step
+does between one piece and the next, and it is wrapping up, not moving on.
+Graded by the same per-issue tests and the whole suite. Because the session
+commits as it goes, `git diff HEAD` no longer shows what it changed, so the
+workspace's broken state is tagged `eval-start` and the checks diff against
+that; one more check asks that the work was committed, a commit per issue at
+least. Verified both ways: in the broken state every issue check fails, with
+the twenty real fixes committed one by one every check passes, and a test
+edited and committed fails `tests_untouched`.
+
 **`audit`** -- five steps researching a real Flask checkout, then five building
 a standard-library tool that finds configuration key reads, run against that
 same checkout. The answer is exact and computable -- 30 keys, 42 reads, under a
 counting rule the briefing fixes -- so the tool either agrees with the source or
 it does not. The output format changes at step nine, invalidating what step
 seven built.
+
+## The judge, replayed over real sessions
+
+`make eval-judge` asks the judge about sixteen steps written for it. `make
+eval-replay` asks it about every step real sessions took that taskcut would
+have judged, as the session looked at that moment -- so a change to what the
+judge reads or is asked is measured on the work it will actually see, and
+priced:
+
+```bash
+make eval-replay MODEL=sonnet                 # the working tree's hooks/judge.ts
+make eval-replay MODEL=sonnet REF=main        # the judge as it was on main
+make eval-replay-compare A=eval/results/replay--main--sonnet.json B=eval/results/replay--<sha>--sonnet.json
+```
+
+A **set** (`replay/<set>.json`) is one session's transcript turned into what
+`$.session.messages()` held before each step, with the step, and nothing of
+any tool's output; its **labels** (`replay/<set>.labels`) say, for every step
+taskcut would judge, whether the work moves on there: `N`, `S`, or `E` for
+either. [replay/LABELS.md](replay/LABELS.md) says how to label, and `make
+eval-replay-sheet SET=…` prints a set's steps with what a labeller needs to
+see. A set that is someone's own session goes in `replay/local/`, which is not
+committed; it is read the same way when it is there.
+
+The run reports, with a 95% bootstrap interval where it is a rate:
+
+* **boundaries caught** -- an N step and the E steps just before it are one
+  window, caught if the judge says NEXT anywhere in it, as live the first NEXT
+  compacts;
+* **false NEXT** -- S steps called NEXT: a compaction in the middle of a piece;
+* **hard SAME** -- S steps that say a piece passes or is done, got right;
+* **same every repeat**, **unanswered**, and what it cost: list price per
+  judgement, and for the judged steps of `sqlglot-long--off` past 35% of the
+  window, the stretch a shipped floor would actually judge.
+
+`replay-compare` pairs two runs step by step and gives the difference of each
+rate with an interval over the same boundaries and steps, which is what "not
+worse" has to rest on.
+
+### Whether the replay is what the judge sees
+
+Every number above is about a prompt rebuilt from a transcript. `make
+eval-replay-check` checks that it is the prompt a live session builds: one
+real session -- a request, a long turn kept on a task list and compacted twice
+by taskcut, the `Continue.` it submits, a question after -- with a recorder
+plugin (`replaycheck/`) beside taskcut that writes, at every step, the judge's
+prompt as taskcut builds it from what the engine holds. The transcript is
+then replayed and every step's prompt compared, character for character.
+
+It is not a formality. Its first run matched 2 steps of 18: the engine holds a
+response a block at a time and already holds the step, and its tools' results
+when they have run, when the step is judged -- so taskcut's judge had been
+reading every step twice -- and after a compaction the engine keeps the latest
+messages whole after the summary, which the replay had dropped. Both are
+fixed, and it matches every step.
+
+### The harness's own tests
+
+`make eval-test` runs, for the replay: the parser against a transcript written
+to hold every case (a response split over records, a compaction and its
+preserved messages, a plugin's prompt, a sub-agent, a message nobody sent);
+which steps are judged, against register.ts's rule; the scorer against judges
+whose answers are known -- one always right, one always SAME, one always NEXT,
+one that changes its mind between repeats -- which must score exactly what they
+must; the intervals; the replay check against records it must accept and
+records it must reject; and, for the committed sets, that their labels cover
+exactly the steps taskcut judges and that they hold no home directory. Where
+Python mirrors the plugin (the read-only tools, the debug line's format), a
+test runs the plugin's own TypeScript under node and compares.
 
 ## Checks
 
@@ -216,6 +301,15 @@ comparison.
 1.25 of a base input token and a cache read about 0.1. Adding the three input
 counters together -- the number people usually quote -- bills cached tokens at
 full price and overstates a long session several times over. Both are printed.
+
+The `judge` columns are taskcut's own calls, in the same units for the judge's
+model. They are in neither the transcript nor Claude Code's cost ledger, so the
+harness runs every session with `--debug-file`, sums the record at the end of
+each judgement line (`[judge sonnet: in=… cache_read=… cache_write=… out=…
+ms=…]`) and keeps the sums in `results/<run>.judging.json`, beside the
+transcript. A `-` there is a run recorded before taskcut logged them, not a
+run that made none. The debug log itself stays in the scratch directory: it is
+large and full of absolute paths.
 
 `context carried into each turn` is `cache_read + cache_write` on the first
 request of a turn. It has to be both: a cut invalidates the cache past the tool

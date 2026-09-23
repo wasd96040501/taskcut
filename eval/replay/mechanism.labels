@@ -1,0 +1,6 @@
+# mechanism: make eval-mechanism as it was for 0.8, floor 5: short turns reading long files, then two turns of three tasks each, compacted between them. Claude Code 2.1.278, Sonnet 5, 2026-09-22.
+# One line per step taskcut would judge: N moves on, S does not, E either. See eval/replay/LABELS.md.
+9    S  File is truncated, need the remaining lines to find the actual last line.
+19   N  Task 1 confirmed: answer4.txt contains `OSPREY-12`. Moving to task 2.
+26   S  Full file read (702 lines). Last content line is line 701: `HERON-58` (line 702 is blank trailing newline). Writing that to answer5.txt now.
+28   N  Task 2 confirmed: answer5.txt contains `HERON-58`. Moving to task 3.

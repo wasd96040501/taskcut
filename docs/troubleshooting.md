@@ -84,13 +84,22 @@ Past the floor, every compaction taskcut makes gets a dim line:
 taskcut: context at 43%, compacting before the next piece
 ```
 
-Every other judgement is silent; `claude --debug` shows each one, as `step
-judged a new piece` or `step judged the same work`. The end of a turn is never
+Every other judgement is silent. `/taskcut` counts them, and `claude --debug`
+shows each one, with what it cost:
+
+```
+context at 41%, step judged the same work [judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]
+context at 43%, step judged a new piece [judge sonnet: in=1902 cache_read=0 cache_write=0 out=47 ms=1810]
+context at 44%, could not judge the step (api-error 429 rate_limit) [judge sonnet: in=0 cache_read=0 cache_write=0 out=0 ms=310]
+```
+
+A judgement that could not be made keeps the context, and says why. The end of a turn is never
 judged, even when everything you asked for is done: what you say next may be
-about it, and `/compact` before new work is yours. The judge reads what auto
-mode's permission classifier reads -- your messages, the assistant's
-non-read-only tool calls and `CLAUDE.md` -- plus the step it is judging, and
-never any tool output.
+about it, and `/compact` before new work is yours. The judge reads your
+messages, the assistant's latest messages, what its latest calls touched and
+its task list, plus the step it is judging -- never any tool output, and not
+`CLAUDE.md`. A step that does not itself say a piece is done is not a
+boundary, however plainly the work shows it.
 
 ### 6. Nothing is compacted inside a long turn
 
@@ -103,6 +112,11 @@ taskcut: turn.step hook skipped: ran past its 10s budget
 
 It means the engine skipped the step hook, and on that step taskcut could not
 act. Report it with your Claude Code version.
+
+If there is no such line, and `claude --debug` shows no `step judged` lines
+for the turn either, Claude worked through it without a word between its
+calls. A step that says nothing is not judged, so a turn done entirely in
+silence is never compacted inside. `/taskcut` shows how many steps were judged.
 
 ## It compacts on every turn
 

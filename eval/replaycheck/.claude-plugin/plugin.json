@@ -1,0 +1,5 @@
+{
+  "name": "taskcut-replaycheck",
+  "version": "0.0.0",
+  "description": "Benchmark harness, not a plugin to install: records the judge's prompt at every step of a live session, to check the replay against."
+}

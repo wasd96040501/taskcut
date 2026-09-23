@@ -1,0 +1,19 @@
+# issues-long--off: the issues-long workload, arm off: 20 real click changes, one per message. Claude Code 2.1.278, Sonnet 5, 2026-09-21.
+# One line per step taskcut would judge: N moves on, S does not, E either. See eval/replay/LABELS.md.
+5    S  The suite has 84 failures, which are presumably the other open issues. To check I didn't add any, I'll compare against the baseline without my change.
+12   S  Working on issue 2. I've read `Command.main` and I'm now adding guards so a second Ctrl-C can't replace the exit code.
+13   S  Now `Command.main` itself.
+18   S  Now the types' `get_metavar` implementations, so I can see where the brackets come from.
+40   S  I'm on issue 5, working out how the automatic help option gets its name from `Option._parse_decls`.
+43   S  All ten failing cases across the five named tests now pass, and nothing new fails. I'll add the changelog entry and check the behaviour end to end.
+67   S  The cause is in `ProgressBar.update`. Steps are held back until `update_min_steps` is reached, so any remainder left at the end never gets applied to `pos`, an…
+74   S  `group()` goes through `command()`, so one change covers both. The changelog records this rule under 8.2.0: the suffixes `_command`, `_cmd`, `_group` and `_grp…
+81   S  It passes, but the `.format` template I wrote is clumsier than it needs to be. I'll simplify it before moving on.
+97   S  All 11 cases pass. I'll also check that a custom `type_cast_value` really never sees the sentinel on the paths the tests don't cover, and that the built-in beh…
+101  S  The test passes. I'll confirm the streaming with a real pager process and a slow generator, since that's the behaviour the issue describes and the unit test on…
+104  S  The stable order should hold under any hash seed, not just the one I use for comparisons. I'll run the test under many seeds and then the full suite.
+113  S  The target test passes. I'll check that the extra render respects `update_min_steps`, since rendering on every item would defeat it.
+119  S  Both target tests pass. As a last check I'll look at the rendered output for the other affected surfaces: the subcommand listing, which uses the short help, an…
+127  S  Python 3.11, 3.12 and 3.13 are installed through `uv`, so I can test the below-3.13 case directly. First I'll confirm the real problem on 3.12.
+132  S  The import test passes. Now the real check: importing click and using `ParamType[...]` on Python 3.11, 3.12 and 3.13, where `typing_extensions` isn't installed.
+134  S  On 3.12 the suite gives the same result as on 3.14, with only 7 failures left. I'll confirm the two sets match exactly.

@@ -7,7 +7,12 @@ import json
 import sys
 from pathlib import Path
 
-from . import arms, driver, judgebench, judgecases, mechanism, metrics, models, report, transcript, workload
+import dataclasses
+import re
+import subprocess
+from statistics import mean
+
+from . import arms, driver, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -23,6 +28,24 @@ def _workspace(work: Path, name: str, arm: str, model: str) -> Path:
     # Per arm and per model, always: two runs sharing a directory share a
     # transcript directory, and can no longer be told apart afterwards.
     return work / "workspaces" / f"{name}--{arm}--{model}"
+
+
+def _debug_file(work: Path, stem: str) -> Path:
+    # Outside the results: a debug log is large and full of absolute paths.
+    # What the report needs from it is summed into a sidecar.
+    path = work / "debug" / f"{stem}.log"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.unlink(missing_ok=True)
+    return path
+
+
+def _write_judging(debug: Path, destination: Path) -> None:
+    """What the judge spent, summed from the session's debug log into a sidecar
+    beside the transcript. The judge's calls are in neither the transcript nor
+    Claude Code's cost ledger."""
+    spent = metrics.judging(debug.read_text(errors="replace") if debug.exists() else "")
+    destination.write_text(json.dumps(vars(spent), indent=1) + "\n")
+    print(f"judge: {spent.calls} calls, {spent.plain + spent.read + spent.write:,} tokens in, {spent.output:,} out -> {destination}")
 
 
 def cmd_list(args) -> int:
@@ -67,16 +90,18 @@ def cmd_run(args) -> int:
     if problems:
         raise SystemExit("workload is not answerable:\n  " + "\n  ".join(problems))
 
+    stem = f"{w.name}--{arm.name}--{model.alias}"
     plugin = driver.prepare_plugin(arm, REPO_ROOT, work / "plugins" / arm.name)
-    driver.run(w, arm, space, plugin, model.alias)
+    debug = _debug_file(work, stem)
+    driver.run(w, arm, space, plugin, model.alias, debug_file=debug)
 
     path = transcript.find(PROJECTS, space)
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    stem = f"{w.name}--{arm.name}--{model.alias}"
     destination = results / f"{stem}.jsonl"
     destination.write_bytes(path.read_bytes())
     print(f"transcript -> {destination}")
+    _write_judging(debug, results / f"{stem}.judging.json")
 
     # While the workspace is still as the session left it. A check is the only
     # honest grade for a task that produced something, and it cannot be
@@ -112,21 +137,28 @@ def cmd_report(args) -> int:
         sidecar = path.with_suffix("").with_suffix(".checks.json")
         if sidecar.exists():
             run.checks.extend(metrics.CheckResult(**v) for v in json.loads(sidecar.read_text()))
+        spent = path.with_suffix("").with_suffix(".judging.json")
+        if spent.exists():
+            run = dataclasses.replace(run, judging=metrics.Judging(**json.loads(spent.read_text())))
         grouped.setdefault((name, model), []).append(run)
 
     if not grouped:
         raise SystemExit(f"no results in {results}")
 
-    chunks, summary = [], {}
+    # The transcripts are large and full of absolute paths, so they stay out of
+    # history, and a checkout rarely has all of them. runs.json is what a later
+    # run is compared against: the runs whose transcripts are here update their
+    # entries in it, and every other entry is kept as it was.
+    summary_path = results / "runs.json"
+    summary = json.loads(summary_path.read_text()) if summary_path.exists() else {}
+    chunks = []
     for (name, model), runs in sorted(grouped.items()):
         runs.sort(key=lambda r: (r.arm != "off", r.arm))
         chunks.append(report.render(f"{name} on {model}", runs, models.get(model)))
-        summary.setdefault(name, {})[model] = {r.arm: _numbers(r) for r in runs}
+        summary.setdefault(name, {}).setdefault(model, {}).update({r.arm: _numbers(r) for r in runs})
     text = "\n\n".join(chunks)
 
-    # The transcripts are large and full of absolute paths, so they stay out of
-    # history. These are what a later run is compared against.
-    (results / "runs.json").write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n")
+    summary_path.write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n")
     if args.out:
         Path(args.out).write_text(text + "\n")
         print(f"report -> {args.out}")
@@ -155,6 +187,7 @@ def _numbers(run) -> dict:
         "request_context_mean": round(run.mean_request),
         "elapsed_seconds": round(run.elapsed),
         "checks": {c.id: c.passed for c in run.checks},
+        "judging": vars(run.judging) if run.judging else None,
         "drift": {
             d.id: {"held": d.held, "steps": d.steps, "first_lapse": d.first_lapse,
                    "per_step": list(d.per_step)}
@@ -178,14 +211,16 @@ def cmd_mechanism(args) -> int:
     model = models.get(args.model)
     space = mechanism.materialise(_workspace(work, "mechanism", mechanism.ARM.name, model.alias))
     plugin = driver.prepare_plugin(mechanism.ARM, REPO_ROOT, work / "plugins" / mechanism.ARM.name)
-    mechanism.drive(space, plugin, mechanism.ARM, model.alias)
+    stem = f"mechanism--{model.alias}"
+    debug = _debug_file(work, stem)
+    mechanism.drive(space, plugin, mechanism.ARM, model.alias, debug_file=debug)
 
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    stem = f"mechanism--{model.alias}"
     destination = results / f"{stem}.jsonl"
     destination.write_bytes(transcript.find(PROJECTS, space).read_bytes())
     print(f"transcript -> {destination}")
+    _write_judging(debug, results / f"{stem}.judging.json")
 
     verdicts = mechanism.check(destination, model.window, space)
     (results / f"{stem}.checks.json").write_text(json.dumps([vars(v) for v in verdicts], indent=1) + "\n")
@@ -212,6 +247,193 @@ def cmd_judge(args) -> int:
     return 0 if all(s.right == len(s.verdicts) for s in scored) else 1
 
 
+REPLAY = EVAL_ROOT / "replay"
+#: Sets that cannot be published -- someone's own sessions. Not committed.
+REPLAY_LOCAL = REPLAY / "local"
+
+
+def cmd_replay_build(args) -> int:
+    """A set from a transcript, and a labels file for it: `?` for every step
+    still to label, the label already there for every step that has one."""
+    directory = REPLAY_LOCAL if args.local else REPLAY
+    directory.mkdir(parents=True, exist_ok=True)
+    memory = [Path(p).read_text() for p in args.memory]
+    built = replay.build(Path(args.transcript), args.name, args.source, str(Path.home()), memory)
+    (directory / f"{args.name}.json").write_text(json.dumps(built, ensure_ascii=False, separators=(",", ":")) + "\n")
+    marks = directory / f"{args.name}.labels"
+    known = replay.read_labels(marks.read_text()) if marks.exists() else {}
+    header = f"{args.name}: {args.source}\nOne line per step taskcut would judge: N moves on, S does not, E either. See eval/replay/LABELS.md."
+    marks.write_text(replay.labels_template(built, header, known))
+    print(f"{args.name}: {len(built['steps'])} steps, {len(built['judged'])} judged, "
+          f"{sum(n not in known for n in built['judged'])} to label -> {marks}")
+    return 0
+
+
+def _replay_tag(ref: str) -> str:
+    if ref:
+        return ref.replace("/", "-")
+    head = subprocess.run(["git", "-C", str(REPO_ROOT), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    dirty = subprocess.run(["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--", "hooks/judge.ts"], capture_output=True, text=True).stdout.strip()
+    return f"{head}{'+' if dirty else ''}"
+
+
+def _score_file(path: Path, labels, sets) -> tuple[replay.Scores, dict]:
+    record = json.loads(path.read_text())
+    answers = replay.verdicts(record["answers"], record["model"])
+    wanted = {name: marks for name, marks in labels.items() if all(f"{name}#{n}" in answers for n in marks)}
+    return replay.score(sets, wanted, answers), {"record": record, "answers": answers, "labels": wanted}
+
+
+def cmd_replay(args) -> int:
+    """The judge over every labelled step of every set, `--repeats` times each."""
+    sets, labels, paths = replay.load_sets([REPLAY, REPLAY_LOCAL], args.set)
+    work = Path(args.work)
+    judge = REPO_ROOT / "hooks" / "judge.ts"
+    if args.ref:
+        judge = judgebench.judge_at(REPO_ROOT, args.ref, work / "judges" / f"{args.ref.replace('/', '-')}.ts")
+    tag = f"replay--{_replay_tag(args.ref)}--{args.model}"
+    # Per run, so that two judges can be measured at once.
+    plugin = judgebench.prepare(EVAL_ROOT / "judge", judge, work / "plugins" / f"judgebench-{tag}")
+    order = list(sets)
+    items = replay.cases(sets, labels, order)
+    print(f"{len(items)} steps from {len(sets)} sets, {args.repeats} times each, judged by {args.model} with hooks/judge.ts at {args.ref or 'the working tree'}", flush=True)
+    answers = judgebench.ask(items, plugin, work / tag, args.model, args.repeats, args.concurrency,
+                             sets=[paths[name] for name in order], timeout=6 * 3600)
+
+    results = Path(args.results)
+    results.mkdir(parents=True, exist_ok=True)
+    # What is committed: the verdicts and what each call cost. The judge's
+    # sentences go beside them, uncommitted, for reading the misses.
+    compact = [{k: a[k] for k in ("id", "run", "verdict", "usage", "ms", "attempts") if k in a} for a in answers]
+    (results / f"{tag}.json").write_text(json.dumps(
+        {"judge": args.ref or _replay_tag(""), "model": args.model, "repeats": args.repeats, "sets": order, "answers": compact},
+        indent=0) + "\n")
+    with (results / f"{tag}.texts.jsonl").open("w") as out:
+        for a in answers:
+            out.write(json.dumps({"id": a["id"], "run": a["run"], "text": a["text"]}, ensure_ascii=False) + "\n")
+    print(f"verdicts -> {results / f'{tag}.json'}")
+    return _replay_report(results / f"{tag}.json", sets, labels)
+
+
+def _replay_report(path: Path, sets, labels) -> int:
+    scores, data = _score_file(path, labels, sets)
+    caught, false = replay.units(data["labels"], data["answers"])
+    past = replay.stretch(sets, data["answers"], "sqlglot-long--off", 350_000) if "sqlglot-long--off" in sets else None
+    print(replay.render(path.stem, scores, replay.interval(caught), replay.interval(false), past))
+    return 0
+
+
+def cmd_replay_report(args) -> int:
+    sets, labels, _ = replay.load_sets([REPLAY, REPLAY_LOCAL], args.set)
+    for path in args.runs:
+        _replay_report(Path(path), sets, labels)
+        print()
+    return 0
+
+
+def cmd_replay_compare(args) -> int:
+    """Two runs over the same steps: the difference in each rate, B minus A,
+    with a bootstrap interval over the boundaries and steps both were asked."""
+    sets, labels, _ = replay.load_sets([REPLAY, REPLAY_LOCAL], args.set)
+    a_scores, a = _score_file(Path(args.a), labels, sets)
+    b_scores, b = _score_file(Path(args.b), labels, sets)
+    shared = {name: marks for name, marks in a["labels"].items() if name in b["labels"]}
+    ca, fa = replay.units(shared, a["answers"])
+    cb, fb = replay.units(shared, b["answers"])
+    # Units are compared on the repeats both have.
+    k = min(len(ca[0]) if ca else 0, len(cb[0]) if cb else 0) or min(a_scores.repeats, b_scores.repeats)
+    trim = lambda units: [u[:k] for u in units]  # noqa: E731
+    print(f"B minus A over {len(ca)} boundaries and {len(fa)} steps that are not one, {k} repeats each")
+    print(f"  A: {args.a}\n  B: {args.b}")
+    for name, (x, y) in {"boundaries caught": (ca, cb), "false NEXT": (fa, fb)}.items():
+        d, lo, hi = replay.paired(trim(x), trim(y))
+        print(f"  {name:<18} {d:+.1%}   95% {lo:+.1%} to {hi:+.1%}")
+    print(f"  $ per judgement    {a_scores.per_judgement:.5f} -> {b_scores.per_judgement:.5f}"
+          f"   ({b_scores.per_judgement / a_scores.per_judgement:.2f}x)")
+    return 0
+
+
+def cmd_replay_sheet(args) -> int:
+    sets, labels, _ = replay.load_sets([REPLAY, REPLAY_LOCAL], [args.set]) if not args.unlabelled else ({}, {}, {})
+    if args.unlabelled:
+        path = next(p for p in (REPLAY / f"{args.set}.json", REPLAY_LOCAL / f"{args.set}.json") if p.exists())
+        sets = {args.set: json.loads(path.read_text())}
+        marks = path.with_suffix(".labels")
+        labels = {args.set: replay.read_labels(marks.read_text()) if marks.exists() else {}}
+    print(replay.sheet(sets[args.set], {} if args.blind else labels[args.set]))
+    return 0
+
+
+def cmd_replay_agree(args) -> int:
+    """The committed labels against other labellings of the same sets, each a
+    directory of <set>.labels: Cohen's kappa pairwise, and every step on which
+    they do not all agree, with what each labeller said."""
+    sets, committed, _ = replay.load_sets([REPLAY, REPLAY_LOCAL], args.set)
+    names = ["committed", *[Path(d).name for d in args.dirs]]
+    labellings = [committed]
+    notes: dict[str, dict[str, dict[int, str]]] = {"committed": {}}
+    for directory in map(Path, args.dirs):
+        mine, why = {}, {}
+        for name in sets:
+            path = directory / f"{name}.labels"
+            if path.exists():
+                text = path.read_text()
+                mine[name] = replay.read_labels(text)
+                why[name] = {int(m[1]): m[3].strip() for m in re.finditer(r"^(\d+)\s+([NSE])\s*(.*)$", text, re.M)}
+        labellings.append(mine)
+        notes[directory.name] = why
+    print("Cohen's kappa, over the steps both labelled (all sets, then per set):")
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            a = {(s, n): v for s, marks in labellings[i].items() for n, v in marks.items()}
+            b = {(s, n): v for s, marks in labellings[j].items() for n, v in marks.items()}
+            keys = sorted(set(a) & set(b))
+            index = {k: k2 for k2, k in enumerate(keys)}
+            overall = replay.kappa({index[k]: a[k] for k in keys}, {index[k]: b[k] for k in keys})
+            per = ", ".join(f"{s} {replay.kappa(labellings[i].get(s, {}), labellings[j].get(s, {})):.2f}" for s in sets if s in labellings[i] and s in labellings[j])
+            agree = mean(a[k] == b[k] for k in keys) if keys else float("nan")
+            print(f"  {names[i]} / {names[j]}: {overall:.2f} over {len(keys)} steps, {agree:.1%} the same  ({per})")
+    print("\nSteps not all labelled alike:")
+    split = 0
+    for name, s in sets.items():
+        by_n = {x["n"]: x for x in s["steps"]}
+        for n in s["judged"]:
+            votes = [lab.get(name, {}).get(n) for lab in labellings]
+            if len({v for v in votes if v}) > 1:
+                split += 1
+                said = "  ".join(f"{who}={v}" + (f" ({notes[who].get(name, {}).get(n)})" if notes[who].get(name, {}).get(n) else "") for who, v in zip(names, votes))
+                print(f"  {name}#{n}: {said}\n      {replay.excerpt(by_n[n]['step']['text'], 150)}")
+    print(f"\n{split} of {sum(len(s['judged']) for s in sets.values())} steps")
+    return 0
+
+
+def cmd_replay_check(args) -> int:
+    """One real session with the recorder beside taskcut: does the replay
+    build the prompts the judge is given live?"""
+    work = Path(args.work)
+    model = models.get(args.model)
+    space = _workspace(work, "replaycheck", mechanism.ARM.name, model.alias)
+    judge = REPO_ROOT / "hooks" / "judge.ts"
+    recorder = work / "plugins" / "replaycheck"
+    debug = work / "debug" / "replaycheck.log"
+    if not args.again:
+        space = mechanism.materialise(space)
+        taskcut = driver.prepare_plugin(mechanism.ARM, REPO_ROOT, work / "plugins" / "replaycheck-taskcut")
+        replaycheck.prepare(judge, recorder)
+        debug = _debug_file(work, "replaycheck")
+        replaycheck.drive(space, [taskcut, recorder], model.alias, debug_file=debug)
+
+    records = json.loads((recorder / "records.json").read_text())
+    rebuilt = replay.parse(transcript.find(PROJECTS, space).read_text().splitlines())
+    outcome = replaycheck.compare(records, rebuilt, judge)
+    print(f"{outcome.matched}/{outcome.steps} steps: the replay built the prompt the judge was given live; the session had {outcome.kinds}")
+    for problem in outcome.mismatches:
+        print(f"  {problem}")
+    judged_live = metrics.judging(debug.read_text(errors="replace") if debug.exists() else "")
+    print(f"taskcut judged {judged_live.calls} step(s) past the floor and compacted {rebuilt and len(rebuilt['segments']) - 1} time(s)")
+    return 0 if outcome.passed else 1
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -236,6 +458,49 @@ def main(argv=None) -> int:
     judge.add_argument("--repeats", type=int, default=3)
     judge.add_argument("--case", action="append", default=[], help="only this case id (repeatable)")
     judge.set_defaults(func=cmd_judge)
+
+    build = sub.add_parser("replay-build", help="turn a transcript into a replay set and a labels file")
+    build.add_argument("--transcript", required=True)
+    build.add_argument("--name", required=True)
+    build.add_argument("--source", required=True, help="one line: where the session came from, and on what")
+    build.add_argument("--memory", action="append", default=[], help="a CLAUDE.md the session had loaded, for judges that read it")
+    build.add_argument("--local", action="store_true", help="a session that cannot be published: eval/replay/local, not committed")
+    build.set_defaults(func=cmd_replay_build)
+
+    rp = sub.add_parser("replay", help="ask the judge about every labelled step of real sessions")
+    rp.add_argument("--model", default="sonnet")
+    rp.add_argument("--ref", default="", help="measure hooks/judge.ts as it was at this commit, not the working tree's")
+    rp.add_argument("--repeats", type=int, default=3)
+    rp.add_argument("--concurrency", type=int, default=6)
+    rp.add_argument("--set", action="append", default=[], help="only this set (repeatable)")
+    rp.set_defaults(func=cmd_replay)
+
+    rr = sub.add_parser("replay-report", help="score recorded replay runs against the current labels")
+    rr.add_argument("runs", nargs="+")
+    rr.add_argument("--set", action="append", default=[])
+    rr.set_defaults(func=cmd_replay_report)
+
+    rc = sub.add_parser("replay-compare", help="two replay runs over the same steps: B minus A")
+    rc.add_argument("a")
+    rc.add_argument("b")
+    rc.add_argument("--set", action="append", default=[])
+    rc.set_defaults(func=cmd_replay_compare)
+
+    sh = sub.add_parser("replay-sheet", help="a set's judged steps, for labelling or checking labels")
+    sh.add_argument("--set", required=True)
+    sh.add_argument("--unlabelled", action="store_true", help="a set whose labels are not all there yet")
+    sh.add_argument("--blind", action="store_true", help="leave the labels out, for labelling it again independently")
+    sh.set_defaults(func=cmd_replay_sheet)
+
+    ag = sub.add_parser("replay-agree", help="the committed labels against independent labellings: kappa, and the steps they split on")
+    ag.add_argument("dirs", nargs="+", help="directories of <set>.labels")
+    ag.add_argument("--set", action="append", default=[])
+    ag.set_defaults(func=cmd_replay_agree)
+
+    ck = sub.add_parser("replay-check", help="check the replay against a live session's judge prompts")
+    ck.add_argument("--model", default="sonnet")
+    ck.add_argument("--again", action="store_true", help="compare the last check's session again, without running one")
+    ck.set_defaults(func=cmd_replay_check)
 
     rep = sub.add_parser("report", help="render the collected results")
     rep.add_argument("--out", default="")

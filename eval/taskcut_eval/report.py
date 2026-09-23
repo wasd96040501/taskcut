@@ -19,9 +19,12 @@ def table(header: list[str], rows: list[list[str]]) -> str:
 
 
 def cost_table(runs: list[Run]) -> str:
+    """The session's own requests, then the judge's calls, which are in neither
+    its transcript nor its cost ledger: "-" is a run recorded before taskcut
+    logged them, not a run that made none."""
     rows = []
     for run in runs:
-        c = run.cost
+        c, j = run.cost, run.judging
         rows.append([
             run.arm,
             f"{c.weighted:,.0f}",
@@ -29,8 +32,12 @@ def cost_table(runs: list[Run]) -> str:
             f"{c.write:,}",
             f"{c.output:,}",
             str(c.requests),
+            f"{j.calls} ({j.model})" if j and j.calls else ("0" if j else "-"),
+            f"{j.weighted:,.0f}" if j else "-",
+            f"{j.output:,}" if j else "-",
         ])
-    return table(["arm", "weighted input", "cache read", "cache write", "output", "requests"], rows)
+    return table(["arm", "weighted input", "cache read", "cache write", "output", "requests",
+                  "judge calls", "judge weighted input", "judge output"], rows)
 
 
 def context_table(runs: list[Run], model: Model | None = None) -> str:

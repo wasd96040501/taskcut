@@ -8,12 +8,14 @@ declarations it is written against are generated per Claude Code version by
 
 | Depends on | Kind | If it changes |
 | --- | --- | --- |
-| `session.start`, `turn.step`, `turn.complete` | hook events | taskcut stops working; `claude plugin validate` reports the unknown event before a session loads it |
-| `$.session.usage`, `$.session.messages`, `$.session.compact`, `$.fs.read`, `$.env.get`, `$.model.complete`, `$.turn.abort`, `$.prompt.submit`, `$.ui.log` | engine calls | same: refused at load, named in the validation output |
+| `session.start`, `turn.step`, `turn.complete`, `command.run` | hook events | taskcut stops working; `claude plugin validate` reports the unknown event before a session loads it |
+| `$.session.usage`, `$.session.messages`, `$.session.compact`, `$.env.get`, `$.model.complete`, `$.turn.abort`, `$.prompt.submit`, `$.ui.log`, `$.command.register` | engine calls | same: refused at load, named in the validation output. `/taskcut` failing to register is logged to the debug log and changes nothing else |
+| `$.model.complete`'s `usage`, and the call being off the session's cost ledger | data shape, engine behaviour, 2.1.280 | `/taskcut` counts calls whose usage it cannot read apart, as unmetered. If the ledger starts counting them, `/cost` would include what `/taskcut` also reports |
+| what `$.session.messages` holds: a compaction's summary opening with "This session is being continued from a previous conversation", a plugin's prompt with "The … plugin sent a message", a background task's report with `<task-notification>` | text Claude Code writes | the judge would read such a message as something you asked for; it is still shown the step, so the cost is a request misread, not a crash |
 | a hook's budget counting only its own code, not its `$` calls | engine rule | the judgement inside a step would overrun it, and the engine would skip the hook: taskcut would compact only at the end of a turn, and say so in the transcript |
 | what `$.model.complete` resolves to | data shape | `claude plugin validate` does not see it; only `tsc` against regenerated types does. 2.1.278, which taskcut was measured on, resolved the reply's text; 2.1.280 resolves `{ isAnswered, text, usage }`, and 0.8.0 read that object as text, so every judgement failed and nothing was ever compacted. The reply is now taken as `unknown` and read by `readReply`, which knows both shapes and treats anything else as no reply |
 | a compaction after a request that ended on the person's words answering them instead of summarising | engine bug, 2.1.280 | taskcut never ends a turn at its first step; when it is fixed, that guard can go |
-| `$.model.complete` sending no cache breakpoint | engine behaviour, 2.1.280 | none needed: the judge's prompt keeps a stable prefix, so a release that caches it serves it with no change here |
+| `$.model.complete` sending no cache breakpoint | engine behaviour, 2.1.280 | little: the judge reads about two thousand tokens, and a cache would save a fraction of a cent; see [the judge's prompt cache](design.md#the-judges-prompt-cache) |
 | `session.start`'s `isInteractive` | data shape | taskcut would stop ending turns early, and so would not compact at all |
 | `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` | early-access flag | **nothing**, by design — see below |
 

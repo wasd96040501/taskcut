@@ -23,11 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A turn is never ended at its first step: on Claude Code 2.1.280 a compaction
   after a request that ended on your own words, `/compact` typed by hand
   included, answers them instead of summarising the conversation.
-- The judge reads the whole conversation, as the permission classifier reads
-  its whole transcript, rather than the newest 40,000 characters, so each
-  judgement's prompt begins with everything the one before it read. A
-  conversation too long for the judge's window is no verdict, and keeps the
-  context.
+- **The judge reads what says whether the work moves on, and little else**:
+  every message you sent, the first and the latest three whole and the rest
+  cut to a line; Claude's latest ten messages; what its latest twelve calls
+  touched -- a file, or what a command says it does, never the call in full;
+  its task list; and the step. It no longer reads every command in full, nor
+  `CLAUDE.md`, and taskcut no longer reads any file. A judgement is about two
+  thousand tokens however long the session has run, where it was sixteen
+  thousand on average and grew with the work, and costs about half a cent
+  instead of about three.
 - The notice reads `compacting before the next piece`.
 - taskcut is released under the MIT License, in place of Apache-2.0.
 
@@ -35,6 +39,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `make eval-judge`: the judge alone, over labelled steps, three times each,
   through the call taskcut makes.
+- **`/taskcut`** says what taskcut has done in this session and what it cost:
+  how many steps it judged, the tokens those calls read and wrote, and the
+  compactions it started. The judge's calls are not in `/cost`, which counts
+  only the session's own requests, nor in the transcript; this is where they
+  are counted. The tally is the API's own token counts, summed in memory:
+  nothing is written anywhere and nothing is asked of a model.
+- `make eval-replay`: the judge over every step taskcut would have judged in
+  real sessions -- 228 steps from seven, committed with their labels -- with
+  intervals on every rate, the list price of each judgement, and
+  `REF=` to measure the judge of another commit on the same steps.
+  `make eval-replay-check` checks, against a live session, that the replay
+  gives the judge the prompt taskcut builds there.
+- The `click-zh` workload: the twenty click changes handed over in one
+  message in Chinese, with a task list and a commit per issue.
+- Each judgement's debug line (`claude --debug`) ends with what the call cost,
+  `[judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]`, and the
+  benchmark adds them up: its cost table now has the judge beside the session.
 
 ### Fixed
 
@@ -42,7 +63,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   resolves `{ isAnswered, text, usage }` rather than the reply's text; taskcut
   read the object as text, every judgement failed, and the failure was logged
   only to the debug log. The reply is now read in either shape, so 2.1.278
-  keeps working, and a failed call is logged with its reason.
+  keeps working, and a failed call is logged with its reason -- for an API
+  error, its status and kind, so a spent rate limit reads as one.
+- **The judge read the step it was judging twice**, once as the step and once
+  as the latest thing the assistant said, on most steps -- and whether it did
+  depended on how fast the step's tools ran. When a step is judged,
+  `$.session.messages()` already holds it, a block at a time (its words, then
+  each call, then any result already in), and only a last message matching
+  the step whole was left out. The step's messages are now found and left
+  out whatever their shape. Found by checking the replay benchmark against
+  the prompts a live session builds.
+- **A `floorPercent` of 0 judged nothing until the context reached 5%.** The
+  wait taskcut keeps after a compaction that could not get under the floor
+  read "no compaction yet" as one that had left the context at 0%.
 
 ## [0.8.0] - 2026-09-22
 

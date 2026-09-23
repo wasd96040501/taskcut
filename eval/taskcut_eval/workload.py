@@ -129,6 +129,10 @@ class Workload:
     nudge: str = ""
     done_marker: str = ""
     max_nudges: int = 0
+    #: Set in the session's environment, the same under every arm: what the
+    #: work needs of Claude Code itself, such as its task-list tools, which
+    #: are off unless CLAUDE_CODE_ENABLE_TODO_TOOLS is set (2.1.280).
+    env: tuple[tuple[str, str], ...] = ()
 
     def steps(self) -> list[str]:
         """The prompt for each sub-task, in order.
@@ -181,6 +185,7 @@ def load(path: str | Path) -> Workload:
         nudge=raw.get("nudge", ""),
         done_marker=raw.get("done_marker", ""),
         max_nudges=int(raw.get("max_nudges", 0)),
+        env=tuple(sorted(raw.get("env", {}).items())),
     )
 
 

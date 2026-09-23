@@ -35,20 +35,34 @@ def prepare(harness: Path, judge: Path, destination: Path) -> Path:
     return destination
 
 
-def ask(cases: list[Case], plugin: Path, scratch: Path, model: str, repeats: int, concurrency: int = 4) -> list[dict]:
-    """Every case, ``repeats`` times, and what the judge answered each time."""
+def judge_at(repo: Path, ref: str, destination: Path) -> Path:
+    """hooks/judge.ts as it was at a commit, to measure the judge that shipped then."""
+    text = subprocess.run(["git", "-C", str(repo), "show", f"{ref}:hooks/judge.ts"], capture_output=True, text=True, check=True).stdout
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(text)
+    return destination
+
+
+def ask(cases: list, plugin: Path, scratch: Path, model: str, repeats: int, concurrency: int = 4,
+        sets: list[Path] = (), timeout: int = 1800) -> list[dict]:
+    """Every case, ``repeats`` times, and what the judge answered each time.
+    A case is a ``Case`` or its JSON; a replay case names one of ``sets``."""
     scratch.mkdir(parents=True, exist_ok=True)
     request, answers = scratch / "judge-input.json", scratch / "judge-output.json"
     request.write_text(json.dumps({
-        "model": model, "repeats": repeats, "concurrency": concurrency,
-        "cases": [case.as_json() for case in cases],
+        "model": model, "repeats": repeats, "concurrency": concurrency, "sets": [str(s) for s in sets],
+        "cases": [case.as_json() if isinstance(case, Case) else case for case in cases],
     }))
     answers.unlink(missing_ok=True)
     environment = {k: v for k, v in os.environ.items() if k not in driver.INHERITED}
     environment["CLAUDE_CODE_ENABLE_FUNCTION_HOOKS"] = "1"
+    # No tools. The harness hook takes the prompt and drops it; if it fails --
+    # it throws, or the engine refuses it -- the prompt goes on to the model as
+    # an ordinary request, and a model with tools would set about working out
+    # what "taskcut-judgebench <paths>" means, in this directory, unattended.
     subprocess.run(
-        [driver._binary(), "-p", "--plugin-dir", str(plugin), f"{MARKER} {request} {answers}"],
-        cwd=str(scratch), env=environment, stdin=subprocess.DEVNULL, check=False, timeout=1800,
+        [driver._binary(), "-p", "--tools", "", "--plugin-dir", str(plugin), f"{MARKER} {request} {answers}"],
+        cwd=str(scratch), env=environment, stdin=subprocess.DEVNULL, check=False, timeout=timeout,
     )
     if not answers.exists():
         raise RuntimeError("the harness wrote no answers: is the plugin loading? try `claude --debug`")

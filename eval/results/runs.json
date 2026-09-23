@@ -285,6 +285,128 @@
    }
   }
  },
+ "click-zh": {
+  "sonnet": {
+   "off": {
+    "cache_read": 8076462,
+    "cache_write": 126258,
+    "checks": {
+     "committed": true,
+     "issue01": true,
+     "issue02": true,
+     "issue03": true,
+     "issue04": true,
+     "issue05": true,
+     "issue06": true,
+     "issue07": true,
+     "issue08": true,
+     "issue09": true,
+     "issue10": true,
+     "issue11": true,
+     "issue12": true,
+     "issue13": true,
+     "issue14": true,
+     "issue15": true,
+     "issue16": true,
+     "issue17": true,
+     "issue18": true,
+     "issue19": true,
+     "issue20": true,
+     "no_regressions": true,
+     "tests_untouched": true
+    },
+    "context_first": 36908,
+    "context_last": 36908,
+    "context_peak": 36908,
+    "context_series": [
+     36908
+    ],
+    "continued": 0,
+    "cuts": 0,
+    "drift": {},
+    "elapsed_seconds": 746,
+    "fidelity": {},
+    "judging": {
+     "calls": 0,
+     "model": "",
+     "moved_on": 0,
+     "ms": 0,
+     "output": 0,
+     "plain": 0,
+     "read": 0,
+     "unanswered": 0,
+     "write": 0
+    },
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "nudges": 0,
+    "output": 30577,
+    "request_context_mean": 101270,
+    "request_context_peak": 152028,
+    "requests": 81,
+    "weighted_input": 965631
+   },
+   "on": {
+    "cache_read": 8584211,
+    "cache_write": 136993,
+    "checks": {
+     "committed": true,
+     "issue01": true,
+     "issue02": true,
+     "issue03": true,
+     "issue04": true,
+     "issue05": true,
+     "issue06": true,
+     "issue07": true,
+     "issue08": true,
+     "issue09": true,
+     "issue10": true,
+     "issue11": true,
+     "issue12": true,
+     "issue13": true,
+     "issue14": true,
+     "issue15": true,
+     "issue16": true,
+     "issue17": true,
+     "issue18": true,
+     "issue19": true,
+     "issue20": true,
+     "no_regressions": true,
+     "tests_untouched": true
+    },
+    "context_first": 36908,
+    "context_last": 36908,
+    "context_peak": 36908,
+    "context_series": [
+     36908
+    ],
+    "continued": 0,
+    "cuts": 0,
+    "drift": {},
+    "elapsed_seconds": 685,
+    "fidelity": {},
+    "judging": {
+     "calls": 0,
+     "model": "",
+     "moved_on": 0,
+     "ms": 0,
+     "output": 0,
+     "plain": 0,
+     "read": 0,
+     "unanswered": 0,
+     "write": 0
+    },
+    "ledger_messages": 0,
+    "ledger_tokens": 0,
+    "nudges": 0,
+    "output": 37173,
+    "request_context_mean": 106358,
+    "request_context_peak": 162763,
+    "requests": 82,
+    "weighted_input": 1029826
+   }
+  }
+ },
  "flask": {
   "sonnet": {
    "boundary": {
@@ -885,8 +1007,8 @@
  "sqlglot-long": {
   "sonnet": {
    "default": {
-    "cache_read": 65241047,
-    "cache_write": 767155,
+    "cache_read": 32114865,
+    "cache_write": 401693,
     "checks": {
      "issue-01": true,
      "issue-02": true,
@@ -927,28 +1049,37 @@
      "suite-passes": true,
      "tests-untouched": true
     },
-    "context_first": 44070,
-    "context_last": 51456,
-    "context_peak": 51456,
+    "context_first": 44218,
+    "context_last": 46245,
+    "context_peak": 46245,
     "context_series": [
-     44070,
-     51456
+     44218,
+     46245
     ],
     "continued": 1,
     "cuts": 1,
     "drift": {},
-    "elapsed_seconds": 5835,
+    "elapsed_seconds": 2416,
     "fidelity": {},
-    "judged": 1,
-    "judged_finished": 1,
+    "judging": {
+     "calls": 1,
+     "model": "sonnet",
+     "moved_on": 1,
+     "ms": 4082,
+     "output": 47,
+     "plain": 1952,
+     "read": 0,
+     "unanswered": 0,
+     "write": 0
+    },
     "ledger_messages": 1,
-    "ledger_tokens": 3221,
+    "ledger_tokens": 3619,
     "nudges": 0,
-    "output": 347613,
-    "request_context_mean": 240908,
-    "request_context_peak": 426173,
-    "requests": 274,
-    "weighted_input": 7483596
+    "output": 115862,
+    "request_context_mean": 165061,
+    "request_context_peak": 353505,
+    "requests": 197,
+    "weighted_input": 3713997
    },
    "off": {
     "cache_read": 96923928,

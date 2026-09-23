@@ -23,15 +23,15 @@ when the context window fills.
 
 taskcut changes **when** Claude Code compacts, not how. Once the context is
 past a floor, a model judges each step Claude takes for whether the work is
-moving on from a finished piece to another, reading what auto mode's
-permission classifier reads. If it is, taskcut runs Claude Code's own
-compaction, the one `/compact` runs. A piece being finished is not enough:
-when the last thing you asked for is done, nothing has moved on yet, and what
-you say next may well be about it. Hand over twenty tasks in one message and
-walk away, and it compacts between them, not after the last. Once a turn has
-ended the work is back with you, and so is `/compact`. Below the floor it does
-nothing at all and costs nothing, and nothing in your prompts has to mention
-it.
+moving on from a finished piece to another, reading what you asked for and
+where Claude has got to, never any tool output. If it is, taskcut runs Claude
+Code's own compaction, the one `/compact` runs. A piece being finished is not
+enough: when the last thing you asked for is done, nothing has moved on yet,
+and what you say next may well be about it. Hand over twenty tasks in one
+message and walk away, and it compacts between them, not after the last. Once
+a turn has ended the work is back with you, and so is `/compact`. Below the
+floor it does nothing at all and costs nothing, and nothing in your prompts
+has to mention it.
 
 ## Try it
 
@@ -114,11 +114,15 @@ Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, or put
 | | |
 | --- | --- |
 | **Below the floor** | Nothing: no model call, no tool, nothing written. |
-| **Each step Claude explains past it** | One `sonnet` call and a sentence out. What goes in is your messages and Claude's commands since the last compaction, never their output: a few thousand tokens, tens of thousands in a long stretch of work, uncached (`$.model.complete` marks no cache point) — a few cents. It runs while the step's tools run, so it rarely adds a wait. |
+| **Each step Claude explains past it** | One `sonnet` call and a sentence out. What goes in is your messages, Claude's latest messages, what its latest commands touched and the step it is taking, never any output: about two thousand tokens however long the session has run, uncached (`$.model.complete` marks no cache point) — about half a cent. It runs while the step's tools run, so it rarely adds a wait. |
 | **Each compaction** | Whatever `/compact` costs, because it is `/compact`. |
 
 Past the floor is a short stretch: a compaction takes the context back under
 it, and judging stops until it fills again.
+
+`/taskcut` says what it has spent so far in the session. `/cost` does not
+count the judge's calls -- Claude Code keeps no ledger of a plugin's model
+calls -- so they are counted there, from the token counts the API returns.
 
 Thirty-six real sqlglot changes, handed to Sonnet 5 in one message and left
 to run: taskcut compacted once inside the turn, after issue 20, from 431,567
@@ -145,12 +149,14 @@ installed with.
 After each step of the main conversation, taskcut reads the context fill the
 status line shows. Below `floorPercent` it stops there. Past it, it asks
 `model`, through the hooks API's `$.model.complete`, whether the work moves on
-from a finished piece to another at that step. The judge reads what auto mode's
-permission classifier reads — your messages, the assistant's tool calls except
-read-only lookups, and `CLAUDE.md`, never any tool output, all of it however
-long the session — plus the step it is judging: what Claude just said and the
-calls it is making. A step that asks you something is never a boundary, and
-the end of a turn is never judged.
+from a finished piece to another at that step. The judge reads what says so
+and little else: every message you sent (the first and the latest few whole,
+the rest cut to a line), Claude's latest messages, what its latest calls
+touched — a file, or what a command says it does, never the call in full — its
+task list if it keeps one, and the step it is judging: what Claude just said
+and the calls it is making. Never any tool output, and not `CLAUDE.md`. A step
+that asks you something is never a boundary, and the end of a turn is never
+judged.
 
 On a yes, taskcut waits for that step's tools to finish, ends the turn with
 `$.turn.abort` before the next request goes out, calls `$.session.compact()` —
@@ -168,6 +174,12 @@ reasoning, and the designs this one replaced.
   compact, and taskcut never ends a turn there.
 * **The judge never sees tool output**, so a reply that claims more than was
   done can fool it. The cost is a compaction a little early.
+* **Only a step that says something is judged.** A step that finishes one
+  piece and starts the next without a word -- a commit, then the next issue's
+  first command -- is never asked about. Claude usually says so somewhere
+  nearby, but not always: in the benchmark about half the moves between issues
+  were silent, and one turn of four tasks done in silence was not compacted at
+  all ([measurement](docs/measurement.md)).
 * **A compaction inside a turn splits it in two.** Claude Code compacts only
   between turns, so taskcut ends the turn and starts the next with
   `Continue.`, which the transcript shows as a message from the plugin. What

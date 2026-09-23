@@ -1,0 +1,10041 @@
+{
+"judge": "6f6cddd",
+"model": "haiku",
+"repeats": 3,
+"sets": [
+"click-zh--off",
+"click-zh--on",
+"issues-long--off",
+"issues-long--on",
+"mechanism",
+"sqlglot-long--default",
+"sqlglot-long--off",
+"dev-1bb1d249",
+"dev-7c21a9fe"
+],
+"answers": [
+{
+"id": "click-zh--off#2",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1506,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2093,
+"attempts": 1
+},
+{
+"id": "click-zh--off#2",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1506,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2093,
+"attempts": 1
+},
+{
+"id": "click-zh--off#8",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1565,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2638,
+"attempts": 1
+},
+{
+"id": "click-zh--off#8",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1565,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2650,
+"attempts": 1
+},
+{
+"id": "click-zh--off#2",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1506,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2826,
+"attempts": 1
+},
+{
+"id": "click-zh--off#8",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1565,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2855,
+"attempts": 1
+},
+{
+"id": "click-zh--off#14",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1601,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1236,
+"attempts": 1
+},
+{
+"id": "click-zh--off#14",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1601,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1427,
+"attempts": 1
+},
+{
+"id": "click-zh--off#29",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1660,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1134,
+"attempts": 1
+},
+{
+"id": "click-zh--off#14",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1601,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1194,
+"attempts": 1
+},
+{
+"id": "click-zh--off#29",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1660,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1144,
+"attempts": 1
+},
+{
+"id": "click-zh--off#29",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1660,
+"output_tokens": 74,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1488,
+"attempts": 1
+},
+{
+"id": "click-zh--off#35",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1690,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1230,
+"attempts": 1
+},
+{
+"id": "click-zh--off#35",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1690,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1383,
+"attempts": 1
+},
+{
+"id": "click-zh--off#35",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1690,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1198,
+"attempts": 1
+},
+{
+"id": "click-zh--off#38",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1721,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1259,
+"attempts": 1
+},
+{
+"id": "click-zh--off#38",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1721,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1268,
+"attempts": 1
+},
+{
+"id": "click-zh--off#40",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1741,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1121,
+"attempts": 1
+},
+{
+"id": "click-zh--off#38",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1721,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1701,
+"attempts": 1
+},
+{
+"id": "click-zh--off#40",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1741,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1727,
+"attempts": 1
+},
+{
+"id": "click-zh--off#40",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1741,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1375,
+"attempts": 1
+},
+{
+"id": "click-zh--off#46",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1820,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1251,
+"attempts": 1
+},
+{
+"id": "click-zh--off#46",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1820,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1798,
+"attempts": 1
+},
+{
+"id": "click-zh--off#46",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1820,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1197,
+"attempts": 1
+},
+{
+"id": "click-zh--off#52",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1741,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1183,
+"attempts": 1
+},
+{
+"id": "click-zh--off#52",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1741,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1290,
+"attempts": 1
+},
+{
+"id": "click-zh--off#52",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1741,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1420,
+"attempts": 1
+},
+{
+"id": "click-zh--off#59",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1831,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1552,
+"attempts": 1
+},
+{
+"id": "click-zh--off#59",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1831,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1386,
+"attempts": 1
+},
+{
+"id": "click-zh--off#65",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1971,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1307,
+"attempts": 1
+},
+{
+"id": "click-zh--off#59",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1831,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1411,
+"attempts": 1
+},
+{
+"id": "click-zh--off#65",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1971,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1265,
+"attempts": 1
+},
+{
+"id": "click-zh--on#2",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1499,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1426,
+"attempts": 1
+},
+{
+"id": "click-zh--on#2",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1499,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1262,
+"attempts": 1
+},
+{
+"id": "click-zh--on#8",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1645,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1325,
+"attempts": 1
+},
+{
+"id": "click-zh--on#2",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1499,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1985,
+"attempts": 1
+},
+{
+"id": "click-zh--on#8",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1645,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1284,
+"attempts": 1
+},
+{
+"id": "click-zh--off#65",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1971,
+"output_tokens": 55,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2914,
+"attempts": 1
+},
+{
+"id": "click-zh--on#14",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1659,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1206,
+"attempts": 1
+},
+{
+"id": "click-zh--on#8",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1645,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1302,
+"attempts": 1
+},
+{
+"id": "click-zh--on#14",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1659,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1163,
+"attempts": 1
+},
+{
+"id": "click-zh--on#14",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1659,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1270,
+"attempts": 1
+},
+{
+"id": "click-zh--on#16",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1739,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1354,
+"attempts": 1
+},
+{
+"id": "click-zh--on#16",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1739,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1156,
+"attempts": 1
+},
+{
+"id": "click-zh--on#16",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1739,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1058,
+"attempts": 1
+},
+{
+"id": "click-zh--on#22",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1888,
+"output_tokens": 59,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1549,
+"attempts": 1
+},
+{
+"id": "click-zh--on#28",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1678,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1164,
+"attempts": 1
+},
+{
+"id": "click-zh--on#22",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1888,
+"output_tokens": 59,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1761,
+"attempts": 1
+},
+{
+"id": "click-zh--on#22",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1888,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1692,
+"attempts": 1
+},
+{
+"id": "click-zh--on#28",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1678,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1215,
+"attempts": 1
+},
+{
+"id": "click-zh--on#28",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1678,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1695,
+"attempts": 1
+},
+{
+"id": "click-zh--on#37",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1805,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1214,
+"attempts": 1
+},
+{
+"id": "click-zh--on#37",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1805,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1216,
+"attempts": 1
+},
+{
+"id": "click-zh--on#37",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1805,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1286,
+"attempts": 1
+},
+{
+"id": "click-zh--on#45",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1863,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1383,
+"attempts": 1
+},
+{
+"id": "click-zh--on#45",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1863,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1432,
+"attempts": 1
+},
+{
+"id": "click-zh--on#45",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1863,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1245,
+"attempts": 1
+},
+{
+"id": "click-zh--on#51",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1751,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1126,
+"attempts": 1
+},
+{
+"id": "click-zh--on#51",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1751,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1155,
+"attempts": 1
+},
+{
+"id": "click-zh--on#51",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1751,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1292,
+"attempts": 1
+},
+{
+"id": "click-zh--on#62",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1882,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1267,
+"attempts": 1
+},
+{
+"id": "click-zh--on#62",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1882,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1297,
+"attempts": 1
+},
+{
+"id": "click-zh--on#62",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1882,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1394,
+"attempts": 1
+},
+{
+"id": "click-zh--on#68",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1862,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1196,
+"attempts": 1
+},
+{
+"id": "click-zh--on#68",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1862,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1297,
+"attempts": 1
+},
+{
+"id": "click-zh--on#68",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1862,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1882,
+"attempts": 1
+},
+{
+"id": "click-zh--on#74",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2004,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1679,
+"attempts": 1
+},
+{
+"id": "click-zh--on#77",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2043,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1181,
+"attempts": 1
+},
+{
+"id": "click-zh--on#74",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2004,
+"output_tokens": 73,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1732,
+"attempts": 1
+},
+{
+"id": "click-zh--on#77",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2043,
+"output_tokens": 78,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1713,
+"attempts": 1
+},
+{
+"id": "click-zh--on#77",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2043,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1284,
+"attempts": 1
+},
+{
+"id": "click-zh--on#74",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2004,
+"output_tokens": 91,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2622,
+"attempts": 1
+},
+{
+"id": "issues-long--off#5",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 935,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1410,
+"attempts": 1
+},
+{
+"id": "issues-long--off#5",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 935,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1269,
+"attempts": 1
+},
+{
+"id": "issues-long--off#5",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 935,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1603,
+"attempts": 1
+},
+{
+"id": "issues-long--off#12",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1602,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1663,
+"attempts": 1
+},
+{
+"id": "issues-long--off#12",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1602,
+"output_tokens": 80,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1651,
+"attempts": 1
+},
+{
+"id": "issues-long--off#12",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1602,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1486,
+"attempts": 1
+},
+{
+"id": "issues-long--off#13",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1655,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1612,
+"attempts": 1
+},
+{
+"id": "issues-long--off#13",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1655,
+"output_tokens": 55,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1507,
+"attempts": 1
+},
+{
+"id": "issues-long--off#13",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1655,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1234,
+"attempts": 1
+},
+{
+"id": "issues-long--off#18",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1858,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1327,
+"attempts": 1
+},
+{
+"id": "issues-long--off#18",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1858,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1396,
+"attempts": 1
+},
+{
+"id": "issues-long--off#18",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1858,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1448,
+"attempts": 1
+},
+{
+"id": "issues-long--off#40",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2369,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1233,
+"attempts": 1
+},
+{
+"id": "issues-long--off#40",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2369,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1327,
+"attempts": 1
+},
+{
+"id": "issues-long--off#40",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2369,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1127,
+"attempts": 1
+},
+{
+"id": "issues-long--off#67",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2719,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1304,
+"attempts": 1
+},
+{
+"id": "issues-long--off#67",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2719,
+"output_tokens": 87,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1759,
+"attempts": 1
+},
+{
+"id": "issues-long--off#43",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2460,
+"output_tokens": 124,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2073,
+"attempts": 1
+},
+{
+"id": "issues-long--off#67",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2719,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1267,
+"attempts": 1
+},
+{
+"id": "issues-long--off#43",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2460,
+"output_tokens": 166,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2572,
+"attempts": 1
+},
+{
+"id": "issues-long--off#81",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2837,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1195,
+"attempts": 1
+},
+{
+"id": "issues-long--off#74",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2848,
+"output_tokens": 67,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1615,
+"attempts": 1
+},
+{
+"id": "issues-long--off#81",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2837,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1072,
+"attempts": 1
+},
+{
+"id": "issues-long--off#74",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2848,
+"output_tokens": 60,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2238,
+"attempts": 1
+},
+{
+"id": "issues-long--off#43",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2460,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4459,
+"attempts": 1
+},
+{
+"id": "issues-long--off#81",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2837,
+"output_tokens": 22,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1217,
+"attempts": 1
+},
+{
+"id": "issues-long--off#97",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3238,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1443,
+"attempts": 1
+},
+{
+"id": "issues-long--off#97",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3238,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1514,
+"attempts": 1
+},
+{
+"id": "issues-long--off#97",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3238,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1337,
+"attempts": 1
+},
+{
+"id": "issues-long--off#101",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3241,
+"output_tokens": 69,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1553,
+"attempts": 1
+},
+{
+"id": "issues-long--off#104",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3090,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1176,
+"attempts": 1
+},
+{
+"id": "issues-long--off#74",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2848,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4185,
+"attempts": 1
+},
+{
+"id": "issues-long--off#101",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3241,
+"output_tokens": 98,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2096,
+"attempts": 1
+},
+{
+"id": "issues-long--off#104",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3090,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1534,
+"attempts": 1
+},
+{
+"id": "issues-long--off#113",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3229,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1435,
+"attempts": 1
+},
+{
+"id": "issues-long--off#104",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3090,
+"output_tokens": 67,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1543,
+"attempts": 1
+},
+{
+"id": "issues-long--off#113",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3229,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1731,
+"attempts": 1
+},
+{
+"id": "issues-long--off#113",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3229,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1285,
+"attempts": 1
+},
+{
+"id": "issues-long--off#119",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3212,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1438,
+"attempts": 1
+},
+{
+"id": "issues-long--off#101",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3241,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4262,
+"attempts": 1
+},
+{
+"id": "issues-long--off#119",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3212,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1480,
+"attempts": 1
+},
+{
+"id": "issues-long--off#119",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3212,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1645,
+"attempts": 1
+},
+{
+"id": "issues-long--off#127",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3288,
+"output_tokens": 67,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1797,
+"attempts": 1
+},
+{
+"id": "issues-long--off#127",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3288,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1432,
+"attempts": 1
+},
+{
+"id": "issues-long--off#132",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3305,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1406,
+"attempts": 1
+},
+{
+"id": "issues-long--off#127",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3288,
+"output_tokens": 68,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2213,
+"attempts": 1
+},
+{
+"id": "issues-long--off#132",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3305,
+"output_tokens": 62,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1563,
+"attempts": 1
+},
+{
+"id": "issues-long--off#132",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3305,
+"output_tokens": 52,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1463,
+"attempts": 1
+},
+{
+"id": "issues-long--off#134",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3242,
+"output_tokens": 62,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1635,
+"attempts": 1
+},
+{
+"id": "issues-long--off#134",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3242,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1489,
+"attempts": 1
+},
+{
+"id": "issues-long--off#134",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3242,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1561,
+"attempts": 1
+},
+{
+"id": "issues-long--on#5",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 963,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1216,
+"attempts": 1
+},
+{
+"id": "issues-long--on#5",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 963,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1247,
+"attempts": 1
+},
+{
+"id": "issues-long--on#5",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 963,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1918,
+"attempts": 1
+},
+{
+"id": "issues-long--on#13",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1527,
+"output_tokens": 25,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1384,
+"attempts": 1
+},
+{
+"id": "issues-long--on#13",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1527,
+"output_tokens": 23,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1460,
+"attempts": 1
+},
+{
+"id": "issues-long--on#13",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1527,
+"output_tokens": 20,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1693,
+"attempts": 1
+},
+{
+"id": "issues-long--on#14",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1704,
+"output_tokens": 115,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2148,
+"attempts": 1
+},
+{
+"id": "issues-long--on#16",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1774,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1188,
+"attempts": 1
+},
+{
+"id": "issues-long--on#16",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1774,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1389,
+"attempts": 1
+},
+{
+"id": "issues-long--on#16",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1774,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1298,
+"attempts": 1
+},
+{
+"id": "issues-long--on#17",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1819,
+"output_tokens": 25,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1104,
+"attempts": 1
+},
+{
+"id": "issues-long--on#17",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1819,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1605,
+"attempts": 1
+},
+{
+"id": "issues-long--on#17",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1819,
+"output_tokens": 100,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1844,
+"attempts": 1
+},
+{
+"id": "issues-long--on#14",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1704,
+"output_tokens": 268,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4321,
+"attempts": 1
+},
+{
+"id": "issues-long--on#24",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2028,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2191,
+"attempts": 1
+},
+{
+"id": "issues-long--on#14",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1704,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4540,
+"attempts": 1
+},
+{
+"id": "issues-long--on#24",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2028,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1540,
+"attempts": 1
+},
+{
+"id": "issues-long--on#28",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2312,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1202,
+"attempts": 1
+},
+{
+"id": "issues-long--on#28",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2312,
+"output_tokens": 59,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1445,
+"attempts": 1
+},
+{
+"id": "issues-long--on#28",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2312,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1257,
+"attempts": 1
+},
+{
+"id": "issues-long--on#24",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2028,
+"output_tokens": 166,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2584,
+"attempts": 1
+},
+{
+"id": "issues-long--on#31",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2275,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1504,
+"attempts": 1
+},
+{
+"id": "issues-long--on#31",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2275,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1506,
+"attempts": 1
+},
+{
+"id": "issues-long--on#31",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2275,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1421,
+"attempts": 1
+},
+{
+"id": "issues-long--on#32",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2376,
+"output_tokens": 85,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1734,
+"attempts": 1
+},
+{
+"id": "issues-long--on#32",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2376,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1255,
+"attempts": 1
+},
+{
+"id": "issues-long--on#37",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2410,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1406,
+"attempts": 1
+},
+{
+"id": "issues-long--on#37",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2410,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1426,
+"attempts": 1
+},
+{
+"id": "issues-long--on#37",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2410,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1462,
+"attempts": 1
+},
+{
+"id": "issues-long--on#49",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2545,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1752,
+"attempts": 1
+},
+{
+"id": "issues-long--on#32",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2376,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3215,
+"attempts": 1
+},
+{
+"id": "issues-long--on#55",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2566,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1245,
+"attempts": 1
+},
+{
+"id": "issues-long--on#55",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2566,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1245,
+"attempts": 1
+},
+{
+"id": "issues-long--on#49",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2545,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1352,
+"attempts": 1
+},
+{
+"id": "issues-long--on#49",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2545,
+"output_tokens": 81,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1793,
+"attempts": 1
+},
+{
+"id": "issues-long--on#55",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2566,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1314,
+"attempts": 1
+},
+{
+"id": "issues-long--on#61",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2479,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1304,
+"attempts": 1
+},
+{
+"id": "issues-long--on#61",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2479,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1302,
+"attempts": 1
+},
+{
+"id": "issues-long--on#64",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2562,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1335,
+"attempts": 1
+},
+{
+"id": "issues-long--on#64",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2562,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1403,
+"attempts": 1
+},
+{
+"id": "issues-long--on#61",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2479,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1543,
+"attempts": 1
+},
+{
+"id": "issues-long--on#83",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2907,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1066,
+"attempts": 1
+},
+{
+"id": "issues-long--on#64",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2562,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1259,
+"attempts": 1
+},
+{
+"id": "issues-long--on#83",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2907,
+"output_tokens": 21,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1042,
+"attempts": 1
+},
+{
+"id": "issues-long--on#83",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2907,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1268,
+"attempts": 1
+},
+{
+"id": "issues-long--on#85",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2936,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1254,
+"attempts": 1
+},
+{
+"id": "issues-long--on#85",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2936,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1415,
+"attempts": 1
+},
+{
+"id": "issues-long--on#92",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3044,
+"output_tokens": 18,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1020,
+"attempts": 1
+},
+{
+"id": "issues-long--on#92",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3044,
+"output_tokens": 21,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1053,
+"attempts": 1
+},
+{
+"id": "issues-long--on#85",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2936,
+"output_tokens": 62,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1462,
+"attempts": 1
+},
+{
+"id": "issues-long--on#95",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2916,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1270,
+"attempts": 1
+},
+{
+"id": "issues-long--on#92",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3044,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1865,
+"attempts": 1
+},
+{
+"id": "issues-long--on#95",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2916,
+"output_tokens": 55,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1522,
+"attempts": 1
+},
+{
+"id": "issues-long--on#95",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2916,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1305,
+"attempts": 1
+},
+{
+"id": "issues-long--on#102",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2988,
+"output_tokens": 23,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1113,
+"attempts": 1
+},
+{
+"id": "issues-long--on#102",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2988,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1566,
+"attempts": 1
+},
+{
+"id": "issues-long--on#102",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2988,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1277,
+"attempts": 1
+},
+{
+"id": "issues-long--on#108",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2912,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1296,
+"attempts": 1
+},
+{
+"id": "issues-long--on#108",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2912,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1357,
+"attempts": 1
+},
+{
+"id": "issues-long--on#115",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2906,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1231,
+"attempts": 1
+},
+{
+"id": "issues-long--on#115",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2906,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1172,
+"attempts": 1
+},
+{
+"id": "issues-long--on#121",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3081,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1206,
+"attempts": 1
+},
+{
+"id": "issues-long--on#115",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2906,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1426,
+"attempts": 1
+},
+{
+"id": "issues-long--on#108",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2912,
+"output_tokens": 136,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2678,
+"attempts": 1
+},
+{
+"id": "issues-long--on#121",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3081,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1934,
+"attempts": 1
+},
+{
+"id": "issues-long--on#129",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3351,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1289,
+"attempts": 1
+},
+{
+"id": "issues-long--on#121",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3081,
+"output_tokens": 80,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1986,
+"attempts": 1
+},
+{
+"id": "issues-long--on#129",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3351,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1168,
+"attempts": 1
+},
+{
+"id": "issues-long--on#129",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3351,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1281,
+"attempts": 1
+},
+{
+"id": "issues-long--on#132",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3181,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1124,
+"attempts": 1
+},
+{
+"id": "issues-long--on#132",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3181,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1522,
+"attempts": 1
+},
+{
+"id": "issues-long--on#132",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3181,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1261,
+"attempts": 1
+},
+{
+"id": "issues-long--on#144",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1514,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1346,
+"attempts": 1
+},
+{
+"id": "issues-long--on#145",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1533,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1345,
+"attempts": 1
+},
+{
+"id": "issues-long--on#144",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1514,
+"output_tokens": 136,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2785,
+"attempts": 1
+},
+{
+"id": "issues-long--on#147",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1635,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1437,
+"attempts": 1
+},
+{
+"id": "issues-long--on#144",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1514,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3512,
+"attempts": 1
+},
+{
+"id": "issues-long--on#145",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1533,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3188,
+"attempts": 1
+},
+{
+"id": "issues-long--on#147",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1635,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1403,
+"attempts": 1
+},
+{
+"id": "mechanism#9",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 837,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1356,
+"attempts": 1
+},
+{
+"id": "issues-long--on#147",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1635,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2649,
+"attempts": 1
+},
+{
+"id": "mechanism#9",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 837,
+"output_tokens": 25,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1039,
+"attempts": 1
+},
+{
+"id": "issues-long--on#145",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1533,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3827,
+"attempts": 1
+},
+{
+"id": "mechanism#9",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 837,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1273,
+"attempts": 1
+},
+{
+"id": "mechanism#19",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1106,
+"output_tokens": 78,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1509,
+"attempts": 1
+},
+{
+"id": "mechanism#19",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1106,
+"output_tokens": 92,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1682,
+"attempts": 1
+},
+{
+"id": "mechanism#19",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1106,
+"output_tokens": 23,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1224,
+"attempts": 1
+},
+{
+"id": "mechanism#26",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 987,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1418,
+"attempts": 1
+},
+{
+"id": "mechanism#26",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 987,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1362,
+"attempts": 1
+},
+{
+"id": "mechanism#26",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 987,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1501,
+"attempts": 1
+},
+{
+"id": "mechanism#28",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1043,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1278,
+"attempts": 1
+},
+{
+"id": "mechanism#28",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1043,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1408,
+"attempts": 1
+},
+{
+"id": "mechanism#28",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1043,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1432,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#3",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 888,
+"output_tokens": 98,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1696,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#3",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 888,
+"output_tokens": 87,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1975,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#1",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 839,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3317,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#1",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 839,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3400,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#1",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 839,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3043,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#4",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 860,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1340,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#4",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 860,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1402,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#12",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 996,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1426,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#12",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 996,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1326,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#3",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 888,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4057,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#4",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 860,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2444,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#13",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1158,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1464,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#14",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1168,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1181,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#12",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 996,
+"output_tokens": 85,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2197,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#13",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1158,
+"output_tokens": 82,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1802,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#14",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1168,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1051,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#15",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1285,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#14",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1168,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1394,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#19",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 55,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1415,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#15",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1887,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#15",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1879,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#19",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1257,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#19",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1290,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#13",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1158,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3968,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#25",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1246,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1317,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#26",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1375,
+"output_tokens": 20,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1069,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#25",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1246,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1997,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#27",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1314,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1178,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#26",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1375,
+"output_tokens": 22,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1671,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#25",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1246,
+"output_tokens": 79,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2241,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#26",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1375,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1951,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#27",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1314,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1523,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#27",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1314,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1360,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#30",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1342,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1304,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#30",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1342,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1536,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#30",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1342,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1743,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#34",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1369,
+"output_tokens": 58,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1434,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#34",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1369,
+"output_tokens": 65,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1569,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#34",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1369,
+"output_tokens": 72,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1758,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#35",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1341,
+"output_tokens": 56,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1683,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#35",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1341,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1483,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#35",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1341,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1646,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#42",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1871,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#42",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1634,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#43",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1280,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#43",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1307,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#42",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 127,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2047,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#48",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1303,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1042,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#43",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1454,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#48",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1303,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1420,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#51",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1219,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#48",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1303,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1345,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#51",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1253,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#51",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1667,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#52",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1219,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1302,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#52",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1219,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1978,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#53",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1749,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#52",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1219,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1954,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#53",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1318,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#53",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1897,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#54",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1278,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1071,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#54",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1278,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1252,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#54",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1278,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1402,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#62",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1237,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1235,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#55",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1227,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1846,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#62",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1237,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1394,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#55",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1227,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1993,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#55",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1227,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1861,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#65",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1232,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1229,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#65",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1232,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1305,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#65",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1232,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1388,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#67",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1255,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1532,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#62",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1237,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2613,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#67",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1255,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1676,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#67",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1255,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1083,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#70",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1267,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1286,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#70",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1267,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1464,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#70",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1267,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1368,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#72",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1266,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1305,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#72",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1266,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1679,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#73",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1271,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1172,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#73",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1271,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1373,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#73",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1271,
+"output_tokens": 25,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1165,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#72",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1266,
+"output_tokens": 140,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2562,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#74",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1345,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1320,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#74",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1345,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1844,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#74",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1345,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1757,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#84",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1223,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1257,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#82",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1269,
+"output_tokens": 102,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1973,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#82",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1269,
+"output_tokens": 128,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2069,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#84",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1223,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1571,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#84",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1223,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1284,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#82",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1269,
+"output_tokens": 152,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2454,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#86",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1349,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1251,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#86",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1349,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1371,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#86",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1349,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1356,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#87",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1295,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1213,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#87",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1295,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1724,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#91",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1204,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#91",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1264,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#87",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1295,
+"output_tokens": 102,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2461,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#91",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1814,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#93",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1408,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1263,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#94",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1374,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1471,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#93",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1408,
+"output_tokens": 124,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2160,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#94",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1374,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1730,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#94",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1374,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1953,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#98",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1357,
+"output_tokens": 58,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1409,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#93",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1408,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3678,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#98",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1357,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1860,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#98",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1357,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1541,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#106",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1290,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1495,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#106",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1290,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1669,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#106",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1290,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1314,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#108",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1331,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1396,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#108",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1331,
+"output_tokens": 59,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1553,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#108",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1331,
+"output_tokens": 56,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1472,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#110",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1268,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1260,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#109",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1274,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2016,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#109",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1274,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1576,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#110",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1268,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1360,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#109",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1274,
+"output_tokens": 72,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2209,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#110",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1268,
+"output_tokens": 56,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1613,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#112",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1256,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1232,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#112",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1256,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1256,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#115",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1062,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#112",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1256,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1294,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#115",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1459,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#115",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1843,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#116",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1344,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1365,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#116",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1344,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1353,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#116",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1344,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1443,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#117",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1298,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1159,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#117",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1298,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1457,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#118",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1322,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1405,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#118",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1322,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1530,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#117",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1298,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1774,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#125",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1335,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1567,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#125",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1335,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1892,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#118",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1322,
+"output_tokens": 55,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2372,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#125",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1335,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1323,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#129",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1304,
+"output_tokens": 21,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1178,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#129",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1304,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1725,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#132",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1405,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1509,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#132",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1405,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1483,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#129",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1304,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2414,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#132",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1405,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1424,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#134",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1319,
+"output_tokens": 76,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1798,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#134",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1319,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1196,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#135",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1340,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1332,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#134",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1319,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1936,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#135",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1340,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1269,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#135",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1340,
+"output_tokens": 58,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1829,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#139",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1354,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1356,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#139",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1354,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1389,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#146",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1381,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1592,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#139",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1354,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2144,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#146",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1381,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1778,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#146",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1381,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1680,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#149",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1350,
+"output_tokens": 66,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1700,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#150",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1344,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1452,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#149",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1350,
+"output_tokens": 129,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2198,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#150",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1344,
+"output_tokens": 69,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1913,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#150",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1344,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1672,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#149",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1350,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3559,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#157",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1452,
+"output_tokens": 82,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1823,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#157",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1452,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2056,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#163",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1554,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1271,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#163",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1554,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1438,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#157",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1452,
+"output_tokens": 52,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1609,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#164",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1604,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1327,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#163",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1554,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2062,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#164",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1604,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1556,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#164",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1604,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1433,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#167",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1675,
+"output_tokens": 25,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1230,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#167",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1675,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1333,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#167",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1675,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1626,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#165",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1624,
+"output_tokens": 196,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3170,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#165",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1624,
+"output_tokens": 94,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2535,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#169",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1691,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1426,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#169",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1691,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1203,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#165",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1624,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4288,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#169",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1691,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1987,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#176",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1793,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1432,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#177",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1829,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1332,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#177",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1829,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1270,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#176",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1793,
+"output_tokens": 164,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2984,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#176",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1793,
+"output_tokens": 96,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2631,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#185",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1854,
+"output_tokens": 86,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1765,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#185",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1854,
+"output_tokens": 141,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2942,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#177",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1829,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3590,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#187",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1888,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1181,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#187",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1888,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1486,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#185",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1854,
+"output_tokens": 165,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2974,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#187",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1888,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1271,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#190",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1829,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1367,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#190",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1829,
+"output_tokens": 65,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1623,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#190",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1829,
+"output_tokens": 83,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1757,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#196",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1900,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1210,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#196",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1900,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1538,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#196",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1900,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1531,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#207",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1871,
+"output_tokens": 60,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1639,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#207",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1871,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1274,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#213",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1854,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1216,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#207",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1871,
+"output_tokens": 58,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1687,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#213",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1854,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1291,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#214",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1861,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1206,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#213",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1854,
+"output_tokens": 192,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2789,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#214",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1861,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1817,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#216",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1886,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1243,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#214",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1861,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2580,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#216",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1886,
+"output_tokens": 120,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2113,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#217",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1914,
+"output_tokens": 146,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2616,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#216",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1886,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4128,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#217",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1914,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3917,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#217",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1914,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4968,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#219",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1881,
+"output_tokens": 272,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3993,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#220",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1899,
+"output_tokens": 135,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2517,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#219",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1881,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 5523,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#220",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1899,
+"output_tokens": 88,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2123,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#219",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1881,
+"output_tokens": 280,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4331,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#220",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1899,
+"output_tokens": 81,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2119,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#226",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1908,
+"output_tokens": 111,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2282,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#226",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1908,
+"output_tokens": 165,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2689,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#230",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1895,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1432,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#226",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1908,
+"output_tokens": 118,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2335,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#233",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1900,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1500,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#233",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1900,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1268,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#230",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1895,
+"output_tokens": 235,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3293,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#230",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1895,
+"output_tokens": 87,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3133,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#238",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1892,
+"output_tokens": 76,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1504,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#240",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1880,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1319,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#240",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1880,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1335,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#233",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1900,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3829,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#238",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1892,
+"output_tokens": 142,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2223,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#238",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1892,
+"output_tokens": 192,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3150,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#240",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1880,
+"output_tokens": 23,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1391,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#243",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1882,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1177,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#243",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1882,
+"output_tokens": 105,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1768,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#247",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1847,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1469,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#243",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1882,
+"output_tokens": 22,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1802,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#256",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1794,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1271,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#247",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1847,
+"output_tokens": 99,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2159,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#256",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1794,
+"output_tokens": 23,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1350,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#256",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1794,
+"output_tokens": 21,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1333,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#261",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1831,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1102,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#247",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1847,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3385,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#270",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1878,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1530,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#270",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1878,
+"output_tokens": 59,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1589,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#270",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1878,
+"output_tokens": 89,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1919,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#271",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1884,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1329,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#271",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1884,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1215,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#271",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1884,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1449,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#261",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1831,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3735,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#261",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1831,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3988,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#272",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1868,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1380,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#272",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1868,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1343,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--default#272",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1868,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1260,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#1",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 743,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1365,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#1",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 743,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1242,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#1",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 743,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1322,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#6",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 825,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1371,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#6",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 825,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2198,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#15",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1044,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1249,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#6",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 825,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1604,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#15",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1044,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1235,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#15",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1044,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1381,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#16",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1029,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1209,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#16",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1029,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2003,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#25",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1103,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1453,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#16",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1029,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1506,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#25",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1103,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1435,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#25",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1103,
+"output_tokens": 51,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1507,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#26",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1075,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1199,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#26",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1075,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1302,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#29",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1161,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1344,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#26",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1075,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1388,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#29",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1161,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1393,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#29",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1161,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1417,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#33",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1448,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#33",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1452,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#33",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1173,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1481,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#39",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1195,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1601,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#39",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1195,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1513,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#40",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1204,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1442,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#40",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1204,
+"output_tokens": 65,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1826,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#39",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1195,
+"output_tokens": 181,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2590,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#40",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1204,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1558,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#46",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1233,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1442,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#46",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1233,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1376,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#46",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1233,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1237,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#48",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1275,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1150,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#48",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1275,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1470,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#48",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1275,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1649,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#49",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1214,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#49",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1636,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#50",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1267,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1254,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#50",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1267,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1261,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#50",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1267,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1484,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#53",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1556,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#53",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1499,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#53",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1399,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#54",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1337,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1440,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#54",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1337,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1328,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#65",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1261,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1406,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#54",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1337,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2081,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#65",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1261,
+"output_tokens": 59,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1436,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#67",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1261,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1235,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#49",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1311,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4799,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#67",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1261,
+"output_tokens": 58,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1577,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#67",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1261,
+"output_tokens": 87,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1794,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#68",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1269,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1232,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#68",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1269,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1444,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#68",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1269,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1468,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#65",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1261,
+"output_tokens": 126,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2980,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#69",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1233,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1238,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#69",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1233,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1395,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#69",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1233,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1530,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#75",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1214,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1087,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#75",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1214,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1408,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#75",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1214,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1244,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#81",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1265,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1207,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#81",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1265,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1257,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#81",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1265,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1727,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#82",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1268,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1368,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#82",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1268,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1390,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#82",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1268,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2010,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#93",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1283,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1233,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#93",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1283,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1403,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#93",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1283,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1535,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#95",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1418,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#95",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1344,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#96",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1259,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1294,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#95",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 65,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1861,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#96",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1259,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1336,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#96",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1259,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1548,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#102",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1233,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#102",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1174,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#102",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1499,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#106",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1364,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#106",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1361,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#106",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1564,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#110",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1282,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1427,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#110",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1282,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1316,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#110",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1282,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1384,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#111",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1310,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1302,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#111",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1310,
+"output_tokens": 63,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1555,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#111",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1310,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1306,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#113",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1281,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1192,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#113",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1281,
+"output_tokens": 60,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1590,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#117",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1265,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1256,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#113",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1281,
+"output_tokens": 52,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1589,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#117",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1265,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1220,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#117",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1265,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1282,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#122",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1325,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1418,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#122",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1325,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1355,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#122",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1325,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1427,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#123",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1276,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1333,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#123",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1276,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1462,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#124",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1243,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1363,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#123",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1276,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2209,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#124",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1243,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1456,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#124",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1243,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1274,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#129",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1227,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1400,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#129",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1227,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1251,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#133",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1252,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1208,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#133",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1252,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1296,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#133",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1252,
+"output_tokens": 63,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1592,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#136",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1302,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1434,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#129",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1227,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1976,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#136",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1302,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1383,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#136",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1302,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1311,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#142",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1441,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#142",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1352,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#142",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1854,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#153",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1284,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1473,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#153",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1284,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1317,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#153",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1284,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1311,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#154",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1252,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1358,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#154",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1252,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1821,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#154",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1252,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1271,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#159",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 95,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1926,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#160",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1316,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1336,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#160",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1316,
+"output_tokens": 27,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1326,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#160",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1316,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1337,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#167",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1309,
+"output_tokens": 20,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1218,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#167",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1309,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1199,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#159",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3574,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#167",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1309,
+"output_tokens": 22,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1139,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#168",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1327,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1554,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#159",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3880,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#168",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1327,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1148,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#176",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1328,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1277,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#168",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1327,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2105,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#176",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1328,
+"output_tokens": 84,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1819,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#178",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1290,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1130,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#176",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1328,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1324,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#178",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1290,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1470,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#182",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1372,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1263,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#178",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1290,
+"output_tokens": 91,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1991,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#185",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1389,
+"output_tokens": 64,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1422,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#182",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1372,
+"output_tokens": 69,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1603,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#182",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1372,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2191,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#185",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1389,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1484,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#186",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1398,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1410,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#186",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1398,
+"output_tokens": 52,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1505,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#186",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1398,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1560,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#185",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1389,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2090,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#190",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1375,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1556,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#204",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1091,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#190",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1375,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1952,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#190",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1375,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1526,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#204",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1309,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#204",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1294,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1354,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#205",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1291,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1478,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#205",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1291,
+"output_tokens": 56,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1523,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#208",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1324,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1405,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#205",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1291,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1732,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#208",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1324,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1264,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#208",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1324,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2109,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#210",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1358,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1488,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#214",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1355,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1536,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#210",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1358,
+"output_tokens": 113,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2293,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#214",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1355,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1647,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#214",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1355,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1467,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#216",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1296,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#216",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1543,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#216",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1287,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1476,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#222",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1270,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1742,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#210",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1358,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4254,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#222",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1270,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1479,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#222",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1270,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2343,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#225",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1279,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1435,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#225",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1279,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1905,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#225",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1279,
+"output_tokens": 48,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2176,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#228",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1202,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1211,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#228",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1202,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1232,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#228",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1202,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1635,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#232",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1213,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1334,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#232",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1213,
+"output_tokens": 34,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1461,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#232",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1213,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1245,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#235",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1292,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1443,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#238",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1285,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1179,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#235",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1292,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1330,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#238",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1285,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1274,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#238",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1285,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1364,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#235",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1292,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2286,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#246",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1274,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1335,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#246",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1274,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1238,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#246",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1274,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1251,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#249",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1357,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#249",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 22,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1118,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#249",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1300,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1386,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#256",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1275,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1284,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#256",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1275,
+"output_tokens": 25,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1113,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#256",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1275,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1106,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#258",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1229,
+"output_tokens": 26,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1205,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#258",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1229,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1234,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#258",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1229,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1288,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#259",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1242,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1239,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#259",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1242,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1807,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#259",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1242,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1313,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#260",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1278,
+"output_tokens": 37,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1318,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#260",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1278,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1409,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#260",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1278,
+"output_tokens": 46,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1497,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#262",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1395,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#262",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1574,
+"attempts": 1
+},
+{
+"id": "sqlglot-long--off#262",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 1313,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1732,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#5",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 848,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1681,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#5",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 848,
+"output_tokens": 71,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1814,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#11",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 963,
+"output_tokens": 52,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1660,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#11",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 963,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1413,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#11",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 963,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1571,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#5",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 848,
+"output_tokens": 86,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2353,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#22",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1329,
+"output_tokens": 50,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1288,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#22",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1329,
+"output_tokens": 68,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1466,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#38",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2010,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1169,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#38",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2010,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1170,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#38",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2010,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1187,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#22",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1329,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1426,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#43",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2009,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1314,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#44",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2072,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1180,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#44",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2072,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1311,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#43",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2009,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1956,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#43",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2009,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1750,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#67",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3595,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1307,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#44",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2072,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1656,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#67",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3595,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1150,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#67",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3595,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1410,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#73",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2992,
+"output_tokens": 62,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1718,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#75",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2764,
+"output_tokens": 30,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1342,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#75",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2764,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1211,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#73",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2992,
+"output_tokens": 78,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1972,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#75",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2764,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1481,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#73",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2992,
+"output_tokens": 143,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2456,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#77",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3068,
+"output_tokens": 40,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1554,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#77",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3068,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1713,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#77",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3068,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1410,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#78",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2884,
+"output_tokens": 58,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1665,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#82",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2643,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1469,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#82",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2643,
+"output_tokens": 44,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1574,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#89",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2476,
+"output_tokens": 28,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1253,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#78",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2884,
+"output_tokens": 103,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2546,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#89",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2476,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1288,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#100",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2232,
+"output_tokens": 67,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1521,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#89",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2476,
+"output_tokens": 31,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2085,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#100",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2232,
+"output_tokens": 52,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1987,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#78",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2884,
+"output_tokens": 258,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4717,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#100",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2232,
+"output_tokens": 41,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2096,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#104",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2175,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1567,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#104",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2175,
+"output_tokens": 35,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1569,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#82",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2643,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4855,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#104",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2175,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1350,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#108",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2572,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1276,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#108",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2572,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1204,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#108",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2572,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1273,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#120",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2804,
+"output_tokens": 36,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1286,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#120",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2804,
+"output_tokens": 54,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1568,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#123",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3176,
+"output_tokens": 53,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1421,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#120",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2804,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1982,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#127",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3207,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1394,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#127",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3207,
+"output_tokens": 42,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1369,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#127",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3207,
+"output_tokens": 81,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1776,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#123",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3176,
+"output_tokens": 99,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2011,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#136",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 3144,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1308,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#136",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3144,
+"output_tokens": 47,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1448,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#137",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2831,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1435,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#137",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2831,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1845,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#137",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2831,
+"output_tokens": 80,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2191,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#123",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3176,
+"output_tokens": 252,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4327,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#138",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2721,
+"output_tokens": 61,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1645,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#138",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2721,
+"output_tokens": 170,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3073,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#138",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 2721,
+"output_tokens": 149,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2447,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#136",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 3144,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4845,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#139",
+"run": 2,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2728,
+"output_tokens": 49,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1348,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#139",
+"run": 0,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2728,
+"output_tokens": 170,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3079,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#146",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1628,
+"output_tokens": 33,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1945,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#139",
+"run": 1,
+"verdict": "NEXT",
+"usage": {
+"input_tokens": 2728,
+"output_tokens": 246,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 3867,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#146",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1628,
+"output_tokens": 119,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2328,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#189",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 4950,
+"output_tokens": 24,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1752,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#146",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1628,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 5101,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#189",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 4950,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4844,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#189",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 4950,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4307,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#195",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 4639,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4809,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#8",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1100,
+"output_tokens": 32,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1954,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#195",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 4639,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 5015,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#8",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1100,
+"output_tokens": 57,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2660,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#8",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1100,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2854,
+"attempts": 1
+},
+{
+"id": "dev-1bb1d249#195",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 4639,
+"output_tokens": 300,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 4529,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#9",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1175,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1459,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#9",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1175,
+"output_tokens": 38,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1227,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#10",
+"run": 1,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1243,
+"output_tokens": 29,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1375,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#9",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1175,
+"output_tokens": 39,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2097,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#10",
+"run": 2,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1243,
+"output_tokens": 45,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 1567,
+"attempts": 1
+},
+{
+"id": "dev-7c21a9fe#10",
+"run": 0,
+"verdict": "SAME",
+"usage": {
+"input_tokens": 1243,
+"output_tokens": 43,
+"cache_read_input_tokens": 0,
+"cache_creation_input_tokens": 0
+},
+"ms": 2145,
+"attempts": 1
+}
+]
+}

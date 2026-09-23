@@ -35,3 +35,20 @@ export function readConfig(options: PluginOptions): Config {
     model: typeof options['model'] === 'string' && options['model'] ? options['model'] : DEFAULTS.model,
   }
 }
+
+/**
+ * How far past the context a compaction left it the next judgement waits, when
+ * that compaction could not bring it back under the floor: so that the same
+ * finished work is not compacted again and again.
+ */
+export const REGROWTH = 5
+
+/**
+ * The context fill from which steps are judged: the floor, or -- after a
+ * compaction that left the context at or over it -- REGROWTH points past what
+ * it left. Before any compaction there is nothing it left, and the floor
+ * alone decides: a floor of 0 judges from the first step.
+ */
+export function judgingFrom(floorPercent: number, leftAt: number | undefined): number {
+  return leftAt !== undefined && leftAt >= floorPercent ? leftAt + REGROWTH : floorPercent
+}

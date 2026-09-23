@@ -97,8 +97,8 @@ def materialise(root: Path) -> Path:
     return root
 
 
-def drive(workspace: Path, plugin: Path, arm: Arm, model: str, log=print) -> None:
-    session = driver.Session(workspace, plugin, dict(arm.env), model)
+def drive(workspace: Path, plugin: Path, arm: Arm, model: str, log=print, debug_file: Path | None = None) -> None:
+    session = driver.Session(workspace, plugin, dict(arm.env), model, debug_file=debug_file)
     try:
         session.read_until_quiet(quiet=3.0, timeout=120)
         session.accept_trust_prompt()

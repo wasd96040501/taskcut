@@ -10,25 +10,37 @@ Which changes, and in what order they are reverted, is named by an order file
 beside the patches. Reverting has to go newest first: a later change can build
 on an earlier one, and peeling them off in any other order does not apply.
 
-The broken state is committed, so that a check can ask afterwards exactly what
-the session changed.
+The broken state is committed and tagged `eval-start`, so that a check can ask
+afterwards exactly what the session changed -- even of a session told to commit
+its work as it goes, which moves HEAD.
 
-Usage: click_issues.py <workspace> <order file>
+A workload that hands every issue over in one message names its own file as a
+third argument, and its issues are written to ISSUES.md, in its order.
+
+Usage: click_issues.py <workspace> <order file> [workload file]
 """
 
+import json
 import pathlib
 import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 PATCHES = HERE.parent / "fixtures" / "click"
+WORKLOADS = HERE.parent / "workloads"
 
 
 def run(*args, cwd):
     subprocess.run(args, cwd=cwd, check=True, stdout=subprocess.DEVNULL)
 
 
-def main(root: pathlib.Path, order: str) -> None:
+def issues_markdown(issues: list[str]) -> str:
+    parts = [f"# Open issues\n\n{len(issues)} issues, to be worked through in order.\n"]
+    parts += [f"## Issue {n}\n\n{text.strip()}\n" for n, text in enumerate(issues, 1)]
+    return "\n".join(parts)
+
+
+def main(root: pathlib.Path, order: str, workload: str = "") -> None:
     shas = [line.strip() for line in (PATCHES / order).read_text().splitlines() if line.strip()]
 
     exclude = root / ".git" / "info" / "exclude"
@@ -42,11 +54,17 @@ def main(root: pathlib.Path, order: str) -> None:
     for sha in shas:
         run("git", "apply", "-R", str(PATCHES / f"{sha}.patch"), cwd=root)
 
+    if workload:
+        issues = json.loads((WORKLOADS / workload).read_text())["files"]
+        (root / "ISSUES.md").write_text(issues_markdown(issues))
+
+    run("git", "add", "-A", cwd=root)
     run("git", "-c", "user.name=taskcut-eval", "-c", "user.email=eval@taskcut.invalid",
-        "commit", "--quiet", "-am", f"{len(shas)} open issues", cwd=root)
+        "commit", "--quiet", "-m", f"{len(shas)} open issues", cwd=root)
+    run("git", "tag", "eval-start", cwd=root)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4):
         sys.exit(__doc__)
-    main(pathlib.Path(sys.argv[1]).resolve(), sys.argv[2])
+    main(pathlib.Path(sys.argv[1]).resolve(), *sys.argv[2:])

@@ -1,7 +1,7 @@
 {
   "name": "taskcut",
   "version": "0.8.0",
-  "description": "Compacts when the work moves on from one sub-task to the next instead of when the context window fills, including in the middle of a long turn. Once the context is past a floor, a model judges each step, from the same inputs auto mode's permission classifier reads, for whether the work moves on from a finished piece to another; if it does, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
+  "description": "Compacts when the work moves on from one sub-task to the next instead of when the context window fills, including in the middle of a long turn. Once the context is past a floor, a model judges each step, reading what you asked for and where Claude has got to but never any tool output, for whether the work moves on from a finished piece to another; if it does, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
   "author": {
     "name": "Yangze Luo"
   },

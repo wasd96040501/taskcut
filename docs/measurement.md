@@ -33,6 +33,91 @@ to 0.5, which built the compacted transcript themselves and, until 0.5, had the
 working model call `close_task` at every boundary. Those numbers describe a
 mechanism that no longer ships; they are kept because they are what led here.
 
+### What the judge reads, replayed over real sessions (unreleased)
+
+Measured on Claude Code 2.1.280, Sonnet 5, with `make eval-replay` over the
+seven committed sessions: sqlglot-long off and default, issues-long off and
+on, the mechanism check, and click-zh off and on. taskcut would judge 228 of
+their steps; labelled, they hold 82 boundaries, 129 steps that are not one
+and 17 either way. Each step three times; intervals are 95%, bootstrapped over
+boundaries and over steps.
+
+| judge | boundaries caught | false NEXT | hard SAME | same every repeat | $ a judgement |
+| --- | --- | --- | --- | --- | --- |
+| 0.8 (main), as it read live | 99.2% (97.6–100) | 5.2% (2.3–8.5) | 95.4% | 95.3% | 0.0347 |
+| **this change** | **99.2% (97.6–100)** | **1.3% (0.3–2.8)** | 98.1% | 97.6% | **0.0050** |
+| this change, on `haiku` | 53.7% (45.5–61.0) | 35.9% (29.2–42.6) | 50.0% | 56.9% | 0.0020 |
+
+Paired over the same steps, this change against 0.8: boundaries caught +0.0%
+(−2.4 to +2.4), false NEXT −3.9% (−7.5 to −0.8), at 0.14 of the price. Past
+a floor of 35% on the sqlglot-long run -- 33 judged steps, the stretch a
+shipped floor actually judges -- that is $0.14 against $2.57. With the one
+unpublished session of this project's own development added (29 more steps,
+none a boundary once labelled), false NEXT is 2.3% against 5.3%, and the
+interval of the difference, −6.2 to +0.2, just reaches zero: the judge now
+calls "pushed `v0.8.0`; next I'll check the local installs" a new piece, and
+the labels say it is a step of the same one.
+
+What makes the number mean something:
+
+* **The replay is what the judge sees.** `make eval-replay-check` runs a real
+  session with a recorder beside taskcut and compares, character for
+  character, the prompt taskcut builds at every step with the one the replay
+  rebuilds from the transcript. It matched 2 steps of 18 the first time: the
+  engine holds the step being judged, a block at a time, when it is judged,
+  and 0.8's judge read every step twice -- the row for 0.8 above is that
+  judge given what it was given live; and after a compaction the engine keeps
+  the latest messages whole behind the summary, which the replay had
+  dropped. Both fixed, it matched 17 of 17 steps, and then 16 of 16 of a
+  second session it had not been adjusted to.
+* **A worse judge scores worse.** The same judge on `haiku` is the negative
+  control, and the benchmark puts it 45 points behind on boundaries and 35
+  ahead on false NEXT.
+* **The labels are not one person's opinion.** Every step was labelled again,
+  blind, by two annotators given only [the guideline](../eval/replay/LABELS.md)
+  and the sheets. Cohen's kappa: 0.87 and 0.89 against the committed labels,
+  0.91 between the two. The 21 steps they split on went to the majority, or E
+  where all three differed; six public labels changed, and
+  [every split](../eval/replay/disagreements.md) is recorded with the reasons
+  given. The annotators were Claude Sonnet 5, the judge's own model, which can
+  share its blind spots: a person reading `disagreements.md` is the next check.
+
+What it does not show:
+
+* **Boundaries nobody announces.** A step that says nothing is not judged. In
+  click-zh the model moved from one issue to the next nineteen times, and
+  usually did it in a silent step -- commit one issue, open the next. Only 8
+  and 10 of the 19 moves came with a step taskcut would judge. Past the floor
+  one boundary is all a compaction needs, and in click-zh the next announced
+  one was never more than a few issues away -- but a turn done entirely in
+  silence has none (the mechanism check below). "Boundaries caught" is of the
+  announced ones, not of every move the session made.
+* The rates are over 82 boundaries and 129 steps; the intervals say how far
+  that goes.
+
+**End to end.** sqlglot-long, arm `default` (a floor of 35%), one run: all 36
+issues and every check passed, taskcut judged one step -- 1,952 tokens in and
+47 out, which the harness now reads off the debug log -- and compacted once,
+when the context had reached 353,505 tokens. The session itself ran 197 requests in 40 minutes, where
+the earlier runs of both arms took 264 to 274 in about 100; that is how much
+one run of this workload varies, so its cost says nothing about taskcut's.
+click-zh passed all 23 checks in both arms and stayed under 17% of the
+window, below any floor.
+
+**`make eval-mechanism` fails one check of nine, twice out of two.** In the
+first long turn taskcut compacts after task 1 and after task 2, as it should.
+In the second, the working model did all four tasks without a word until its
+closing summary, so no step was judged and nothing was compacted: "a piece
+finished inside a turn, with another to follow, is compacted there" fails for
+that turn. Every judgement that was made was right. A run earlier the same day,
+before the change that stopped the judge reading the step twice, passed all
+nine, with a model that narrated both turns. This is the silent-boundary gap
+above, and it can empty a whole turn; the check is right to fail on it.
+
+This round spent about $49 at list price: $32 of it the three replay runs
+($26 of those the 0.8 judge, whose prompt is seven times the size), $9 the
+sqlglot session, $5 the click-zh sessions, the rest the checks.
+
 ### Moving on, not finishing (unreleased)
 
 Measured on Claude Code 2.1.280, Sonnet 5.

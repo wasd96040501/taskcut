@@ -4,18 +4,27 @@
  * same file, never across an import, which is why the code that fetches these
  * inputs lives in register.ts.
  *
- * The inputs follow auto mode's permission classifier, which decides from a
- * portion of the transcript rather than all of it: the person's messages, the
- * assistant's tool calls other than read-only lookups, and CLAUDE.md, with every
- * tool result stripped. To that the judge adds the one thing it is judging --
- * the step the assistant is taking -- as the classifier adds the pending action.
+ * The judge is asked one thing -- does the work move on here from a finished
+ * piece to another? -- and most of a session says nothing about it. What does,
+ * in order of how much:
  *
- * Like the classifier, the judge reads the whole of that portion, never a
- * window of it, and in the same order every time: CLAUDE.md, then the
- * conversation oldest first, then the step. Each judgement's prompt therefore
- * begins with the whole of the one before it, which is the prefix a prompt
- * cache can serve. (`$.model.complete` marks no cache point as of 2.1.280; the
- * classifier builds its own request and marks one after the transcript.)
+ *  1. the step itself, which says in its own words that a piece is complete and
+ *     names the next;
+ *  2. what the person asked for, which says whether there is a next;
+ *  3. a trail of what the assistant has been doing -- what its recent calls
+ *     touched, what it said, its task list -- which says where it has got to.
+ *
+ * So the judge reads those and nothing else: every message the person sent,
+ * the first and the latest whole and the rest cut to a line; the assistant's
+ * latest messages; what its latest calls touched, a file or what a command
+ * says it does, never the call in full; its task list as it last wrote it; and
+ * the step. Never any tool output, and not CLAUDE.md, which says how to work
+ * and not how far the work has got.
+ *
+ * Commands in full were nine tenths of what an earlier judge read, and the
+ * reason its prompt grew with the session. Without them the prompt is a few
+ * thousand tokens however long the session runs, and the judge is as right as
+ * it was: see docs/measurement.md.
  */
 
 import type { SessionMessage } from 'claude-code'
@@ -28,9 +37,9 @@ export const NEXT = 'NEXT'
 export const SAME = 'SAME'
 
 /**
- * Lookups that change nothing. The permission classifier leaves out "tool
- * calls other than read-only lookups such as file reads and searches"; what
- * the assistant read says nothing about whether a piece of work is done.
+ * Lookups that change nothing. What the assistant read says nothing about
+ * whether a piece of work is done, and a step made only of them never follows
+ * the finishing of one.
  */
 export const READ_ONLY_TOOLS: ReadonlySet<string> = new Set([
   'Read',
@@ -42,11 +51,20 @@ export const READ_ONLY_TOOLS: ReadonlySet<string> = new Set([
   'ToolSearch',
 ])
 
-/** How much of each piece the judge reads. */
-export const MESSAGE_LIMIT = 2_000
-export const CALL_LIMIT = 500
-export const MEMORY_LIMIT = 4_000
-export const STEP_LIMIT = 4_000
+/** How many of each the judge reads, and how much of each. */
+export const RECENT_REQUESTS = 3
+export const REQUEST_HEAD = 1_500
+export const REQUEST_TAIL = 500
+export const REQUEST_LINE = 150
+export const SUMMARY_HEAD = 1_500
+export const SUMMARY_TAIL = 1_000
+export const RECENT_SAYINGS = 10
+export const SAYING_LIMIT = 400
+export const RECENT_ACTIONS = 12
+export const TOUCH_LIMIT = 100
+export const TASK_LIMIT = 160
+export const STEP_LIMIT = 2_000
+export const CALL_LIMIT = 300
 /** Room for one sentence and the verdict. */
 export const ANSWER_TOKENS = 300
 
@@ -68,8 +86,9 @@ export type Step = { text: string; calls: readonly { name: string; input: unknow
  */
 export const JUDGE_SYSTEM = [
   'You watch an assistant working through what a person asked for. You are shown what the person',
-  "said, the commands the assistant ran (not their output), the project's instructions if it has",
-  'any, and the latest step the assistant is taking: what it just said and the calls it is making now.',
+  "said (older messages shortened), the assistant's latest messages, what its latest commands",
+  'touched, its task list if it keeps one, and the latest step the assistant is taking: what it just',
+  'said and the calls it is making now. The output of every command is left out.',
   '',
   'The conversation may open with a summary Claude Code wrote when it compacted what came before: it',
   'is a record of past work, not a request.',
@@ -100,40 +119,161 @@ function tail(text: string, limit: number): string {
   return text.length <= limit ? text : `[...] ${text.slice(-limit)}`
 }
 
+function ends(text: string, first: number, last: number): string {
+  return text.length <= first + last ? text : `${text.slice(0, first)} [...] ${text.slice(-last)}`
+}
+
+function oneLine(text: string): string {
+  return text.replace(/\s+/g, ' ').trim()
+}
+
+/** How Claude Code opens the message a compaction leaves in place of what it summarised. */
+const SUMMARY_OPENING = 'This session is being continued from a previous conversation'
+
 /**
- * The conversation as the judge reads it: what the person said and what the
- * assistant did, oldest first, with no tool output anywhere in it.
+ * User messages nobody typed: a background task reporting in, a prompt a
+ * plugin submitted (taskcut's own `Continue.` among them), the record of a
+ * local command, an interruption. None of them asks for anything.
  */
-export function conversationLines(messages: readonly SessionMessage[]): string[] {
-  const lines: string[] = []
-  for (const message of messages) {
-    if (message.role === 'user') {
-      // A user message carrying tool results is the output of a call, not
-      // something the person said.
-      if ((message.toolResults?.length ?? 0) > 0 || !message.text.trim()) continue
-      lines.push(`Person: ${head(message.text.trim(), MESSAGE_LIMIT)}`)
-      continue
-    }
-    for (const use of message.toolUses) {
-      if (READ_ONLY_TOOLS.has(use.tool)) continue
-      lines.push(`Assistant ran ${use.tool}: ${head(JSON.stringify(use.input), CALL_LIMIT)}`)
-    }
-  }
-  return lines
+const NOT_ASKED = [
+  /^<task-notification>/,
+  /^The \S+ plugin sent a message/,
+  /^<local-command-/,
+  /^Caveat: The messages below were generated by the user while running local commands/,
+  /^\[Request interrupted by user/,
+]
+
+/** Whether a user message is the person asking for something. */
+export function isRequest(message: SessionMessage): boolean {
+  if (message.role !== 'user' || (message.toolResults?.length ?? 0) > 0) return false
+  const text = message.text.trim()
+  return text !== '' && !NOT_ASKED.some((pattern) => pattern.test(text))
 }
 
 /**
- * The messages before the step. Whether the transcript already holds the step
- * when it is judged is the engine's business; if it does, it is left out here
- * so that the step's calls are not read twice.
+ * What a call touched: the file it read or wrote, or what a command says it
+ * does. Enough to tell one piece of work from the next; the call in full is
+ * what made an earlier judge's prompt grow with the session.
+ */
+export function touched(tool: string, input: unknown): string {
+  const fields = (typeof input === 'object' && input !== null ? input : {}) as Record<string, unknown>
+  if (typeof fields.file_path === 'string') return `${tool} ${fields.file_path}`
+  if (tool === 'Bash') return `Bash: ${head(oneLine(String(fields.description || fields.command || '')), TOUCH_LIMIT)}`
+  return `${tool}: ${head(oneLine(JSON.stringify(input) ?? ''), TOUCH_LIMIT)}`
+}
+
+/**
+ * The assistant's task list as it last wrote it, through `TodoWrite` or the
+ * `TaskCreate` and `TaskUpdate` tools, the step's own calls included. Empty
+ * when it keeps none. `TaskCreate` numbers its tasks from 1, in order.
+ */
+export function taskList(messages: readonly SessionMessage[], step: Step): string[] {
+  const calls = [
+    ...messages.flatMap((message) => (message.role === 'assistant' ? message.toolUses.map((use) => ({ name: use.tool, input: use.input })) : [])),
+    ...step.calls,
+  ]
+  let todos: { content: string; status: string }[] | undefined
+  const tasks = new Map<string, { subject: string; status: string }>()
+  for (const { name, input } of calls) {
+    const fields = (typeof input === 'object' && input !== null ? input : {}) as Record<string, unknown>
+    if (name === 'TodoWrite' && Array.isArray(fields.todos)) {
+      todos = (fields.todos as Record<string, unknown>[]).map((todo) => ({ content: String(todo.content ?? ''), status: String(todo.status ?? '') }))
+    } else if (name === 'TaskCreate' && typeof fields.subject === 'string') {
+      tasks.set(String(tasks.size + 1), { subject: fields.subject, status: 'pending' })
+    } else if (name === 'TaskUpdate' && typeof fields.status === 'string') {
+      const task = tasks.get(String(fields.taskId))
+      if (task) task.status = fields.status
+    }
+  }
+  const mark = (status: string) => (status === 'completed' ? '[done]' : status === 'in_progress' ? '[doing]' : '[todo]')
+  const items = todos?.map((todo) => ({ subject: todo.content, status: todo.status })) ?? [...tasks.values()].filter((task) => task.status !== 'deleted')
+  return items.map((item) => `${mark(item.status)} ${head(oneLine(item.subject), TASK_LIMIT)}`)
+}
+
+/**
+ * The messages before the step, without the step.
+ *
+ * When the step is judged, `$.session.messages()` (2.1.280) already holds it,
+ * and as more than one message: a response is recorded a block at a time, so
+ * its words are one message and each call another -- and a call that has
+ * already run is followed by its result. Left in, the step would be read
+ * twice, once as the latest thing the assistant said, and whether it was
+ * would depend on how fast its tools ran.
+ *
+ * So the step is the shortest run of messages at the end whose words, joined,
+ * are the step's and whose calls are the step's, with nothing between them
+ * but the results of those calls. When there is none -- the engine does not
+ * hold the step yet -- every message is before it.
  */
 export function beforeStep(messages: readonly SessionMessage[], step: Step): readonly SessionMessage[] {
-  const last = messages[messages.length - 1]
-  if (last?.role !== 'assistant') return messages
-  const same =
-    last.toolUses.length === step.calls.length &&
-    last.toolUses.every((use, i) => use.tool === step.calls[i]!.name && JSON.stringify(use.input) === JSON.stringify(step.calls[i]!.input))
-  return same ? messages.slice(0, -1) : messages
+  const words = oneLine(step.text)
+  const calls = step.calls.map((call) => `${call.name} ${JSON.stringify(call.input)}`)
+  const said: string[] = []
+  const made: string[] = []
+  const madeIds = new Set<string>()
+  const resultIds: string[] = []
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i]!
+    if (message.role === 'user') {
+      if (!message.toolResults?.length) return messages
+      resultIds.push(...message.toolResults.map((result) => result.tool_use_id))
+      continue
+    }
+    said.unshift(message.text)
+    made.unshift(...message.toolUses.map((use) => `${use.tool} ${JSON.stringify(use.input)}`))
+    for (const use of message.toolUses) madeIds.add(use.tool_use_id)
+    if (made.length > calls.length) return messages
+    const isStep = oneLine(said.join(' ')) === words && made.length === calls.length && made.every((call, k) => call === calls[k])
+    // Nothing may come between the step's messages but its own calls' results.
+    if (isStep) return resultIds.every((id) => madeIds.has(id)) ? messages.slice(0, i) : messages
+  }
+  return messages
+}
+
+/**
+ * The conversation as the judge reads it, oldest first: every request, the
+ * first and the latest few whole; the assistant's latest messages; what its
+ * latest calls other than lookups touched. Nothing else, and no output.
+ */
+export function conversationLines(messages: readonly SessionMessage[]): string[] {
+  const indexed = messages.map((message, i) => ({ message, i }))
+  const requests = indexed.filter(({ message }) => isRequest(message)).map(({ i }) => i)
+  const asked = new Set(requests)
+  const whole = new Set([...requests.slice(0, 1), ...requests.slice(-RECENT_REQUESTS)])
+  const sayings = new Set(indexed.filter(({ message }) => message.role === 'assistant' && message.text.trim()).map(({ i }) => i).slice(-RECENT_SAYINGS))
+  const actions = new Set(
+    indexed.filter(({ message }) => message.role === 'assistant' && message.toolUses.some((use) => !READ_ONLY_TOOLS.has(use.tool))).map(({ i }) => i).slice(-RECENT_ACTIONS),
+  )
+
+  const lines: string[] = []
+  let unsaid = 0
+  const skipped = () => {
+    if (unsaid > 0) lines.push(`(${unsaid} earlier assistant message${unsaid > 1 ? 's' : ''} left out)`)
+    unsaid = 0
+  }
+  for (const [i, message] of messages.entries()) {
+    if (message.role === 'user') {
+      if (!asked.has(i)) continue
+      skipped()
+      const text = message.text.trim()
+      if (text.startsWith(SUMMARY_OPENING)) lines.push(`Summary of the conversation before it was compacted: ${ends(text, SUMMARY_HEAD, SUMMARY_TAIL)}`)
+      else if (whole.has(i)) lines.push(`Person: ${ends(text, REQUEST_HEAD, REQUEST_TAIL)}`)
+      else lines.push(`Person (shortened): ${head(oneLine(text), REQUEST_LINE)}`)
+      continue
+    }
+    if (sayings.has(i)) {
+      skipped()
+      lines.push(`Assistant: ${head(message.text.trim(), SAYING_LIMIT)}`)
+    } else if (message.text.trim()) {
+      unsaid++
+    }
+    if (actions.has(i)) {
+      skipped()
+      for (const use of message.toolUses) if (!READ_ONLY_TOOLS.has(use.tool)) lines.push(`Assistant ran ${touched(use.tool, use.input)}`)
+    }
+  }
+  skipped()
+  return lines
 }
 
 /**
@@ -155,20 +295,18 @@ export function acts(calls: readonly { name: string }[]): boolean {
   return calls.some((call) => !READ_ONLY_TOOLS.has(call.name))
 }
 
-/**
- * Everything the judge is shown: all of the conversation, as the classifier
- * reads all of its transcript. The step comes last, so that everything before
- * it is what the judgement before this one was shown, and then some.
- */
-export function judgePrompt(messages: readonly SessionMessage[], step: Step, memory: readonly string[]): string {
+/** Everything the judge is shown: the conversation, the task list, and the step last. */
+export function judgePrompt(messages: readonly SessionMessage[], step: Step): string {
+  const before = beforeStep(messages, step)
+  const tasks = taskList(before, step)
   return [
-    ...(memory.length > 0 ? ['--- project instructions (CLAUDE.md) ---', ...memory.map((m) => head(m.trim(), MEMORY_LIMIT)), ''] : []),
-    '--- conversation ---',
-    ...conversationLines(beforeStep(messages, step)),
+    '--- the conversation, oldest first (recent commands shortened, output left out) ---',
+    ...conversationLines(before),
+    ...(tasks.length > 0 ? ['', "--- the assistant's task list, as it last wrote it ---", ...tasks] : []),
     '',
     '--- latest step: what the assistant is doing now ---',
     tail(step.text.trim(), STEP_LIMIT) || '(no text)',
-    ...step.calls.map((call) => `Calls ${call.name}: ${head(JSON.stringify(call.input), CALL_LIMIT)}`),
+    ...step.calls.map((call) => `Calls ${call.name}: ${head(JSON.stringify(call.input) ?? '', CALL_LIMIT)}`),
   ].join('\n')
 }
 
@@ -183,9 +321,11 @@ export type Reply = { text: string } | { reason: string }
 export function readReply(answer: unknown): Reply {
   if (typeof answer === 'string') return { text: answer }
   if (typeof answer === 'object' && answer !== null && 'isAnswered' in answer) {
-    const { isAnswered, text, reason } = answer as { isAnswered: unknown; text?: unknown; reason?: unknown }
+    const { isAnswered, text, reason, status, error } = answer as { isAnswered: unknown; text?: unknown; reason?: unknown; status?: unknown; error?: unknown }
     if (isAnswered === true && typeof text === 'string') return { text }
-    if (isAnswered === false) return { reason: String(reason) }
+    // An API error says which: a spent rate limit and a refused request
+    // otherwise read the same.
+    if (isAnswered === false) return { reason: [reason, status, error].filter((part) => part !== undefined && part !== null).join(' ') }
   }
   return { reason: 'a reply of no shape taskcut knows' }
 }
