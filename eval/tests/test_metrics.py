@@ -84,6 +84,37 @@ class Judging(unittest.TestCase):
         self.assertEqual((j.plain, j.output, j.read, j.write, j.ms), (7, 8, 9, 10, 12))
 
 
+class ReportReadsTheSidecar(unittest.TestCase):
+    """The judge's sums reach the report's cost table, through the command a
+    person runs."""
+
+    def test_the_judge_columns_come_from_the_sidecar(self):
+        import contextlib
+        import io
+        import json
+        import tempfile
+
+        from taskcut_eval import cli
+
+        with tempfile.TemporaryDirectory() as directory:
+            results = Path(directory)
+            record = {"type": "assistant", "requestId": "r", "timestamp": "2026-09-23T00:00:00Z",
+                      "message": {"role": "assistant", "content": [{"type": "text", "text": "ok"}],
+                                  "usage": {"input_tokens": 1, "output_tokens": 1, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}}}
+            prompt = {"type": "user", "timestamp": "2026-09-23T00:00:00Z", "message": {"role": "user", "content": [{"type": "text", "text": "go"}]}}
+            (results / "synthetic--default--sonnet.jsonl").write_text(json.dumps(prompt) + "\n" + json.dumps(record) + "\n")
+            (results / "synthetic--off--sonnet.jsonl").write_text(json.dumps(prompt) + "\n" + json.dumps(record) + "\n")
+            (results / "synthetic--default--sonnet.judging.json").write_text(json.dumps(vars(metrics.judging(LOG))))
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                cli.main(["--results", str(results), "report"])
+            cost = out.getvalue().split("## Cost", 1)[1].split("\n## ", 1)[0]
+            rows = {line.split("|")[1].strip(): line for line in cost.splitlines() if line.startswith("| default") or line.startswith("| off")}
+            self.assertIn("3 (sonnet)", rows["default"])
+            self.assertIn("3,895", rows["default"])  # 3835 + 1.25 * 40 + 0.1 * 100
+            self.assertIn("| -", rows["off"].replace("|  ", "| "))
+
+
 class Fidelity(unittest.TestCase):
     def setUp(self):
         self.workload = workload.Workload(

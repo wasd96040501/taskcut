@@ -4,7 +4,7 @@
 6    E  Baseline captured (all failing tests map to the issues, plus `test_lazy_load`). Starting with Issue 1.
 15   S  No linters in the venv, so I'll rely on tests. I'll make a helper that runs the full suite and reports any failure not in the baseline.
 16   N  Issue 1 is done: all five lineage tests pass and nothing new has broken. On to Issue 2 (Oracle PIVOT/UNPIVOT).
-25   E  Oracle test passes. I'll tweak the helper to print only failures that weren't in the baseline, so regressions stand out.
+25   S  Oracle test passes. I'll tweak the helper to print only failures that weren't in the baseline, so regressions stand out.
 26   N  Issue 2 is done with no regressions. Issue 3: dropping an unnamed UNIQUE constraint.
 29   N  Issue 3 is fixed: `test_remove_unique_constraints` and Spark's `test_ddl` now pass. Issue 4: Databricks `INSERT ... REPLACE USING`.
 33   N  Issue 4 done. Issue 5: SingleStore percentile NULL ordering.
@@ -21,8 +21,8 @@
 68   S  I'll guard against a `dot_parts` list shorter than the chain, since MAP/VARIANT roots now reach this path more often.
 69   N  Issue 8 done, and nothing new in the failure list. Issue 9: executor DISTINCT inside aggregates.
 75   S  Status: Issue 9 — the planner already extracts aggregate arguments into `_a_N` operands; I need to see where a `Distinct` inside an aggregate loses its meaning.
-81   N  Issues 9 and 10 are done. I'll run the full suite as a checkpoint before Issue 11 (pipe syntax `__tmp` CTEs).
-82   E  No regressions from Issues 1–10. Issue 11: pipe syntax CTE collisions.
+81   E  Issues 9 and 10 are done. I'll run the full suite as a checkpoint before Issue 11 (pipe syntax `__tmp` CTEs).
+82   N  No regressions from Issues 1–10. Issue 11: pipe syntax CTE collisions.
 93   S  Quick status: reformatting a few over-long lines from Issues 6, 8 and 11 (style only), then running the checkpoint.
 95   S  `is_wrapper` isn't a Paren check, so that broke the tests. Reverting to an explicit `Paren` check, formatted to fit the line width.
 96   N  Issue 11 is done. Issue 12: StarRocks `REFRESH EXTERNAL TABLE`.
@@ -32,7 +32,7 @@
 111  S  `find(exp.Tuple)` would also match `GROUP BY (a, b)`, which is too broad. I'll use a small helper that checks specifically for an empty tuple.
 113  N  Issue 14 passes. Issue 15: implicit `NULLS FIRST` on UNIQUE/INDEX key parts.
 117  S  StarRocks `test_ddl` regressed. It passed after Issue 12, so this is from the MySQL change. Checking.
-122  E  Both pass now. To avoid misreading tail output again, I'll build a checker that runs each issue's exact listed tests and reports pass/fail per issue.
+122  S  Both pass now. To avoid misreading tail output again, I'll build a checker that runs each issue's exact listed tests and reports pass/fail per issue.
 123  E  Issues 1–15 all pass their listed tests. Full-suite regression check:
 124  N  Clean. Issue 16: `GROUPING()` type in the Hive family.
 129  N  Issue 16 done. Issue 17: `qualify_tables` stripping parentheses of a function body.

@@ -358,7 +358,9 @@ def verdicts(answers: list[dict], model: str) -> dict[str, list[Verdict]]:
 
 
 def score(sets: dict[str, dict], labels: dict[str, dict[int, str]], answers: dict[str, list[Verdict]]) -> Scores:
-    """`answers` by case id, `<set>#<step>`, one verdict per repeat."""
+    """`answers` by case id, `<set>#<step>`, one verdict per repeat. Only the
+    sets in `labels` are scored, and only their calls counted and priced."""
+    answers = {k: v for k, v in answers.items() if k.split("#")[0] in labels}
     repeats = min(len(v) for v in answers.values())
     caught = []
     false = []

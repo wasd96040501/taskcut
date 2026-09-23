@@ -56,13 +56,13 @@
 149  S  One gap: I meant to also keep unwrapping parenthesized string literals so `('a') || 'b'` still folds in one pass.
 150  N  Issue 20's cases are all fixed (the one remaining `test_simplify` failure is Issue 27's). Now Issue 21 (`pushdown_projections` vs positional column lists).
 157  S  Issue 21's tests now pass. I'll confirm the two named tests, check line lengths, and run the wider optimizer suite for regressions before moving on to Issue 22.
-163  E  I'm on Issue 22. `replace_aliases` swaps in the aliased expression bare, so I'll wrap operator expressions in a `Paren` when substituting. Then I'll check how …
+163  S  I'm on Issue 22. `replace_aliases` swaps in the aliased expression bare, so I'll wrap operator expressions in a `Paren` when substituting. Then I'll check how …
 164  S  That passes, including the `NOT` case. I'll run the optimizer suite and check line lengths for regressions.
 165  S  Issue 22's test passes, and the remaining failures all belong to later issues (26, 27, 28, 34). One line I added is 101 characters, so I'll reshape it.
 167  N  Issue 22 is done. The three long lines left are older comments. Next is Issue 23, Spark `GROUPING SETS`.
 169  S  The same test covers Issue 32 (GROUP BY reordering), so I'll read both issue texts and the current parser and generator code before designing the change.
 176  E  Both target tests pass. I'll run the full-suite regression check, since this changes where CUBE, ROLLUP and GROUPING SETS live in the AST.
-177  E  No new failures against baseline, and both Issue 23/32 tests no longer appear in the remaining list. I'll check that my own added lines respect the 100-charact…
+177  S  No new failures against baseline, and both Issue 23/32 tests no longer appear in the remaining list. I'll check that my own added lines respect the 100-charact…
 185  S  A bare `NULL` annotates as `UNKNOWN`, but it is plainly a scalar, so I'll exempt it from the unknown-type check and fix the long lines I introduced.
 187  N  Issue 24's tests pass. The remaining failures in that run belong to later issues (29, 33, 35 and so on). Next is Issue 25, Druid `JSON_VALUE ... RETURNING`.
 190  S  Trino, MySQL and Exasol register `_parse_json_value` in their `FUNCTION_PARSERS`. Druid doesn't, so I'll do the same there.

@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+import dataclasses
 import re
 import subprocess
 from statistics import mean
@@ -138,7 +139,7 @@ def cmd_report(args) -> int:
             run.checks.extend(metrics.CheckResult(**v) for v in json.loads(sidecar.read_text()))
         spent = path.with_suffix("").with_suffix(".judging.json")
         if spent.exists():
-            run.judging = metrics.Judging(**json.loads(spent.read_text()))
+            run = dataclasses.replace(run, judging=metrics.Judging(**json.loads(spent.read_text())))
         grouped.setdefault((name, model), []).append(run)
 
     if not grouped:

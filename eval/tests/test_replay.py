@@ -222,6 +222,13 @@ class Scoring(unittest.TestCase):
         self.assertAlmostEqual(s.boundaries, 1 / 3)
         self.assertLess(s.agreement, 1.0)
 
+    def test_only_the_sets_scored_are_counted_and_priced(self):
+        answers = self.judge(lambda n, r: False)
+        answers["other#1"] = [replay.Verdict(next=True, answered=True, cost=9.0, tokens_in=1, tokens_out=1)] * 3
+        s = replay.score(self.SETS, self.LABELS, answers)
+        self.assertEqual(s.calls, 18)
+        self.assertAlmostEqual(s.dollars, 0.018)
+
     def test_an_unanswered_call_is_same(self):
         answers = [{"id": "s#3", "run": 0, "verdict": "unanswered: api-error 429 rate_limit", "usage": None}]
         v = replay.verdicts(answers, "sonnet")["s#3"][0]

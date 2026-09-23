@@ -263,6 +263,6 @@
   "description": "the whole suite passes, but for the one test that needs `python` on the PATH",
   "kind": "consistency",
   "passed": true,
-  "detail": "uu.uuuuuuuuuuuuuu.uuuu.uu.uu [ 98%]\nuuuu.uu...uuuuuuuuuuuuuuuuuu.uuuuuuuuuu.uuuuuu.uuu.uuuuuuuuuuuuuuuuuuuuu [ 99%]\n....uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu. [ 99%]\n.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu [ 99%]\nuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu..uuuuuuuuuuuuuuuuuu...uuuuuu.  [100%]\n1267 passed, 19684 subtests passed in 52.21s"
+  "detail": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu. [100%]\n1267 passed, 19684 subtests passed in 54.35s"
  }
 ]
