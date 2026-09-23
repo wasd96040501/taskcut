@@ -125,31 +125,60 @@ task and started the next was never a boundary.
 
 ## What the judge reads
 
-The judge reads what auto mode's permission classifier reads, which decides
-from a portion of the transcript rather than all of it: every message the
-person sent, every tool call the assistant made except read-only lookups, and
-`CLAUDE.md`, with all tool output stripped. To that it adds the step being
-judged -- what the assistant just said and the calls it is making -- as the
-classifier adds the pending action.
+The judge is asked one thing, and most of a session says nothing about it.
 
-It reads all of that portion, as the classifier does. Claude Code 2.1.280's
-classifier (`xLt` and `Zke` in the bundle) puts every entry of the transcript
-in its request and never leaves the oldest out; when the request no longer fits
-its window it gives no verdict (`transcript_too_long`) and falls back to asking
-the person. 0.8's judge kept the newest 40,000 characters instead, which moved
-the start of what it read with every line once the conversation passed that.
-Now the conversation is read whole, and a conversation too long for the
-judge's own window is a failed request: no verdict, the context kept -- the
-judge's own way of falling back. Each message and each call is still clipped
-on its own, and what the judge reads is a fraction of the context: no tool
-output, and nothing from before the last compaction.
+Up to 0.8 it read what auto mode's permission classifier reads: every message
+the person sent, every tool call except read-only lookups, and `CLAUDE.md`,
+all of it, with tool output stripped, and the step last. Replayed over real
+sessions, nine tenths of that prompt was the calls in full -- `Bash` commands,
+heredocs, whole files handed to `Write` -- and they are what made it grow with
+the session: on the thirty-six-change sqlglot run, 32,000 characters at the
+median and 100,000 at the most, sixteen thousand tokens a judgement on
+average. They are also what says least about whether the work moves on. A
+command says what was run, not whether a piece is done.
+
+What does say so, in order of how much:
+
+1. **The step itself.** Rule 2 turns on its own words: a piece is complete,
+   and the next is named or started. It is read whole, up to its last 2,000
+   characters, with its calls.
+2. **What the person asked for**, which says whether there is a next piece at
+   all. The first request, usually the brief, and the latest three are read
+   whole; the ones between are cut to a line each. Messages nobody typed are
+   left out: a background task reporting in, a prompt a plugin submitted
+   (taskcut's own `Continue.` among them), a local command's record.
+3. **Where the assistant has got to.** Its latest ten messages; what its
+   latest twelve calls other than lookups touched -- the file an `Edit`
+   changed, the description a `Bash` call gives, never the call in full; and
+   its task list as it last wrote it, through `TodoWrite` or `TaskCreate` and
+   `TaskUpdate`.
+
+Never any tool output, as before, and no longer `CLAUDE.md`: it says how to
+work, not how far the work has got.
+
+The assistant's messages and what its calls touched go together. Replayed
+without the calls, the judge credited a move one message had announced --
+"Issue 11 is done. Issue 12: StarRocks `REFRESH EXTERNAL TABLE`." -- to the
+step after it, which said only how it would implement issue 12, and called
+that step the boundary. With a trail of what was actually done beside the
+words, it did not. And without either, it missed a step as terse as "Fixed and
+verified." every time. The permission classifier leaves assistant text out so
+that the agent cannot talk it into an unsafe action; here the step's own words
+are the evidence, and the worst a persuasive step can do is compact early.
+
+What the judge reads is now set by those windows and not by the work: it
+grows by a line for each message the person sends, and by nothing for the
+calls, the output or the length of the turn. [measurement.md](measurement.md)
+has what that costs and how often it is right.
 
 The default model is `sonnet`, as the permission classifier's is. On twelve
 steps of one long turn -- three boundaries among them -- judged three times
 each, `sonnet` was right 36 times out of 36 and `haiku` 32, every miss a
 boundary it did not see. On forty steps sampled from inside twenty real
-changes, none of them a boundary, `sonnet` called none of them one. A judgement
-costs a few cents and runs only past the floor.
+changes, none of them a boundary, `sonnet` called none of them one. Given the
+view above, `haiku` did worse still: it went on as the assistant it was shown,
+reading the next file or planning the fix, rather than judging the step. A
+judgement costs about half a cent and runs only past the floor.
 
 ## The floor
 
@@ -305,19 +334,26 @@ A plugin could build that request itself, with `$.session.authorize()` and
 `$.http.fetch`, but only by copying what the engine does to send one -- the
 credential's beta header, the identity block a subscription requires, the base
 URL, the model id -- which is the engine's to change. So the judge uses
-`$.model.complete`, and its prompt is built the way the classifier's is, ready
-for a call that caches: the rules, `CLAUDE.md`, the whole conversation oldest
-first, and the step last. `$.session.messages()` only ever adds to what the
-judge reads -- between two steps the one field that changes on an earlier
-message is a call's `result`, which the judge never reads -- so each
-judgement's prompt begins with everything the one before it read ahead of its
-step.
+`$.model.complete`.
+
+Up to 0.8 the judge's prompt was built the way the classifier's is, ready for
+a call that caches: each one began with the whole of the one before it, and
+[anthropics/claude-code#96214](https://github.com/anthropics/claude-code/issues/96214)
+asks for a `$.model.complete` that could serve that prefix from the cache. The
+prompt it builds now is not a growing prefix -- the windows slide, and a
+request is cut to a line once three newer ones follow it -- and it does not
+need to be. At Sonnet 5's prices a cached read is a tenth of an uncached one,
+so the old prompt of sixteen thousand tokens, served from a cache, would cost
+about what the new one of two thousand costs sent whole: some $0.004 against
+$0.005, the sentence out included. If a cacheable call ships, whether to read
+the whole conversation again is a question of accuracy, and the replay in
+[eval/README.md](../eval/README.md) is where to answer it.
 
 `$.model.fork`, the one call that is served from a cache, reads the main
 thread's whole transcript with the main model: past a floor of 35% on a 1M
-window that is 350,000 tokens a judgement at the cache-read price, several
-times what the judge's own prompt costs uncached, and it puts every tool output
-back in front of the judge.
+window that is 350,000 tokens a judgement at the cache-read price, about seven
+cents on Sonnet 5 -- more than ten times what the judge's own prompt costs
+uncached -- and it puts every tool output back in front of the judge.
 
 ## The one structural rule in the source
 

@@ -23,11 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A turn is never ended at its first step: on Claude Code 2.1.280 a compaction
   after a request that ended on your own words, `/compact` typed by hand
   included, answers them instead of summarising the conversation.
-- The judge reads the whole conversation, as the permission classifier reads
-  its whole transcript, rather than the newest 40,000 characters, so each
-  judgement's prompt begins with everything the one before it read. A
-  conversation too long for the judge's window is no verdict, and keeps the
-  context.
+- **The judge reads what says whether the work moves on, and little else**:
+  every message you sent, the first and the latest three whole and the rest
+  cut to a line; Claude's latest ten messages; what its latest twelve calls
+  touched -- a file, or what a command says it does, never the call in full;
+  its task list; and the step. It no longer reads every command in full, nor
+  `CLAUDE.md`, and taskcut no longer reads any file. A judgement is about two
+  thousand tokens however long the session has run, where it was sixteen
+  thousand on average and grew with the work, and costs about half a cent
+  instead of about three.
 - The notice reads `compacting before the next piece`.
 - taskcut is released under the MIT License, in place of Apache-2.0.
 

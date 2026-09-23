@@ -16,7 +16,7 @@ type Input = {
   model: string
   repeats: number
   concurrency: number
-  cases: { id: string; messages: Parameters<typeof judgePrompt>[0]; step: Step; memory: string[] }[]
+  cases: { id: string; messages: Parameters<typeof judgePrompt>[0]; step: Step }[]
 }
 
 type Answer = {
@@ -31,7 +31,7 @@ type Answer = {
 const MARKER = 'taskcut-judgebench '
 
 async function ask($: EngineInterface, model: string, item: Input['cases'][number], run: number): Promise<Answer> {
-  const prompt = judgePrompt(item.messages, item.step, item.memory)
+  const prompt = judgePrompt(item.messages, item.step)
   const answer: unknown = await $.model.complete({ model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
   const reply = readReply(answer)
   const verdict = 'text' in reply ? (saysNext(reply.text) ? NEXT : SAME) : `unanswered: ${reply.reason}`

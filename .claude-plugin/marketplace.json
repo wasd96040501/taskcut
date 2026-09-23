@@ -1,14 +1,14 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "taskcut",
-  "description": "Compaction at the end of a sub-task, not when the window fills, for Claude Code",
+  "description": "Compaction when the work moves on to the next sub-task, not when the window fills, for Claude Code",
   "owner": {
     "name": "Yangze Luo"
   },
   "plugins": [
     {
       "name": "taskcut",
-      "description": "Compacts at the end of a sub-task instead of when the context window fills. Once the context is past a floor, a small model judges at the end of each turn whether the work asked for is finished, from the same inputs auto mode's permission classifier reads; if it is, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
+      "description": "Compacts when the work moves on from one sub-task to the next instead of when the context window fills, including in the middle of a long turn. Once the context is past a floor, a model judges each step, reading what you asked for and where Claude has got to but never any tool output, for whether the work moves on from a finished piece to another; if it does, taskcut runs Claude Code's own compaction. Below the floor it does nothing and costs nothing.",
       "author": {
         "name": "Yangze Luo"
       },

@@ -29,7 +29,7 @@ this plugin calls. Reports that matter most:
   session, or in a subagent's loop;
 * a prompt taskcut submits that is anything other than `Continue.`;
 * a path by which the judge is sent more than it is documented to read -- tool
-  output, or files other than the `CLAUDE.md` files already in the context.
+  output, a call in full from before the step, or the contents of any file.
 
 ## What is out of scope
 

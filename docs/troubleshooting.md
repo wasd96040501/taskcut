@@ -87,10 +87,11 @@ taskcut: context at 43%, compacting before the next piece
 Every other judgement is silent; `claude --debug` shows each one, as `step
 judged a new piece` or `step judged the same work`. The end of a turn is never
 judged, even when everything you asked for is done: what you say next may be
-about it, and `/compact` before new work is yours. The judge reads what auto
-mode's permission classifier reads -- your messages, the assistant's
-non-read-only tool calls and `CLAUDE.md` -- plus the step it is judging, and
-never any tool output.
+about it, and `/compact` before new work is yours. The judge reads your
+messages, the assistant's latest messages, what its latest calls touched and
+its task list, plus the step it is judging -- never any tool output, and not
+`CLAUDE.md`. A step that does not itself say a piece is done is not a
+boundary, however plainly the work shows it.
 
 ### 6. Nothing is compacted inside a long turn
 

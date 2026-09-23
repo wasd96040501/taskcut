@@ -99,34 +99,14 @@ async function pastFloor($: EngineInterface, config: Config): Promise<number | u
 }
 
 /**
- * The project instructions in the context, as the permission classifier reads
- * them. The breakdown is estimated locally, so listing them sends nothing; a
- * file that cannot be read is left out rather than failing the judgement.
- */
-async function memoryFiles($: EngineInterface): Promise<string[]> {
-  const { context } = await $.session.usage({ breakdown: 'summary' })
-  const texts: string[] = []
-  for (const file of context.breakdown?.memoryFiles ?? []) {
-    try {
-      texts.push(await $.fs.read(file.path))
-    } catch {
-      // Moved or unreadable since it was loaded: the judge does without it.
-    }
-  }
-  return texts
-}
-
-/**
  * Whether the work moves on from a finished piece to another at this moment,
  * as the judge sees it. Anything but a clear yes keeps the context: a
  * compaction in the middle of a piece costs re-reading, and a missed boundary
  * only waits for the next one.
- * A conversation too long for the judge's own window is one such no: like the
- * classifier's transcript, the judge's prompt is never cut down to fit.
  */
 async function judge($: EngineInterface, step: Step, config: Config): Promise<boolean> {
   try {
-    const prompt = judgePrompt(await $.session.messages(), step, await memoryFiles($))
+    const prompt = judgePrompt(await $.session.messages(), step)
     // `unknown`: what the call resolves to has changed between releases, and
     // readReply takes every shape it has had.
     const answer: unknown = await $.model.complete({ model: config.model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })

@@ -1,5 +1,5 @@
 {
-  "description": "Once the context window is past the configured floor, judges each step of the main loop with one model call reading what the permission classifier reads. When the work moves on from a finished piece to another, ends the turn before its next request, runs $.session.compact(), the same compaction /compact runs, and submits 'Continue.' after. Below the floor nothing runs.",
+  "description": "Once the context window is past the configured floor, judges each step of the main loop with one model call reading the person's requests, where the assistant has got to and the step, never any tool output. When the work moves on from a finished piece to another, ends the turn before its next request, runs $.session.compact(), the same compaction /compact runs, and submits 'Continue.' after. Below the floor nothing runs.",
   "modules": [
     "./register.ts"
   ]
