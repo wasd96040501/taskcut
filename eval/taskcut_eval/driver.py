@@ -255,7 +255,7 @@ def run(workload: Workload, arm: Arm, workspace: Path, plugin: Path, model: str,
         debug_file: Path | None = None) -> None:
     """Drives one workload under one arm. Results are read from the transcript,
     and what the judge spent from the debug log."""
-    session = Session(workspace, plugin, dict(arm.env), model, debug_file=debug_file)
+    session = Session(workspace, plugin, {**dict(workload.env), **arm.env}, model, debug_file=debug_file)
     try:
         session.read_until_quiet(quiet=3.0, timeout=120)
         if session.accept_trust_prompt():

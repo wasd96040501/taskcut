@@ -38,6 +38,9 @@
  "task": "这是 click（Python 的命令行库）的一个 checkout。ISSUES.md 里列了 20 个待解决的问题，有 bug 也有新功能，每个都写明了因为它而失败的测试；测试就是需求。\n\n请按 ISSUES.md 的顺序把它们全部做完，一次做一个，中间不用停下来问我。开始前先用任务列表把 20 个问题列出来，做的过程中随时更新。每个问题：在 src/click 里改代码，跑它的失败测试直到通过，确认没有弄坏别的测试，然后单独提交一次 git commit，提交信息写明是第几个问题。不要修改、跳过或删除任何测试。\n\n跑测试用 `.venv/bin/python -m pytest`，整个测试集几秒钟就能跑完。\n\n全部做完后，用中文简单总结一下，回复的最后写上 ALL ISSUES DONE。",
  "nudge": "继续处理 ISSUES.md 里剩下的问题。",
  "done_marker": "ALL ISSUES DONE",
+ "env": {
+  "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
+ },
  "max_nudges": 10,
  "probes": [],
  "checks": [
