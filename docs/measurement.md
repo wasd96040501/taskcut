@@ -33,7 +33,7 @@ to 0.5, which built the compacted transcript themselves and, until 0.5, had the
 working model call `close_task` at every boundary. Those numbers describe a
 mechanism that no longer ships; they are kept because they are what led here.
 
-### What the judge reads, replayed over real sessions (unreleased)
+### What the judge reads, replayed over real sessions (0.9)
 
 Measured on Claude Code 2.1.280, Sonnet 5, with `make eval-replay` over the
 seven committed sessions: sqlglot-long off and default, issues-long off and
@@ -44,11 +44,11 @@ boundaries and over steps.
 
 | judge | boundaries caught | false NEXT | hard SAME | same every repeat | $ a judgement |
 | --- | --- | --- | --- | --- | --- |
-| 0.8 (main), as it read live | 99.2% (97.6–100) | 5.2% (2.3–8.5) | 95.4% | 95.3% | 0.0347 |
-| **this change** | **99.2% (97.6–100)** | **1.3% (0.3–2.8)** | 98.1% | 97.6% | **0.0050** |
-| this change, on `haiku` | 53.7% (45.5–61.0) | 35.9% (29.2–42.6) | 50.0% | 56.9% | 0.0020 |
+| 0.8, as it read live | 99.2% (97.6–100) | 5.2% (2.3–8.5) | 95.4% | 95.3% | 0.0347 |
+| **0.9** | **99.2% (97.6–100)** | **1.3% (0.3–2.8)** | 98.1% | 97.6% | **0.0050** |
+| 0.9, on `haiku` | 53.7% (45.5–61.0) | 35.9% (29.2–42.6) | 50.0% | 56.9% | 0.0020 |
 
-Paired over the same steps, this change against 0.8: boundaries caught +0.0%
+Paired over the same steps, 0.9 against 0.8: boundaries caught +0.0%
 (−2.4 to +2.4), false NEXT −3.9% (−7.5 to −0.8), at 0.14 of the price. Past
 a floor of 35% on the sqlglot-long run -- 33 judged steps, the stretch a
 shipped floor actually judges -- that is $0.14 against $2.57. With the one
@@ -118,7 +118,7 @@ This round spent about $49 at list price: $32 of it the three replay runs
 ($26 of those the 0.8 judge, whose prompt is seven times the size), $9 the
 sqlglot session, $5 the click-zh sessions, the rest the checks.
 
-### Moving on, not finishing (unreleased)
+### Moving on, not finishing (0.9)
 
 Measured on Claude Code 2.1.280, Sonnet 5.
 
