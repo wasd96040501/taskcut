@@ -113,6 +113,11 @@ taskcut: turn.step hook skipped: ran past its 10s budget
 It means the engine skipped the step hook, and on that step taskcut could not
 act. Report it with your Claude Code version.
 
+If there is no such line, and `claude --debug` shows no `step judged` lines
+for the turn either, Claude worked through it without a word between its
+calls. A step that says nothing is not judged, so a turn done entirely in
+silence is never compacted inside. `/taskcut` shows how many steps were judged.
+
 ## It compacts on every turn
 
 The context after a compaction -- the summary, the recent messages Claude Code

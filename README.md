@@ -174,6 +174,12 @@ reasoning, and the designs this one replaced.
   compact, and taskcut never ends a turn there.
 * **The judge never sees tool output**, so a reply that claims more than was
   done can fool it. The cost is a compaction a little early.
+* **Only a step that says something is judged.** A step that finishes one
+  piece and starts the next without a word -- a commit, then the next issue's
+  first command -- is never asked about. Claude usually says so somewhere
+  nearby, but not always: in the benchmark about half the moves between issues
+  were silent, and one turn of four tasks done in silence was not compacted at
+  all ([measurement](docs/measurement.md)).
 * **A compaction inside a turn splits it in two.** Claude Code compacts only
   between turns, so taskcut ends the turn and starts the next with
   `Continue.`, which the transcript shows as a message from the plugin. What
