@@ -39,7 +39,8 @@ installed, and `TASKCUT=0` remains a kill switch either way.
 
 | taskcut | Claude Code |
 | --- | --- |
-| unreleased | 2.1.278 and newer; measured on 2.1.280 |
+| 0.9.x | 2.1.278 and newer; measured on 2.1.280 |
+| 0.8.x | 2.1.278 and newer; nothing is compacted on 2.1.280 or later (fixed in 0.9.0) |
 | 0.7.x | 2.1.278 and newer |
 | 0.6.x | 2.1.278 and newer |
 | 0.5.x | 2.1.278 and newer |
