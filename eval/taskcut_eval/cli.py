@@ -286,16 +286,17 @@ def cmd_replay(args) -> int:
     judge = REPO_ROOT / "hooks" / "judge.ts"
     if args.ref:
         judge = judgebench.judge_at(REPO_ROOT, args.ref, work / "judges" / f"{args.ref.replace('/', '-')}.ts")
-    plugin = judgebench.prepare(EVAL_ROOT / "judge", judge, work / "plugins" / "judgebench")
+    tag = f"replay--{_replay_tag(args.ref)}--{args.model}"
+    # Per run, so that two judges can be measured at once.
+    plugin = judgebench.prepare(EVAL_ROOT / "judge", judge, work / "plugins" / f"judgebench-{tag}")
     order = list(sets)
     items = replay.cases(sets, labels, order)
-    print(f"{len(items)} steps from {len(sets)} sets, {args.repeats} times each, judged by {args.model} with hooks/judge.ts at {args.ref or 'the working tree'}")
-    answers = judgebench.ask(items, plugin, work / "replay", args.model, args.repeats, args.concurrency,
+    print(f"{len(items)} steps from {len(sets)} sets, {args.repeats} times each, judged by {args.model} with hooks/judge.ts at {args.ref or 'the working tree'}", flush=True)
+    answers = judgebench.ask(items, plugin, work / tag, args.model, args.repeats, args.concurrency,
                              sets=[paths[name] for name in order], timeout=6 * 3600)
 
     results = Path(args.results)
     results.mkdir(parents=True, exist_ok=True)
-    tag = f"replay--{_replay_tag(args.ref)}--{args.model}"
     # What is committed: the verdicts and what each call cost. The judge's
     # sentences go beside them, uncommitted, for reading the misses.
     compact = [{k: a[k] for k in ("id", "run", "verdict", "usage", "ms", "attempts") if k in a} for a in answers]
