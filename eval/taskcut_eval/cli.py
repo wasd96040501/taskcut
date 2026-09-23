@@ -145,16 +145,20 @@ def cmd_report(args) -> int:
     if not grouped:
         raise SystemExit(f"no results in {results}")
 
-    chunks, summary = [], {}
+    # The transcripts are large and full of absolute paths, so they stay out of
+    # history, and a checkout rarely has all of them. runs.json is what a later
+    # run is compared against: the runs whose transcripts are here update their
+    # entries in it, and every other entry is kept as it was.
+    summary_path = results / "runs.json"
+    summary = json.loads(summary_path.read_text()) if summary_path.exists() else {}
+    chunks = []
     for (name, model), runs in sorted(grouped.items()):
         runs.sort(key=lambda r: (r.arm != "off", r.arm))
         chunks.append(report.render(f"{name} on {model}", runs, models.get(model)))
-        summary.setdefault(name, {})[model] = {r.arm: _numbers(r) for r in runs}
+        summary.setdefault(name, {}).setdefault(model, {}).update({r.arm: _numbers(r) for r in runs})
     text = "\n\n".join(chunks)
 
-    # The transcripts are large and full of absolute paths, so they stay out of
-    # history. These are what a later run is compared against.
-    (results / "runs.json").write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n")
+    summary_path.write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n")
     if args.out:
         Path(args.out).write_text(text + "\n")
         print(f"report -> {args.out}")

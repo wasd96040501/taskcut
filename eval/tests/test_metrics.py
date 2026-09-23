@@ -114,6 +114,25 @@ class ReportReadsTheSidecar(unittest.TestCase):
             self.assertIn("3,895", rows["default"])  # 3835 + 1.25 * 40 + 0.1 * 100
             self.assertIn("| -", rows["off"].replace("|  ", "| "))
 
+    def test_runs_json_keeps_the_runs_whose_transcripts_are_not_here(self):
+        import contextlib
+        import io
+        import json
+        import tempfile
+
+        from taskcut_eval import cli
+
+        with tempfile.TemporaryDirectory() as directory:
+            results = Path(directory)
+            (results / "runs.json").write_text(json.dumps({"flask": {"sonnet": {"off": {"requests": 7}}}}))
+            prompt = {"type": "user", "timestamp": "2026-09-23T00:00:00Z", "message": {"role": "user", "content": [{"type": "text", "text": "go"}]}}
+            (results / "synthetic--off--sonnet.jsonl").write_text(json.dumps(prompt) + "\n")
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.main(["--results", str(results), "report"])
+            summary = json.loads((results / "runs.json").read_text())
+            self.assertEqual(summary["flask"]["sonnet"]["off"], {"requests": 7})
+            self.assertIn("off", summary["synthetic"]["sonnet"])
+
 
 class Fidelity(unittest.TestCase):
     def setUp(self):
