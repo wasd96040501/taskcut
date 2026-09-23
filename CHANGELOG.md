@@ -45,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   only the session's own requests, nor in the transcript; this is where they
   are counted. The tally is the API's own token counts, summed in memory:
   nothing is written anywhere and nothing is asked of a model.
+- `make eval-replay`: the judge over every step taskcut would have judged in
+  real sessions -- 228 steps from seven, committed with their labels -- with
+  intervals on every rate, the list price of each judgement, and
+  `REF=` to measure the judge of another commit on the same steps.
+  `make eval-replay-check` checks, against a live session, that the replay
+  gives the judge the prompt taskcut builds there.
+- The `click-zh` workload: the twenty click changes handed over in one
+  message in Chinese, with a task list and a commit per issue.
 - Each judgement's debug line (`claude --debug`) ends with what the call cost,
   `[judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]`, and the
   benchmark adds them up: its cost table now has the judge beside the session.

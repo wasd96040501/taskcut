@@ -139,7 +139,10 @@ def parse(lines) -> dict:
             by_id[mid] = current
             usage = message.get("usage") or {}
             steps.append({
-                "message": current, "segment": len(segments) - 1, "pos": len(messages),
+                # `pos`: where the step's own messages start; `end`: where
+                # they stop, before any result of its calls. When the step is
+                # judged the engine holds it: the judge is given up to `end`.
+                "message": current, "segment": len(segments) - 1, "pos": len(messages), "end": len(messages),
                 "turn": turn, "index": index, "stop_reason": None,
                 "context": sum(usage.get(k) or 0 for k in ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens")),
             })
@@ -159,6 +162,10 @@ def parse(lines) -> dict:
         if held["text"] or held["toolUses"]:
             messages.append(held)
             by_uuid[record.get("uuid")] = held
+            for step in reversed(steps):
+                if step["message"] is current:
+                    step["end"] = len(messages)
+                    break
         if message.get("stop_reason"):
             for step in reversed(steps):
                 if step["message"] is current:
@@ -273,6 +280,17 @@ def windows(labels: dict[int, str]) -> list[list[int]]:
             j -= 1
         out.append(window)
     return out
+
+
+def kappa(a: dict[int, str], b: dict[int, str]) -> float:
+    """Cohen's kappa of two labellings over the steps both labelled: their
+    agreement beyond what their label frequencies alone would give."""
+    shared = sorted(set(a) & set(b))
+    if not shared:
+        return float("nan")
+    observed = mean(a[n] == b[n] for n in shared)
+    expected = sum(mean(a[n] == c for n in shared) * mean(b[n] == c for n in shared) for c in (N, S, E))
+    return 1.0 if expected == 1 else (observed - expected) / (1 - expected)
 
 
 # --- scoring -----------------------------------------------------------------
@@ -470,7 +488,10 @@ def cases(sets: dict[str, dict], labels: dict[str, dict[int, str]], order: list[
         steps = {s["n"]: s for s in sets[name]["steps"]}
         for n in sorted(marks):
             s = steps[n]
-            out.append({"id": f"{name}#{n}", "step": s["step"], "set": order.index(name), "segment": s["segment"], "pos": s["pos"]})
+            # The messages the engine holds when the step is judged: the step's
+            # own among them, before its calls have run. A judge must leave
+            # them out itself, as it must live.
+            out.append({"id": f"{name}#{n}", "step": s["step"], "set": order.index(name), "segment": s["segment"], "pos": s["end"]})
     return out
 
 

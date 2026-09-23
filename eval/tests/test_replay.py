@@ -171,6 +171,13 @@ class Labels(unittest.TestCase):
         with self.assertRaises(ValueError):
             replay.read_labels("12 N\n12 S")
 
+    def test_kappa(self):
+        a = {1: "N", 2: "S", 3: "S", 4: "N"}
+        self.assertEqual(replay.kappa(a, a), 1.0)
+        self.assertEqual(replay.kappa(a, {1: "S", 2: "N", 3: "N", 4: "S"}), -1.0)
+        # Agreeing on 3 of 4, frequencies 2N 2S against 1N 3S: expected 0.5, kappa 0.5.
+        self.assertAlmostEqual(replay.kappa(a, {1: "N", 2: "S", 3: "S", 4: "S"}), 0.5)
+
     def test_a_window_is_an_n_and_the_es_just_before_it(self):
         self.assertEqual(replay.windows({1: "S", 2: "E", 3: "E", 4: "N", 5: "E", 6: "S", 7: "N"}), [[2, 3, 4], [7]])
 

@@ -7,7 +7,9 @@ import json
 import sys
 from pathlib import Path
 
+import re
 import subprocess
+from statistics import mean
 
 from . import arms, driver, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
 
@@ -356,6 +358,49 @@ def cmd_replay_sheet(args) -> int:
     return 0
 
 
+def cmd_replay_agree(args) -> int:
+    """The committed labels against other labellings of the same sets, each a
+    directory of <set>.labels: Cohen's kappa pairwise, and every step on which
+    they do not all agree, with what each labeller said."""
+    sets, committed, _ = replay.load_sets([REPLAY, REPLAY_LOCAL], args.set)
+    names = ["committed", *[Path(d).name for d in args.dirs]]
+    labellings = [committed]
+    notes: dict[str, dict[str, dict[int, str]]] = {"committed": {}}
+    for directory in map(Path, args.dirs):
+        mine, why = {}, {}
+        for name in sets:
+            path = directory / f"{name}.labels"
+            if path.exists():
+                text = path.read_text()
+                mine[name] = replay.read_labels(text)
+                why[name] = {int(m[1]): m[3].strip() for m in re.finditer(r"^(\d+)\s+([NSE])\s*(.*)$", text, re.M)}
+        labellings.append(mine)
+        notes[directory.name] = why
+    print("Cohen's kappa, over the steps both labelled (all sets, then per set):")
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            a = {(s, n): v for s, marks in labellings[i].items() for n, v in marks.items()}
+            b = {(s, n): v for s, marks in labellings[j].items() for n, v in marks.items()}
+            keys = sorted(set(a) & set(b))
+            index = {k: k2 for k2, k in enumerate(keys)}
+            overall = replay.kappa({index[k]: a[k] for k in keys}, {index[k]: b[k] for k in keys})
+            per = ", ".join(f"{s} {replay.kappa(labellings[i].get(s, {}), labellings[j].get(s, {})):.2f}" for s in sets if s in labellings[i] and s in labellings[j])
+            agree = mean(a[k] == b[k] for k in keys) if keys else float("nan")
+            print(f"  {names[i]} / {names[j]}: {overall:.2f} over {len(keys)} steps, {agree:.1%} the same  ({per})")
+    print("\nSteps not all labelled alike:")
+    split = 0
+    for name, s in sets.items():
+        by_n = {x["n"]: x for x in s["steps"]}
+        for n in s["judged"]:
+            votes = [lab.get(name, {}).get(n) for lab in labellings]
+            if len({v for v in votes if v}) > 1:
+                split += 1
+                said = "  ".join(f"{who}={v}" + (f" ({notes[who].get(name, {}).get(n)})" if notes[who].get(name, {}).get(n) else "") for who, v in zip(names, votes))
+                print(f"  {name}#{n}: {said}\n      {replay.excerpt(by_n[n]['step']['text'], 150)}")
+    print(f"\n{split} of {sum(len(s['judged']) for s in sets.values())} steps")
+    return 0
+
+
 def cmd_replay_check(args) -> int:
     """One real session with the recorder beside taskcut: does the replay
     build the prompts the judge is given live?"""
@@ -440,6 +485,11 @@ def main(argv=None) -> int:
     sh.add_argument("--unlabelled", action="store_true", help="a set whose labels are not all there yet")
     sh.add_argument("--blind", action="store_true", help="leave the labels out, for labelling it again independently")
     sh.set_defaults(func=cmd_replay_sheet)
+
+    ag = sub.add_parser("replay-agree", help="the committed labels against independent labellings: kappa, and the steps they split on")
+    ag.add_argument("dirs", nargs="+", help="directories of <set>.labels")
+    ag.add_argument("--set", action="append", default=[])
+    ag.set_defaults(func=cmd_replay_agree)
 
     ck = sub.add_parser("replay-check", help="check the replay against a live session's judge prompts")
     ck.add_argument("--model", default="sonnet")

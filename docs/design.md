@@ -156,6 +156,17 @@ What does say so, in order of how much:
 Never any tool output, as before, and no longer `CLAUDE.md`: it says how to
 work, not how far the work has got.
 
+The step is read once. When it is judged, `$.session.messages()` already
+holds it -- as the engine records it, a block at a time: its words as one
+message, each call as another, and the result of any call that has already
+run. Up to 0.8 only a last message matching the step whole was left out,
+which never happens, so the judge read every step twice, the second time as
+the assistant's latest message, and how often depended on how fast the step's
+tools ran. `beforeStep` now leaves out the run of messages at the end whose
+words and calls are the step's, with nothing between them but those calls'
+results. This was found by checking the replay against a live session
+([eval/README.md](../eval/README.md#whether-the-replay-is-what-the-judge-sees)).
+
 The assistant's messages and what its calls touched go together. Replayed
 without the calls, the judge credited a move one message had announced --
 "Issue 11 is done. Issue 12: StarRocks `REFRESH EXTERNAL TABLE`." -- to the

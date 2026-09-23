@@ -104,7 +104,8 @@ def compare(records: list[dict], rebuilt: dict, judge: Path) -> Outcome:
     mismatches = []
     if len(live) != len(steps):
         mismatches.append(f"{len(live)} steps recorded live, {len(steps)} in the transcript")
-    cases = [{"messages": rebuilt["segments"][s["segment"]][: s["pos"]], "step": s["step"]} for s in steps]
+    # As the bench gives them: up to the end of the step's own messages.
+    cases = [{"messages": rebuilt["segments"][s["segment"]][: s["end"]], "step": s["step"]} for s in steps]
     rebuilt_prompts = prompts(judge, cases)
     matched = 0
     for record, s, prompt in zip(live, steps, rebuilt_prompts):
