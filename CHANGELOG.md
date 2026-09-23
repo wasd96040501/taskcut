@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The settings read as settings in `/plugin`.** Their titles were half
+  sentences ("Only past this context fill", "Model that judges") and looked like
+  menu entries, not fields to type in. They are now "Context % before taskcut
+  acts" and "Model that spots task switches", and each description says first
+  what to enter and that an empty field keeps the default. The keys are
+  unchanged, so settings already saved still apply.
+
 ## [0.9.0] - 2026-09-24
 
 ### Changed

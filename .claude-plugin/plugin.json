@@ -17,15 +17,15 @@
   "userConfig": {
     "floorPercent": {
       "type": "number",
-      "title": "Only past this context fill",
-      "description": "Below this context fill taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so it is only worth making once the window has actually filled. Set to 0 to judge every turn.",
+      "title": "Context % before taskcut acts",
+      "description": "Leave empty for 35 (0–100). Below this context fill, taskcut does nothing. Lower compacts sooner and more often; each compaction clears the prompt cache. 0 checks every step.",
       "required": false,
       "default": 35
     },
     "model": {
       "type": "string",
-      "title": "Model that judges",
-      "description": "Judges, past the floor, whether the work moves on from a finished piece to another. Alias or full id, resolved the way a --model value is.",
+      "title": "Model that spots task switches",
+      "description": "Leave empty for sonnet. Decides whether Claude has moved on to the next task. haiku is cheaper but misses about half. An alias or a full model id.",
       "required": false,
       "default": "sonnet"
     }
