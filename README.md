@@ -139,10 +139,12 @@ scope's: Claude Code keeps plugin settings in your user settings, so they apply
 wherever taskcut is installed on this machine, whatever `--scope` it was
 installed with.
 
-| Setting | Default | What it controls |
-| --- | --- | --- |
-| `floorPercent` | `35` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so below the floor it costs more than it saves. `0` judges every turn. |
-| `model` | `sonnet` | The model that judges whether the work moves on to another piece — the model auto mode's permission classifier uses by default. `haiku` costs about a third and misses more boundaries. An alias or a full id, resolved the way a `--model` value is. |
+| Setting | In `/plugin` | Default | What it controls |
+| --- | --- | --- | --- |
+| `floorPercent` | Context % before taskcut acts | `35` | A number from 0 to 100. Below this context fill, taskcut does nothing: no model is asked and nothing is compacted. Lower compacts sooner and more often; each compaction clears the prompt cache. `0` checks every step. |
+| `model` | Model that spots task switches | `sonnet` | The model that decides whether Claude has moved on to the next task — the model auto mode's permission classifier uses by default. `haiku` costs about a third but misses about half the task switches. An alias or a full model id, resolved the way a `--model` value is. |
+
+Left empty in `/plugin`, a setting keeps its default.
 
 ## How it works
 
