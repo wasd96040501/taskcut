@@ -46,8 +46,12 @@ def ask(cases: list[Case], plugin: Path, scratch: Path, model: str, repeats: int
     answers.unlink(missing_ok=True)
     environment = {k: v for k, v in os.environ.items() if k not in driver.INHERITED}
     environment["CLAUDE_CODE_ENABLE_FUNCTION_HOOKS"] = "1"
+    # No tools. The harness hook takes the prompt and drops it; if it fails --
+    # it throws, or the engine refuses it -- the prompt goes on to the model as
+    # an ordinary request, and a model with tools would set about working out
+    # what "taskcut-judgebench <paths>" means, in this directory, unattended.
     subprocess.run(
-        [driver._binary(), "-p", "--plugin-dir", str(plugin), f"{MARKER} {request} {answers}"],
+        [driver._binary(), "-p", "--tools", "", "--plugin-dir", str(plugin), f"{MARKER} {request} {answers}"],
         cwd=str(scratch), env=environment, stdin=subprocess.DEVNULL, check=False, timeout=1800,
     )
     if not answers.exists():

@@ -25,6 +25,7 @@ type Answer = {
   verdict: string
   text: string
   usage: unknown
+  error: { status: unknown; error: unknown } | null
   promptChars: number
 }
 
@@ -35,8 +36,11 @@ async function ask($: EngineInterface, model: string, item: Input['cases'][numbe
   const answer: unknown = await $.model.complete({ model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
   const reply = readReply(answer)
   const verdict = 'text' in reply ? (saysNext(reply.text) ? NEXT : SAME) : `unanswered: ${reply.reason}`
-  const usage = typeof answer === 'object' && answer !== null && 'usage' in answer ? answer.usage : null
-  return { id: item.id, run, verdict, text: 'text' in reply ? reply.text : '', usage, promptChars: prompt.length }
+  const fields = typeof answer === 'object' && answer !== null ? (answer as Record<string, unknown>) : {}
+  // Why a call went unanswered, as the engine put it: a rate limit reads the
+  // same as a refusal in the verdict, and only the status tells them apart.
+  const error = 'reason' in reply ? { status: fields.status ?? null, error: fields.error ?? null } : null
+  return { id: item.id, run, verdict, text: 'text' in reply ? reply.text : '', usage: fields.usage ?? null, error, promptChars: prompt.length }
 }
 
 async function runAll($: EngineInterface, input: Input): Promise<Answer[]> {
