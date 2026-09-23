@@ -1,0 +1,29 @@
+# issues-long--on: the issues-long workload, arm on: the same at a floor of 30. Claude Code 2.1.278, Sonnet 5, 2026-09-21.
+# One line per step taskcut would judge: N moves on, S does not, E either. See eval/replay/LABELS.md.
+5    S  The suite shows 86 failures. Most should belong to the other open issues, but I'll compare against the baseline to be sure I didn't cause any of them.
+13   S  The pager keeps retrying `c.wait()` until it completes despite interrupts, so the project already follows this policy and I'll match it. Next I'll check the ch…
+14   S  The changelog entry for #3802 already exists, so only the code needs to change. I'll add two small helpers to `core.py` and guard each handler in `main`.
+16   S  Now I'll run the target tests, then the pinned before/after comparison over the full suite.
+17   S  All 8 tests in the file pass and nothing else changed. I'll also run the type checker and linter on the edit, since I added a `NoReturn` helper.
+24   S  Checking the fix now: running the two target tests, then the deprecated `Choice` case and the full suite comparison.
+28   S  `termui.py` doesn't import `os`, so I'll add it. I'll look at the existing #2869 changelog entry from an earlier release for context.
+31   S  I referenced a `_PathLikeOrStr` alias that isn't defined yet. I'll check what the codebase already uses for path-like types and what Python versions it support…
+32   S  The codebase writes `str | os.PathLike[str]` inline everywhere, but in these signatures the full annotation gets unwieldy. I'll define the alias in `termui.py`…
+37   S  I'll read `help_option` in the decorators, the existing "used more than once" warning, and what the info-dict tests expect.
+49   S  The helper is in and imports cleanly. Next is the target test, the fallback for a stdout with no binary buffer, and the pinned full-suite comparison.
+55   S  That notice is most likely my own edit, since I wrote the file through a script rather than `Edit`. I'll confirm `custom_version_option` is in the file, then r…
+61   S  There is a single call site (`Parameter.process_value`), so the hiding belongs there. I'll add a small context manager on `Context` and use it around the callb…
+64   S  The target test passes, and so does the whole of `test_context.py`. Full pinned comparison next.
+83   S  `test_echo_via_pager_streams_each_write` also fails, but it isn't in this issue's list, so I'll leave it for now. Reading the four target tests and the pager i…
+85   S  The test helper `_force_tempfile_pager` decides how `_tempfilepager` gets called, so I need to see it before changing the signature.
+92   S  I need to see exactly which parametrizations currently pass `UNSET` in, so I'll run them individually.
+95   S  `CHANGES.md` already mentions `type_cast_value` under {issue}`3069`. I'll read that entry so the behavior I implement matches what's documented.
+102  S  The changelog entry sits at line 122, and I want to confirm which release section that is before I document it in the docstring.
+108  S  It passes on all 13 cases under five different hash seeds, so the order no longer depends on the seed. Now the full comparison.
+115  S  I'm confirming the warning is attributed to the caller's line rather than to click's internals, and that the two existing `isolated_filesystem` tests still pas…
+121  S  All 49 progress-bar tests pass and nothing else changed. I'll also check that the extra render respects `update_min_steps`, since that's why I gated it.
+129  S  The assertion failure names `builtins`, not `typing_extensions`. I'll list everything click imports at runtime to see the full picture before changing anything.
+132  S  uv has 3.11, 3.12 and 3.13 installed, and `typing_extensions` isn't installed in `.venv`, which fits it not being a declared dependency. I'll reproduce the act…
+144  S  Reading `Command.format_usage` and the changelog's version heading, then I'll make the fix in `write_usage`.
+145  S  The changelog already documents this fix (under 8.4.0), so only the code is missing. Now the edit.
+147  S  All 37 formatting tests pass, including the 7 parametrized cases behind the three named tests. Now the full suite, pinned and with the default random ordering.

@@ -1,0 +1,88 @@
+# sqlglot-long--default: the sqlglot-long workload, arm default: the same, with taskcut's shipped settings (it compacted once, after issue 20). Claude Code 2.1.278, Sonnet 5, 2026-09-21.
+# One line per step taskcut would judge: N moves on, S does not, E either. See eval/replay/LABELS.md.
+1    S  Let me get a baseline of the full suite first, so I can tell later what I've broken versus what was already failing.
+3    S  The baseline grep missed some tests (subtest failures show up as `SUBFAILED`). Let me capture the full output properly.
+4    E  Baseline captured (178 failed counting subtests, all traceable to the 36 issues plus `test_lazy_load`). Starting with Issue 1: lineage on chained pivots.
+12   S  All 50 lineage tests pass. Let me check whether a formatter is available, since I wrote a long line.
+13   S  No ruff, so I'll keep lines ≤100 by hand. Fixing the one long line I introduced:
+14   E  Issue 1 done (the long lines are pre-existing). Let me set up a regression-check script that diffs the full-suite failures against the baseline, so I can run i…
+15   N  Issue 1 is done: the 5 lineage tests pass and there are no new failures. On to Issue 2 (Oracle PIVOT/UNPIVOT).
+19   S  Generators live in `sqlglot/generators/` in this version. Let me look at Oracle's.
+25   S  Status: Issue 1 is done; I'm on Issue 2 (Oracle pivot generation). I'll add a small generator flag for the alias separator and an Oracle `pivot_sql` override t…
+26   S  That f-string is hard to read; let me tidy it.
+27   N  Oracle passes; the remaining failures shown are other issues. Now Issue 3 (dropping an unnamed UNIQUE constraint).
+30   N  Issue 3 passes. Now Issue 4 (Databricks `INSERT ... REPLACE USING`).
+34   S  `REPLACE WHERE` is parsed inline in `_parse_insert` via `_match_pair`; `REPLACE USING (cols)` fits the same slot. I'll add a `replace_using` arg to `Insert`.
+35   N  Databricks tests pass (remaining two failures are Issues 10 and 31). Now Issue 5 (SingleStore percentile NULL ordering).
+42   S  SingleStore passes (the MySQL failure is Issue 15). One hardening: only touch `Ordered` children.
+43   N  Issue 5 done. Now Issue 6 (SQLite `DATE_ADD` with a computed amount).
+48   N  Issue 6 done. Now Issue 7 (Doris reserved words).
+51   S  The test lists 15 words. I'll insert each into Doris's `RESERVED_KEYWORDS` at its sorted position.
+52   S  The existing list isn't perfectly sorted, so let me check my insertions landed sensibly.
+53   N  Placement is fine. Issue 7 done. Now Issue 8 (`normalize_identifiers`), which is the first bigger one, so I'll read the tests first.
+54   S  Now the three test bodies, to see exactly what they expect.
+55   S  There's already a `dot_parts` mechanism; let me see how annotate_types uses it.
+62   S  Now the dialect flag and folding helper.
+65   E  Part (a) passes. Now parts (b)/(c). Let me look at how `Dot` is annotated and `meta_get`'s cost, since the annotation loop is a hot path.
+67   S  `test_tpcds` wasn't in the baseline failures, so I need to check whether this is mine. Let me isolate.
+70   S  `test_tpcds` is failing at baseline but isn't named in any issue, so it's probably a symptom of one of them. Let me see the actual diff to work out which.
+72   S  That tpcds diff looks like a merge/scoping failure rather than something unrelated to the issues (likely tied to a later optimizer issue). I'll re-check it as …
+73   E  All Issue 8 tests pass. Running the full-suite regression check now.
+74   N  Issues 1–8 done: 16 test ids fixed, no new failures. Now Issue 9 (executor ignores `DISTINCT` in aggregates).
+82   S  Passing. Line 142 is over the 100-char limit though; let me restructure it.
+84   N  Issue 9 done (line 378 is pre-existing). Now Issue 10 (stale hash after `append()`).
+86   S  `set()` clears the cached hash up the parent chain; `append()` never does. Adding the same invalidation to `append()`:
+87   N  Issue 10 done. Now Issue 11 (pipe syntax `__tmp` CTE collisions).
+91   S  The builder itself works, so the CTE must get lost in how the pipe query and the outer `WITH` are combined. Let me read the caller.
+93   S  Found it: in `_parse_select_query`, `this.set("with_", cte)` overwrites the `with_` the pipe operators already built on `this`. It should prepend the outer CTE…
+94   N  Issue 11 done (remaining failure is Issue 31). Now Issue 12 (StarRocks `REFRESH EXTERNAL TABLE`).
+98   S  I'll implement this in the StarRocks parser only (it's StarRocks-specific syntax), reusing `_parse_table(parse_partition=True)` for the `PARTITION(...)` suffix.
+106  N  Issue 12 done. Now Issue 13 (`optimize_joins` reordering unsafe joins).
+108  S  Two independent bugs: predicates are moved out of `OR` (and other non-`AND`) connectors, and `SEMI`/`ANTI` joins aren't treated as non-reorderable. Fixing both.
+109  E  Issue 13 passes. Quick check whether that moved the mystery `test_tpcds` failure:
+110  N  `test_tpcds` now passes too, so that baseline failure was a symptom of Issue 13. Now Issue 14 (`unnest_subqueries` with grouped `EXISTS`).
+112  S  Let me read the fixture cases in full so I get the exact semantics.
+115  S  That notification is just my own edit landing. Three fixtures still fail; let me see their diffs.
+116  S  `parent_predicate` gets reassigned to the replacement node before the final join, so the `isinstance(..., Exists)` check there is always false. I'll capture it…
+117  E  Issue 14 passes. Full regression check for Issues 9–14:
+118  N  Issues 1–14 done: 24 test ids fixed, no regressions. Now Issue 15 (MySQL `UNIQUE`/`INDEX` key parts pick up `NULLS FIRST`).
+125  N  Issue 15 done (remaining failures in that batch are Issue 35 and the known `test_lazy_load`). Now Issue 16 (`GROUPING()` type for Hive/Spark2).
+129  N  Issue 16 done. Now Issue 17 (`qualify_tables` stripping a function body's parentheses).
+132  N  Issue 17 done (remaining failure is Issue 28). Now Issue 18 (Snowflake `PUT` with unquoted `file://`).
+134  S  The unquoted path tokenizes as `URI_START` followed by connected tokens, which `_parse_location_path()` already knows how to gather. I'll read that as the stri…
+135  N  Issue 18 done. Now Issue 19 (Dremio four-argument `REGEXP_SPLIT`).
+139  N  Issue 19 done. Now Issue 20 (`simplify` losing grouping when collapsing `CASE`/`IF`).
+146  S  Most cases are fixed; the two `NOT p || 'x'` cases still lose their parentheses somewhere. Let me trace where.
+149  S  One gap: I meant to also keep unwrapping parenthesized string literals so `('a') || 'b'` still folds in one pass.
+150  N  Issue 20's cases are all fixed (the one remaining `test_simplify` failure is Issue 27's). Now Issue 21 (`pushdown_projections` vs positional column lists).
+157  S  Issue 21's tests now pass. I'll confirm the two named tests, check line lengths, and run the wider optimizer suite for regressions before moving on to Issue 22.
+163  E  I'm on Issue 22. `replace_aliases` swaps in the aliased expression bare, so I'll wrap operator expressions in a `Paren` when substituting. Then I'll check how …
+164  S  That passes, including the `NOT` case. I'll run the optimizer suite and check line lengths for regressions.
+165  S  Issue 22's test passes, and the remaining failures all belong to later issues (26, 27, 28, 34). One line I added is 101 characters, so I'll reshape it.
+167  N  Issue 22 is done. The three long lines left are older comments. Next is Issue 23, Spark `GROUPING SETS`.
+169  S  The same test covers Issue 32 (GROUP BY reordering), so I'll read both issue texts and the current parser and generator code before designing the change.
+176  E  Both target tests pass. I'll run the full-suite regression check, since this changes where CUBE, ROLLUP and GROUPING SETS live in the AST.
+177  E  No new failures against baseline, and both Issue 23/32 tests no longer appear in the remaining list. I'll check that my own added lines respect the 100-charact…
+185  S  A bare `NULL` annotates as `UNKNOWN`, but it is plainly a scalar, so I'll exempt it from the unknown-type check and fix the long lines I introduced.
+187  N  Issue 24's tests pass. The remaining failures in that run belong to later issues (29, 33, 35 and so on). Next is Issue 25, Druid `JSON_VALUE ... RETURNING`.
+190  S  Trino, MySQL and Exasol register `_parse_json_value` in their `FUNCTION_PARSERS`. Druid doesn't, so I'll do the same there.
+196  E  I'm on Issue 26. I'll look at exactly which `test_scope` assertion and which canonicalize fixture fail, then at how `scope.py` currently treats DML and DDL sta…
+207  S  I'm on Issue 26. I'll check who else builds scopes for a bare `Table` or `Subquery` root before I restructure the DML branch.
+213  S  The scope structures now match the test's expectations. I'll run `test_scope` and then handle `eliminate_subqueries` and `canonicalize_internal_names`.
+214  S  `test_scope` passes. Before I rewrite `eliminate_subqueries` for statements, I'll check the one existing fixture that runs a CREATE through the full optimizer,…
+216  S  That change notice shows my own `eliminate_subqueries` edit, so nothing unexpected there. Next is the `canonicalize_internal_names` guard for statement shells,…
+217  S  The three target tests pass. I'll fix the over-length lines I added (`canonicalize_internal_names.py:34` and possibly `scope.py:976`), then run the full regres…
+219  S  `test_qualify_tables` failed at the original baseline, but my Issue 17 fix had made it pass, so it's a regression from this change. I'll look at it.
+220  S  That comes from treating a DELETE/UPDATE target that has joins as a relation head. The fixture says the shell's own references belong to no scope, so I'll drop…
+226  N  Issue 27 passes. Next is Issue 28, where a qualified star exclusion removes the column from every source.
+230  N  Issue 28 passes; the DuckDB failure there is Issue 36's. Next is Issue 29, ClickHouse generating `lagInFrame` and `leadInFrame`.
+233  N  Issue 29 passes. Next is Issue 30, T-SQL star expansion over an `UNPIVOT` giving the wrong column order.
+238  S  Now I'll add the dialect flag and thread the dialect through `output_columns` and its callers in qualify, type annotation and lineage.
+240  N  Issue 30 passes. Next is Issue 31, where a second OFFSET silently replaces the first.
+243  N  Issue 31 passes; Issue 32 was already handled together with 23. Next is Issue 33, Exasol transpiling MySQL's `SHOW DATABASES` and `SHOW SCHEMAS`.
+247  N  Issue 33 passes. Next is Issue 34, Hive `NAMED_STRUCT`.
+256  N  Issue 34 passes. Next is Issue 35, where `FETCH FIRST ROWS ONLY` without a count becomes a bare `LIMIT`.
+261  N  Issue 35 passes; only `test_lazy_load` fails there, as expected. The over-length INSERT line is the existing f-string. Last is Issue 36, DuckDB table alias pla…
+270  S  All 36 issues have now been worked through. Final verification: the full suite against the baseline, and a check that only `sqlglot/` files changed and no test…
+271  S  Only `test_lazy_load` fails, as the task said it would, and nothing outside `sqlglot/` has changed. As a last check I'll run every test id that ISSUES.md names.
+272  S  zsh didn't word-split the variable, so nothing ran. I'll pass the ids through `xargs` instead.

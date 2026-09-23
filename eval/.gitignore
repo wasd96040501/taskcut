@@ -1,3 +1,6 @@
 # Raw transcripts are large and full of absolute paths. The rendered report and
 # the summary numbers are what belongs in history.
 results/*.jsonl
+
+# Replay sets that cannot be published: someone's own sessions.
+replay/local/

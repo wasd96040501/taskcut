@@ -192,6 +192,75 @@ counting rule the briefing fixes -- so the tool either agrees with the source or
 it does not. The output format changes at step nine, invalidating what step
 seven built.
 
+## The judge, replayed over real sessions
+
+`make eval-judge` asks the judge about sixteen steps written for it. `make
+eval-replay` asks it about every step real sessions took that taskcut would
+have judged, as the session looked at that moment -- so a change to what the
+judge reads or is asked is measured on the work it will actually see, and
+priced:
+
+```bash
+make eval-replay MODEL=sonnet                 # the working tree's hooks/judge.ts
+make eval-replay MODEL=sonnet REF=main        # the judge as it was on main
+make eval-replay-compare A=eval/results/replay--main--sonnet.json B=eval/results/replay--<sha>--sonnet.json
+```
+
+A **set** (`replay/<set>.json`) is one session's transcript turned into what
+`$.session.messages()` held before each step, with the step, and nothing of
+any tool's output; its **labels** (`replay/<set>.labels`) say, for every step
+taskcut would judge, whether the work moves on there: `N`, `S`, or `E` for
+either. [replay/LABELS.md](replay/LABELS.md) says how to label, and `make
+eval-replay-sheet SET=…` prints a set's steps with what a labeller needs to
+see. A set that is someone's own session goes in `replay/local/`, which is not
+committed; it is read the same way when it is there.
+
+The run reports, with a 95% bootstrap interval where it is a rate:
+
+* **boundaries caught** -- an N step and the E steps just before it are one
+  window, caught if the judge says NEXT anywhere in it, as live the first NEXT
+  compacts;
+* **false NEXT** -- S steps called NEXT: a compaction in the middle of a piece;
+* **hard SAME** -- S steps that say a piece passes or is done, got right;
+* **same every repeat**, **unanswered**, and what it cost: list price per
+  judgement, and for the judged steps of `sqlglot-long--off` past 35% of the
+  window, the stretch a shipped floor would actually judge.
+
+`replay-compare` pairs two runs step by step and gives the difference of each
+rate with an interval over the same boundaries and steps, which is what "not
+worse" has to rest on.
+
+### Whether the replay is what the judge sees
+
+Every number above is about a prompt rebuilt from a transcript. `make
+eval-replay-check` checks that it is the prompt a live session builds: one
+real session -- a request, a long turn kept on a task list and compacted twice
+by taskcut, the `Continue.` it submits, a question after -- with a recorder
+plugin (`replaycheck/`) beside taskcut that writes, at every step, the judge's
+prompt as taskcut builds it from what the engine holds. The transcript is
+then replayed and every step's prompt compared, character for character.
+
+It is not a formality. Its first run matched 2 steps of 18: the engine holds a
+response a block at a time and already holds the step, and its tools' results
+when they have run, when the step is judged -- so taskcut's judge had been
+reading every step twice -- and after a compaction the engine keeps the latest
+messages whole after the summary, which the replay had dropped. Both are
+fixed, and it matches every step.
+
+### The harness's own tests
+
+`make eval-test` runs, for the replay: the parser against a transcript written
+to hold every case (a response split over records, a compaction and its
+preserved messages, a plugin's prompt, a sub-agent, a message nobody sent);
+which steps are judged, against register.ts's rule; the scorer against judges
+whose answers are known -- one always right, one always SAME, one always NEXT,
+one that changes its mind between repeats -- which must score exactly what they
+must; the intervals; the replay check against records it must accept and
+records it must reject; and, for the committed sets, that their labels cover
+exactly the steps taskcut judges and that they hold no home directory. Where
+Python mirrors the plugin (the read-only tools, the debug line's format), a
+test runs the plugin's own TypeScript under node and compares.
+
 ## Checks
 
 A probe asks the model what it remembers, which is the easiest thing it does. A

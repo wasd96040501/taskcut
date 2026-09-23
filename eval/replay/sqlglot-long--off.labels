@@ -1,0 +1,72 @@
+# sqlglot-long--off: the sqlglot-long workload, arm off: 36 real sqlglot changes in one message, taskcut switched off. Claude Code 2.1.278, Sonnet 5, 2026-09-21.
+# One line per step taskcut would judge: N moves on, S does not, E either. See eval/replay/LABELS.md.
+1    S  36 issues to work through in order. First I'll take a baseline of the whole suite.
+6    E  Baseline captured (all failing tests map to the issues, plus `test_lazy_load`). Starting with Issue 1.
+15   S  No linters in the venv, so I'll rely on tests. I'll make a helper that runs the full suite and reports any failure not in the baseline.
+16   N  Issue 1 is done: all five lineage tests pass and nothing new has broken. On to Issue 2 (Oracle PIVOT/UNPIVOT).
+25   E  Oracle test passes. I'll tweak the helper to print only failures that weren't in the baseline, so regressions stand out.
+26   N  Issue 2 is done with no regressions. Issue 3: dropping an unnamed UNIQUE constraint.
+29   N  Issue 3 is fixed: `test_remove_unique_constraints` and Spark's `test_ddl` now pass. Issue 4: Databricks `INSERT ... REPLACE USING`.
+33   N  Issue 4 done. Issue 5: SingleStore percentile NULL ordering.
+39   S  Status: Issue 5's test passes. `WithinGroup.expression` is optional, so I'll make the code None-safe before moving on.
+40   N  Issue 5 done. Now Issue 6, SQLite `DATE_ADD` with a computed amount.
+46   S  Status: Issue 6 is in progress. The constant cases pass and the non-constant ones still fail. Checking why.
+48   S  `Paren` is itself a `Unary`, so it was getting wrapped twice. Excluding it.
+49   S  The SQLite tests pass; that ad-hoc check just used MySQL syntax that requires INTERVAL. A quick sanity check of the unparenthesized case using the AST directly:
+50   N  Issue 6 done. Issue 7: Doris reserved words.
+53   S  The existing list wasn't strictly sorted, so my re-sort moved unrelated lines. I'll revert and insert only the new words next to their alphabetical neighbors.
+54   N  Issue 7 done with a clean diff. Issue 8: `normalize_identifiers`.
+65   S  Status: implementing Issue 8 in two parts. First, an ASCII-only case-folding flag on `Dialect`.
+67   E  Part A passes (Redshift inherits from Postgres). Now part B: preserving the case of dot parts into semi-structured values, including for non-column roots.
+68   S  I'll guard against a `dot_parts` list shorter than the chain, since MAP/VARIANT roots now reach this path more often.
+69   N  Issue 8 done, and nothing new in the failure list. Issue 9: executor DISTINCT inside aggregates.
+75   S  Status: Issue 9 — the planner already extracts aggregate arguments into `_a_N` operands; I need to see where a `Distinct` inside an aggregate loses its meaning.
+81   N  Issues 9 and 10 are done. I'll run the full suite as a checkpoint before Issue 11 (pipe syntax `__tmp` CTEs).
+82   E  No regressions from Issues 1–10. Issue 11: pipe syntax CTE collisions.
+93   S  Quick status: reformatting a few over-long lines from Issues 6, 8 and 11 (style only), then running the checkpoint.
+95   S  `is_wrapper` isn't a Paren check, so that broke the tests. Reverting to an explicit `Paren` check, formatted to fit the line width.
+96   N  Issue 11 is done. Issue 12: StarRocks `REFRESH EXTERNAL TABLE`.
+102  N  Issue 12 done; the remaining MySQL failures belong to Issue 15. Issue 13: `optimize_joins`.
+106  N  Issue 13 done. Issue 14: decorrelating EXISTS over a grouped subquery.
+110  S  That notice just reflects my own edit. One of my lines is 101 chars; I'll tidy it by extracting the empty-grouping-set check.
+111  S  `find(exp.Tuple)` would also match `GROUP BY (a, b)`, which is too broad. I'll use a small helper that checks specifically for an empty tuple.
+113  N  Issue 14 passes. Issue 15: implicit `NULLS FIRST` on UNIQUE/INDEX key parts.
+117  S  StarRocks `test_ddl` regressed. It passed after Issue 12, so this is from the MySQL change. Checking.
+122  E  Both pass now. To avoid misreading tail output again, I'll build a checker that runs each issue's exact listed tests and reports pass/fail per issue.
+123  E  Issues 1–15 all pass their listed tests. Full-suite regression check:
+124  N  Clean. Issue 16: `GROUPING()` type in the Hive family.
+129  N  Issue 16 done. Issue 17: `qualify_tables` stripping parentheses of a function body.
+133  N  Issue 17 done. Issue 18: Snowflake `PUT` with an unquoted `file://` source.
+136  N  Issue 18 done. Issue 19: Dremio four-argument `REGEXP_SPLIT`.
+142  N  Issues 16–19 done. Starting Issue 20 (simplify losing grouping when collapsing CASE/IF).
+153  S  `simplify_concat` flattens a `||` chain with `flatten()`, which unnests every operand and drops the parens around `NOT p`. I'll keep the grouping for operands …
+154  N  Issue 20's cases all pass now; the one remaining `test_simplify` failure is Issue 27's case. On to Issue 21 (`pushdown_projections` and positional column lists…
+159  S  Since `source` can be a `Table` (hashed structurally), I'll keep the original guard so it's only recorded when a column list actually exists.
+160  N  Issue 21 done. Issue 22: `pushdown_predicates` losing precedence when inlining an alias.
+167  E  Issue 22 done, and the TPC-H/DS and executor tests still pass. Full-suite checkpoint for Issues 16–22:
+168  N  Clean. Now Issues 23 and 32, which both concern GROUP BY structure (Issue 23 first, per the listed order). Reading the tests.
+176  E  Both Issue 23 and Issue 32 tests pass. Since this touched core GROUP BY parsing, a full-suite regression check:
+178  N  Line is 103 chars, so the multi-line form stays. Issue 24: Spark `CONCAT_WS` over arrays to Trino.
+182  S  `STRICT_STRING_CONCAT` is only set for Presto (Trino/Athena inherit), so I'll implement this in `PrestoGenerator.concatws_sql`.
+185  S  A bare `NULL` annotates as UNKNOWN, but the tests treat it as a known scalar, so I'll exclude `exp.Null` from the unknown check.
+186  N  Issue 24 done. Issue 25: Druid `JSON_VALUE` with `RETURNING`.
+190  N  Issue 25 done. Issue 26 (optimizer scoping of DML/DDL) looks like the largest one, so I'll look closely at the failing tests first.
+204  S  All the probed statements now match the expected scope shapes. Running the scope tests and the whole optimizer suite to see the fallout:
+205  S  `test_scope` passes now. The new fallout is the expected one in `qualify_tables` (aliasing `FROM cte` under an UPDATE). Checking the exact diff:
+208  S  Now `eliminate_subqueries` (fixtures 25–27). Current outputs:
+210  S  Issue 26's tests pass. To make sure I haven't changed INSERT/CTAS behavior, I'll compare against a pristine copy of HEAD:
+214  S  Only the intended difference remains. A wider comparison through the full `optimize()` pipeline on DML statements, to catch crashes or unintended changes:
+216  N  Issue 26 done with no regressions. Issue 27: `simplify.gen()` keys.
+222  N  Issue 27 done. Issue 28: qualified star exclusions.
+225  N  Issue 28 done. Issue 29: ClickHouse `LAG`/`LEAD`.
+228  N  Issue 29 done. Issue 30: T-SQL UNPIVOT column order.
+232  N  Issue 30 done. Issue 31: a second OFFSET silently replacing the first.
+235  N  Issue 31 done (Issue 32 was already satisfied with Issue 23; I'll re-verify at the end). Issue 33: Exasol `SHOW DATABASES`.
+238  N  Issue 33 done. Issue 34: Hive `NAMED_STRUCT`.
+246  N  Issue 34 done (Hive still round-trips `NAMED_STRUCT`). Issue 35: `FETCH FIRST ROWS ONLY` without a count.
+249  N  Issue 35 done. The last one, Issue 36: DuckDB alias placement with time-travel syntax.
+256  S  All 36 issues now have code changes. Verifying every issue's listed tests explicitly, then the full suite:
+258  S  Only `test_lazy_load` fails, as expected. The Makefile's test target may also run doctests, so I'll check those as well:
+259  S  Doctests are part of the suite and passed. Now a review pass over the full diff for style, line length, and leftovers:
+260  S  Only the comment line is mine to fix (the two f-strings extend already-long lines). No test files were touched.
+262  S  The diff reads cleanly. One last full run after the final comment edit, plus a check that `test_lazy_load` fails for its known environmental reason:

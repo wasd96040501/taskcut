@@ -1,0 +1,6 @@
+{
+  "description": "The replay check: at every main-thread step, the judge's prompt as taskcut would build it from $.session.messages(), written to records.json in the plugin's directory.",
+  "modules": [
+    "./record.ts"
+  ]
+}

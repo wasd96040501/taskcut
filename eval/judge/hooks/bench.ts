@@ -1,23 +1,36 @@
 /**
  * Asks the judge about labelled steps, through the same `$.model.complete`
- * call taskcut makes, and writes down what it answered.
+ * call taskcut makes, and writes down what it answered and what it cost.
  *
- * The benchmark copies the plugin's own `hooks/judge.ts` in beside this file
- * before a run, so what is measured is the question taskcut ships. A prompt of
- * the form `taskcut-judgebench <input.json> <output.json>` runs the cases in the
- * input and is dropped; any other prompt is left alone.
+ * The benchmark copies a `hooks/judge.ts` in beside this file before a run --
+ * the plugin's own, or one from another commit to compare against -- so what
+ * is measured is a question taskcut ships. A prompt of the form
+ * `taskcut-judgebench <input.json> <output.json>` runs the cases in the input
+ * and is dropped; any other prompt is left alone.
+ *
+ * A case holds its messages, or names a replay set and where in it the step
+ * is: a set holds a whole session once, where a case per step would repeat it
+ * hundreds of times over, and `$.fs.read` takes no file over 4 MiB.
  */
 
 import type { EngineInterface, Register } from 'claude-code'
 
 import { ANSWER_TOKENS, JUDGE_SYSTEM, judgePrompt, readReply, saysNext, NEXT, SAME, type Step } from './judge'
 
+type Messages = Parameters<typeof judgePrompt>[0]
+
+type Case = { id: string; step: Step } & ({ messages: Messages } | { set: number; segment: number; pos: number })
+
 type Input = {
   model: string
   repeats: number
   concurrency: number
-  cases: { id: string; messages: Parameters<typeof judgePrompt>[0]; step: Step }[]
+  /** Replay sets, by the index a case names. */
+  sets?: string[]
+  cases: Case[]
 }
+
+type ReplaySet = { segments: Messages[]; memory?: string[] }
 
 type Answer = {
   id: string
@@ -25,32 +38,52 @@ type Answer = {
   verdict: string
   text: string
   usage: unknown
-  error: { status: unknown; error: unknown } | null
+  attempts: number
+  ms: number
   promptChars: number
 }
 
 const MARKER = 'taskcut-judgebench '
 
-async function ask($: EngineInterface, model: string, item: Input['cases'][number], run: number): Promise<Answer> {
-  const prompt = judgePrompt(item.messages, item.step)
-  const answer: unknown = await $.model.complete({ model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
+/** An API error worth asking again: a rate limit, an overload, a server error. */
+function transient(answer: unknown): boolean {
+  if (typeof answer !== 'object' || answer === null) return false
+  const { reason, status } = answer as { reason?: unknown; status?: unknown }
+  return reason === 'api-error' && (status === 429 || status === 529 || (typeof status === 'number' && status >= 500) || status === null)
+}
+
+const ATTEMPTS = 5
+
+async function ask($: EngineInterface, model: string, messages: Messages, memory: string[], item: Case, run: number): Promise<Answer> {
+  // A judge from before 0.9 took CLAUDE.md as a third argument; the current
+  // one takes two, and ignores it.
+  const prompt = (judgePrompt as (m: Messages, s: Step, memory: string[]) => string)(messages, item.step, memory)
+  let answer: unknown
+  let attempts = 0
+  const started = Date.now()
+  do {
+    if (attempts > 0) await new Promise((resolve) => setTimeout(resolve, 2_000 * 2 ** attempts))
+    answer = await $.model.complete({ model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
+    attempts++
+  } while (transient(answer) && attempts < ATTEMPTS)
   const reply = readReply(answer)
   const verdict = 'text' in reply ? (saysNext(reply.text) ? NEXT : SAME) : `unanswered: ${reply.reason}`
-  const fields = typeof answer === 'object' && answer !== null ? (answer as Record<string, unknown>) : {}
-  // Why a call went unanswered, as the engine put it: a rate limit reads the
-  // same as a refusal in the verdict, and only the status tells them apart.
-  const error = 'reason' in reply ? { status: fields.status ?? null, error: fields.error ?? null } : null
-  return { id: item.id, run, verdict, text: 'text' in reply ? reply.text : '', usage: fields.usage ?? null, error, promptChars: prompt.length }
+  const usage = typeof answer === 'object' && answer !== null && 'usage' in answer ? (answer as { usage: unknown }).usage : null
+  return { id: item.id, run, verdict, text: 'text' in reply ? reply.text : '', usage, attempts, ms: Date.now() - started, promptChars: prompt.length }
 }
 
 async function runAll($: EngineInterface, input: Input): Promise<Answer[]> {
+  const sets: ReplaySet[] = []
+  for (const path of input.sets ?? []) sets.push(JSON.parse(await $.fs.read(path)) as ReplaySet)
   const jobs = input.cases.flatMap((item) => Array.from({ length: input.repeats }, (_, run) => ({ item, run })))
   const answers: Answer[] = []
   let next = 0
   const worker = async () => {
     while (next < jobs.length) {
-      const job = jobs[next++]!
-      answers.push(await ask($, input.model, job.item, job.run))
+      const { item, run } = jobs[next++]!
+      const set = 'set' in item ? sets[item.set]! : undefined
+      const messages = set && 'segment' in item ? set.segments[item.segment]!.slice(0, item.pos) : (item as { messages: Messages }).messages
+      answers.push(await ask($, input.model, messages, set?.memory ?? [], item, run))
     }
   }
   await Promise.all(Array.from({ length: Math.max(1, input.concurrency) }, worker))

@@ -87,7 +87,7 @@ def prepare_plugin(arm: Arm, source: Path, destination: Path) -> Path:
 
 
 class Session:
-    def __init__(self, cwd: Path, plugin: Path | None, env: dict, model: str, cols: int = 120, rows: int = 40,
+    def __init__(self, cwd: Path, plugin: Path | list[Path] | None, env: dict, model: str, cols: int = 120, rows: int = 40,
                  debug_file: Path | None = None):
         # A workspace reused across runs keeps the transcripts of the earlier
         # ones, under the same project directory. This session's is the one
@@ -107,10 +107,13 @@ class Session:
         # The debug log is the only record of what taskcut's judge spent: its
         # calls are in neither the transcript nor Claude Code's cost ledger.
         debug = ["--debug-file", str(debug_file)] if debug_file else []
+        # One plugin, several (a harness plugin beside the one measured), or none.
+        plugins = [plugin] if isinstance(plugin, Path) else list(plugin or [])
+        plugin_dirs = [arg for p in plugins for arg in ("--plugin-dir", str(p))]
         self.process = subprocess.Popen(
             # No plugin directory is a session with whatever is installed, the way
             # a person would start one.
-            [_binary(), *(["--plugin-dir", str(plugin)] if plugin else []), "--model", model, "--allowedTools", TOOLS, "--disallowedTools", DENIED, *debug],
+            [_binary(), *plugin_dirs, "--model", model, "--allowedTools", TOOLS, "--disallowedTools", DENIED, *debug],
             cwd=str(cwd),
             env=environment,
             stdin=slave,

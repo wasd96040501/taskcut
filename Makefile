@@ -57,6 +57,29 @@ eval-mechanism: ## Check the mechanism end to end in one short real session (MOD
 eval-judge: ## Ask the judge about the labelled steps, three times each (MODEL=)
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) judge --model $(MODEL)
 
+REF     ?=
+REPEATS ?= 3
+
+.PHONY: eval-replay
+eval-replay: ## The judge over every labelled step of real sessions (MODEL=, REF= a commit's judge, REPEATS=)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) replay --model $(MODEL) --repeats $(REPEATS) $(if $(REF),--ref $(REF))
+
+.PHONY: eval-replay-compare
+eval-replay-compare: ## Two replay runs over the same steps, B minus A (A=, B= result files)
+	@$(PYTHON) -m taskcut_eval.cli replay-compare $(A) $(B)
+
+.PHONY: eval-replay-check
+eval-replay-check: ## Check the replay builds the prompts a live session gives the judge (MODEL=)
+	@$(PYTHON) -m taskcut_eval.cli replay-check --model $(MODEL)
+
+.PHONY: eval-replay-build
+eval-replay-build: ## A replay set from a transcript, with a labels file to fill (TRANSCRIPT=, NAME=, SOURCE=)
+	@$(PYTHON) -m taskcut_eval.cli replay-build --transcript $(TRANSCRIPT) --name $(NAME) --source "$(SOURCE)"
+
+.PHONY: eval-replay-sheet
+eval-replay-sheet: ## Every judged step of a set with its context, for labelling (SET=)
+	@$(PYTHON) -m taskcut_eval.cli replay-sheet --set $(SET) --unlabelled
+
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report
