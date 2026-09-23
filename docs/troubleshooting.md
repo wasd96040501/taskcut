@@ -84,8 +84,16 @@ Past the floor, every compaction taskcut makes gets a dim line:
 taskcut: context at 43%, compacting before the next piece
 ```
 
-Every other judgement is silent; `claude --debug` shows each one, as `step
-judged a new piece` or `step judged the same work`. The end of a turn is never
+Every other judgement is silent. `/taskcut` counts them, and `claude --debug`
+shows each one, with what it cost:
+
+```
+context at 41%, step judged the same work [judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]
+context at 43%, step judged a new piece [judge sonnet: in=1902 cache_read=0 cache_write=0 out=47 ms=1810]
+context at 44%, could not judge the step (api-error 429 rate_limit) [judge sonnet: in=0 cache_read=0 cache_write=0 out=0 ms=310]
+```
+
+A judgement that could not be made keeps the context, and says why. The end of a turn is never
 judged, even when everything you asked for is done: what you say next may be
 about it, and `/compact` before new work is yours. The judge reads your
 messages, the assistant's latest messages, what its latest calls touched and

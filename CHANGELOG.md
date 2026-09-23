@@ -39,6 +39,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `make eval-judge`: the judge alone, over labelled steps, three times each,
   through the call taskcut makes.
+- **`/taskcut`** says what taskcut has done in this session and what it cost:
+  how many steps it judged, the tokens those calls read and wrote, and the
+  compactions it started. The judge's calls are not in `/cost`, which counts
+  only the session's own requests, nor in the transcript; this is where they
+  are counted. The tally is the API's own token counts, summed in memory:
+  nothing is written anywhere and nothing is asked of a model.
+- Each judgement's debug line (`claude --debug`) ends with what the call cost,
+  `[judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]`, and the
+  benchmark adds them up: its cost table now has the judge beside the session.
 
 ### Fixed
 
@@ -46,7 +55,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   resolves `{ isAnswered, text, usage }` rather than the reply's text; taskcut
   read the object as text, every judgement failed, and the failure was logged
   only to the debug log. The reply is now read in either shape, so 2.1.278
-  keeps working, and a failed call is logged with its reason.
+  keeps working, and a failed call is logged with its reason -- for an API
+  error, its status and kind, so a spent rate limit reads as one.
+- **A `floorPercent` of 0 judged nothing until the context reached 5%.** The
+  wait taskcut keeps after a compaction that could not get under the floor
+  read "no compaction yet" as one that had left the context at 0%.
 
 ## [0.8.0] - 2026-09-22
 

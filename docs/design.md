@@ -310,6 +310,38 @@ interactive session the straight call from `turn.complete` succeeds.
 A failure there is caught and logged rather than thrown. A plugin that cannot
 compact should not be able to take the turn down with it.
 
+## Counting what taskcut spends
+
+A plugin's model calls are nobody's to count but the plugin's. On Claude Code
+2.1.280, `$.model.complete` is not on the session's cost ledger: `/cost`, the
+status line and `$.session.usage().cost` all leave it out -- a call made from a
+hook moves the session's `usd` by nothing -- and the transcript does not record
+it. A compaction taskcut starts *is* on the ledger, because it is Claude Code's
+own request.
+
+Each call does resolve the API's own four token counts, so taskcut keeps an
+exact tally by adding them up, in memory, for free. It is shown two ways, and
+neither needs a setting:
+
+* `/taskcut`, a command taskcut registers, gives the session's totals: steps
+  judged, tokens read and written, compactions started. It is `immediate`, so
+  it answers in the middle of a long turn, which is when it is worth asking.
+* The debug log gets one line per judgement, ending in a record of the call:
+  `[judge sonnet: in=1834 cache_read=0 cache_write=0 out=52 ms=2140]`. Claude
+  Code's own `--debug` is the debug mode; taskcut adds none of its own. The
+  benchmark runs every session with `--debug-file` and adds these lines up, so
+  its cost table has the judge beside the session. The format is kept stable
+  for that reason, and a test renders it with the plugin's own code and parses
+  it with the benchmark's.
+
+It counts tokens, not dollars. A price is the host's to know: it differs by
+model, plan and contract, and a price list in a plugin is wrong the day it
+changes. The benchmark prices at list price, and says so.
+
+Hooking `/cost` to add taskcut's lines was tried and dropped: in an
+interactive session `/cost` opens the usage panel, which prints no text a
+`command.run` hook could extend.
+
 ## The judge's prompt cache
 
 The judge's calls are not served from a prompt cache, and on Claude Code

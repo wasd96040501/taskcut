@@ -295,9 +295,11 @@ export type Reply = { text: string } | { reason: string }
 export function readReply(answer: unknown): Reply {
   if (typeof answer === 'string') return { text: answer }
   if (typeof answer === 'object' && answer !== null && 'isAnswered' in answer) {
-    const { isAnswered, text, reason } = answer as { isAnswered: unknown; text?: unknown; reason?: unknown }
+    const { isAnswered, text, reason, status, error } = answer as { isAnswered: unknown; text?: unknown; reason?: unknown; status?: unknown; error?: unknown }
     if (isAnswered === true && typeof text === 'string') return { text }
-    if (isAnswered === false) return { reason: String(reason) }
+    // An API error says which: a spent rate limit and a refused request
+    // otherwise read the same.
+    if (isAnswered === false) return { reason: [reason, status, error].filter((part) => part !== undefined && part !== null).join(' ') }
   }
   return { reason: 'a reply of no shape taskcut knows' }
 }

@@ -246,7 +246,9 @@ describe('readReply', () => {
   test('reads the result it resolves from 2.1.280', () => {
     const usage = { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
     assert.deepEqual(readReply({ isAnswered: true, text: 'SAME', usage }), { text: 'SAME' })
-    assert.deepEqual(readReply({ isAnswered: false, reason: 'api-error', status: 529, error: 'overloaded', usage }), { reason: 'api-error' })
+    assert.deepEqual(readReply({ isAnswered: false, reason: 'api-error', status: 529, error: 'overloaded', usage }), { reason: 'api-error 529 overloaded' })
+    assert.deepEqual(readReply({ isAnswered: false, reason: 'api-error', status: null, error: 'unknown', usage }), { reason: 'api-error unknown' })
+    assert.deepEqual(readReply({ isAnswered: false, reason: 'aborted', usage }), { reason: 'aborted' })
   })
 
   test('anything else is no reply, never a verdict', () => {

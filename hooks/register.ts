@@ -29,8 +29,9 @@
 import type { EngineInterface, Register } from 'claude-code'
 
 import { ENV_VAR, INERT, decideActivation, type Activation } from './activation'
-import { readConfig, type Config } from './config'
+import { judgingFrom, readConfig, type Config } from './config'
 import { ANSWER_TOKENS, JUDGE_SYSTEM, acts, judgeable, judgePrompt, readReply, saysNext, type Step } from './judge'
+import { NOTHING, addCompaction, addJudgement, judgementLine, readUsage, spendReport, type Spend } from './spend'
 
 /**
  * Resolved once, at `session.start`. It starts inert so that a session in which
@@ -70,13 +71,16 @@ let lastSentOnResults = false
 let actedSince = true
 
 /**
- * The context fill the last compaction left. When a compaction cannot bring
- * the context back under the floor, the next judgement waits until it has
- * grown by REGROWTH points more, so that the same finished work is not
- * compacted again and again.
+ * The context fill the last compaction left, until there has been one. See
+ * judgingFrom.
  */
-let leftAt = 0
-const REGROWTH = 5
+let leftAt: number | undefined
+
+/** What taskcut has spent in this session: its judgements, and the compactions it started. */
+let spend: Spend = NOTHING
+
+/** The command that says so. */
+const COMMAND = 'taskcut'
 
 /** What taskcut submits to pick the work back up after it ended a turn. */
 const CONTINUE = 'Continue.'
@@ -94,8 +98,7 @@ async function contextPercent($: EngineInterface): Promise<number> {
 /** The context fill when a judgement is due, or undefined when it is not. */
 async function pastFloor($: EngineInterface, config: Config): Promise<number | undefined> {
   const percent = await contextPercent($)
-  const floor = leftAt >= config.floorPercent ? leftAt + REGROWTH : config.floorPercent
-  return percent >= floor ? percent : undefined
+  return percent >= judgingFrom(config.floorPercent, leftAt) ? percent : undefined
 }
 
 /**
@@ -103,23 +106,33 @@ async function pastFloor($: EngineInterface, config: Config): Promise<number | u
  * as the judge sees it. Anything but a clear yes keeps the context: a
  * compaction in the middle of a piece costs re-reading, and a missed boundary
  * only waits for the next one.
+ *
+ * Every call is counted, answered or not, and logged to the debug log with
+ * what it cost.
  */
-async function judge($: EngineInterface, step: Step, config: Config): Promise<boolean> {
+async function judge($: EngineInterface, step: Step, config: Config, percent: number): Promise<boolean> {
+  const started = Date.now()
+  let verdict: string
+  let movesOn = false
+  let answer: unknown
   try {
     const prompt = judgePrompt(await $.session.messages(), step)
     // `unknown`: what the call resolves to has changed between releases, and
     // readReply takes every shape it has had.
-    const answer: unknown = await $.model.complete({ model: config.model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
+    answer = await $.model.complete({ model: config.model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
     const reply = readReply(answer)
-    if ('reason' in reply) {
-      $.ui.log(`could not judge the step (${reply.reason})`, { to: 'debug' })
-      return false
+    spend = addJudgement(spend, readUsage(answer), 'text' in reply)
+    if ('reason' in reply) verdict = `could not judge the step (${reply.reason})`
+    else {
+      movesOn = saysNext(reply.text)
+      verdict = `step judged ${movesOn ? 'a new piece' : 'the same work'}`
     }
-    return saysNext(reply.text)
   } catch (error) {
-    $.ui.log(`could not judge the step (${String(error)})`, { to: 'debug' })
-    return false
+    // Refused before it was sent: nothing was spent.
+    verdict = `could not judge the step (${String(error)})`
   }
+  $.ui.log(judgementLine(percent, verdict, config.model, readUsage(answer), Date.now() - started), { to: 'debug' })
+  return movesOn
 }
 
 /**
@@ -128,8 +141,13 @@ async function judge($: EngineInterface, step: Step, config: Config): Promise<bo
  */
 async function compact($: EngineInterface): Promise<void> {
   try {
-    await $.session.compact()
-    actedSince = false
+    const result = await $.session.compact()
+    if (result.skip === undefined) {
+      spend = addCompaction(spend, result.tokensBefore, result.tokensAfter)
+      actedSince = false
+    } else {
+      $.ui.log(`compaction skipped (${result.skip})`)
+    }
   } catch (error) {
     $.ui.log(`compaction skipped (${String(error)})`)
   }
@@ -148,7 +166,20 @@ export const register: Register = (on, options) => {
       env: await $.env.get('TASKCUT'),
     })
     interactive = e.isInteractive
+    try {
+      // Immediate: a long unattended turn is when what taskcut has spent is
+      // worth asking, and the answer needs nothing from the turn.
+      await $.command.register({ name: COMMAND, description: 'What taskcut has judged and compacted in this session, and what the judging cost', immediate: true })
+    } catch (error) {
+      $.ui.log(`/${COMMAND} not registered (${String(error)})`, { to: 'debug' })
+    }
     return result
+  })
+
+  on('command.run', async ($, e, next) => {
+    if (e.command !== COMMAND) return next(e)
+    const percent = activation.active && interactive ? await contextPercent($) : undefined
+    return { text: spendReport(spend, { active: activation.active, interactive, floorPercent: config.floorPercent, model: config.model, percent }) }
   })
 
   // Inside a turn: each step the main loop makes is judged once its response
@@ -181,9 +212,7 @@ export const register: Register = (on, options) => {
     if (result.stopReason !== 'tool_use' || !acted || !lastSentOnResults || !judgeable(step)) return result
     const percent = await pastFloor($, config)
     if (percent === undefined) return result
-    const movesOn = await judge($, step, config)
-    $.ui.log(`context at ${percent}%, step judged ${movesOn ? 'a new piece' : 'the same work'}`, { to: 'debug' })
-    if (movesOn) movedOnAt = percent
+    if (await judge($, step, config, percent)) movedOnAt = percent
     return result
   })
 

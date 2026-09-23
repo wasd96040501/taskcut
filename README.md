@@ -120,6 +120,10 @@ Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, or put
 Past the floor is a short stretch: a compaction takes the context back under
 it, and judging stops until it fills again.
 
+`/taskcut` says what it has spent so far in the session. `/cost` does not
+count the judge's calls -- Claude Code keeps no ledger of a plugin's model
+calls -- so they are counted there, from the token counts the API returns.
+
 Thirty-six real sqlglot changes, handed to Sonnet 5 in one message and left
 to run: taskcut compacted once inside the turn, after issue 20, from 431,567
 tokens to 10,511, and carried on. The peak context fell from 71% of the window

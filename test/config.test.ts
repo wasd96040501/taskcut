@@ -1,7 +1,27 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { DEFAULTS, readConfig } from '../hooks/config.ts'
+import { DEFAULTS, REGROWTH, judgingFrom, readConfig } from '../hooks/config.ts'
+
+describe('judgingFrom', () => {
+  test('is the floor before any compaction', () => {
+    assert.equal(judgingFrom(35, undefined), 35)
+  })
+
+  test('a floor of 0 judges from the first step', () => {
+    // It once waited for 5%: an unset "left at" read as a compaction that left 0%.
+    assert.equal(judgingFrom(0, undefined), 0)
+  })
+
+  test('is the floor again once a compaction took the context under it', () => {
+    assert.equal(judgingFrom(35, 12), 35)
+  })
+
+  test('waits for regrowth after a compaction that could not get under it', () => {
+    assert.equal(judgingFrom(35, 40), 40 + REGROWTH)
+    assert.equal(judgingFrom(0, 3), 3 + REGROWTH)
+  })
+})
 
 describe('readConfig', () => {
   test('returns the defaults for an empty manifest', () => {
