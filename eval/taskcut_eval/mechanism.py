@@ -6,13 +6,12 @@ the floor set low enough to cross it twice, and asserts, from the transcript,
 the things that have to hold every time:
 
 * below the floor nothing happens -- no judgement, no tool, no reminder;
-* past it, a turn that ends in a question is judged unfinished and kept;
-* a turn that finished its work is judged finished and cut;
-* after a cut, back below the floor, nothing happens again;
-* crossing again cuts again;
-* what was cut can still be recalled;
-* inside one long turn, a finished piece is compacted there and then, and the
-  work picks back up and gets finished.
+* inside one long turn, a piece finished with another to follow is compacted
+  there and then, and the work picks back up;
+* the last piece is not compacted, and neither is the end of any turn;
+* what was compacted can still be recalled;
+* crossing again, in a second long turn, compacts again;
+* the work that was interrupted gets finished.
 
 It costs a few minutes and around a dollar, and needs a terminal
 and credentials, so it is not in CI.
@@ -40,32 +39,43 @@ ARM = Arm(name="mechanism", description="", env={"TASKCUT": "1"}, config={"floor
 #: million-token window across five percent.
 _LINES = 700
 
-#: What each file ends with, so that recall can be checked exactly.
-LAST_LINES = {"notes2.txt": "KESTREL-41", "notes3.txt": "MARLIN-07"}
-#: The same, for the files the one long turn works through.
-LONG_TURN_LINES = {"notes4.txt": "OSPREY-12", "notes5.txt": "HERON-58"}
-SECTION_3_FIRST = "PELICAN-93"
+#: What each file ends with, so that what was read can be checked exactly.
+LAST_LINES = {
+    "notes1.txt": "PELICAN-93",
+    "notes2.txt": "KESTREL-41",
+    "notes3.txt": "MARLIN-07",
+    "notes4.txt": "OSPREY-12",
+    "notes5.txt": "HERON-58",
+    "notes6.txt": "EGRET-30",
+}
+
+
+def _long_turn(first: int) -> str:
+    """One message, four pieces, nobody stepping in: three files to read, each
+    about fifteen thousand tokens, and a last piece that reads none."""
+    files = [first, first + 1, first + 2]
+    return (
+        "Work through these tasks in order, one at a time, without stopping to ask me anything. "
+        "Finish and check each one before you start the next. "
+        + " ".join(f"{k}. Read notes{n}.txt in full, write its last line to answer{n}.txt, and check the file with cat."
+                   for k, n in enumerate(files, 1))
+        + f" 4. Run `wc -l a.txt` and write the number to count{first}.txt. "
+        "When all four are done, list each task with its result and end with the words ALL DONE."
+    )
+
 
 STEPS = [
     "Run `wc -l a.txt` and tell me the number.",
-    "Read notes1.txt in full. Before you do anything with it, ask me which of its sections I care about.",
-    "Section 3. Tell me its first line.",
-    "Run `cat b.txt` and tell me the last word.",
-    "Read notes2.txt in full and tell me its last line.",
-    "Read notes3.txt in full and tell me its last line.",
+    _long_turn(1),
     "Without running any tool: list every task I have given you in this conversation, with its result.",
-    # One message, several pieces, nobody stepping in: the case a turn-end
-    # trigger never sees.
-    "Work through these tasks in order, one at a time, without stopping to ask me anything. "
-    "Finish and check each one before you start the next. "
-    "1. Read notes4.txt in full, write its last line to answer4.txt, and check the file with cat. "
-    "2. Read notes5.txt in full, write its last line to answer5.txt, and check the file with cat. "
-    "3. Run `wc -l a.txt` and write the number to answer6.txt. "
-    "When all three are done, list each task with its result and end with the words ALL DONE.",
+    _long_turn(4),
 ]
 
-#: What the files the long turn writes must hold once it is over.
-LONG_TURN_ANSWERS = {"answer4.txt": "OSPREY-12", "answer5.txt": "HERON-58", "answer6.txt": "3"}
+#: The long turns, and what the files each writes must hold once it is over.
+LONG_TURNS = {
+    STEPS[1]: {"answer1.txt": "PELICAN-93", "answer2.txt": "KESTREL-41", "answer3.txt": "MARLIN-07", "count1.txt": "3"},
+    STEPS[3]: {"answer4.txt": "OSPREY-12", "answer5.txt": "HERON-58", "answer6.txt": "EGRET-30", "count4.txt": "3"},
+}
 
 
 def _filler(rng: random.Random, count: int) -> list[str]:
@@ -82,12 +92,7 @@ def materialise(root: Path) -> Path:
     (root / "a.txt").write_text("alpha\nbeta\ngamma\n")
     (root / "b.txt").write_text("delta\nepsilon\n")
     rng = random.Random(7)
-    sections = []
-    for n in range(1, 6):
-        first = SECTION_3_FIRST if n == 3 else f"SECTION-{n}-OPENS"
-        sections += [f"## Section {n}", first, *_filler(rng, _LINES // 5)]
-    (root / "notes1.txt").write_text("\n".join(sections) + "\n")
-    for name, last in {**LAST_LINES, **LONG_TURN_LINES}.items():
+    for name, last in LAST_LINES.items():
         (root / name).write_text("\n".join([*_filler(rng, _LINES), last]) + "\n")
     return root
 
@@ -110,10 +115,18 @@ class Turn:
     prompt: str
     #: Input tokens of each request, in order: what the model was carrying.
     contexts: list[int] = field(default_factory=list)
-    #: taskcut's own notices, one per judgement.
+    #: taskcut's own notices: the notice of a cut.
     verdicts: list[str] = field(default_factory=list)
+    #: The input of every call the turn made, as JSON, in order.
+    touched: list[str] = field(default_factory=list)
     #: Tokens before each cut the turn ended with.
     cuts: list[int] = field(default_factory=list)
+    #: For each cut, where in `touched` the calls of the step it was judged on
+    #: begin: the last step before it.
+    cut_steps: list[int] = field(default_factory=list)
+    #: Where in `touched` the calls of the latest step begin.
+    step_start: int = 0
+    request: str | None = None
     closes: list[dict] = field(default_factory=list)
     searches: int = 0
     reminders: int = 0
@@ -167,10 +180,14 @@ def turns(path: Path) -> list[Turn]:
             turn.reminders += 1
         elif kind == "system" and record.get("subtype") == "compact_boundary":
             turn.cuts.append(int((record.get("compactMetadata") or {}).get("preTokens") or 0))
+            turn.cut_steps.append(turn.step_start)
         elif kind == "system" and str(record.get("content") or "").startswith("taskcut:"):
             turn.verdicts.append(str(record.get("content")))
         elif kind == "assistant":
             usage, request = message.get("usage") or {}, record.get("requestId") or message.get("id")
+            if request != turn.request:
+                # One step's response can span several records; a new request is a new step.
+                turn.request, turn.step_start = request, len(turn.touched)
             if usage and request not in seen:
                 seen.add(request)
                 turn.contexts.append(
@@ -185,6 +202,8 @@ def turns(path: Path) -> list[Turn]:
                     turn.closes.append(dict(block.get("input") or {}))
                 elif block.get("type") == "tool_use" and block.get("name") == "ToolSearch":
                     turn.searches += 1
+                if block.get("type") == "tool_use":
+                    turn.touched.append(json.dumps(block.get("input")))
                 elif block.get("type") == "text" and str(block.get("text")).strip():
                     turn.texts.append(str(block.get("text")))
     return out
@@ -204,33 +223,61 @@ class Result:
 
 def check(path: Path, window: int, workspace: Path | None = None) -> list[Result]:
     """Every property the mechanism promises, asserted against one transcript
-    and, for the long turn, the files it left in the workspace."""
+    and, for the long turns, the files they left in the workspace."""
     everything = turns(path)
-    work = [t for t in everything if t.contexts]  # turns that ran, not re-emitted copies
+    work = [t for t in everything if t.contexts]  # turns that ran, not ones ended before a request
     floor = window * FLOOR / 100
     # A whole percentage, compared as the plugin compares it: allow a point of
     # rounding either side rather than assert on the boundary itself.
-    below = [t for t in work if t.carried < floor - window / 100]
-    above = [t for t in work if t.carried >= floor + window / 100]
-    step = {s: next((t for t in work if t.prompt.strip() == s), None) for s in STEPS}
-    # The long turn, and every turn taskcut started to carry it on.
-    start = next((i for i, t in enumerate(everything) if t.prompt.strip() == STEPS[-1]), len(everything))
-    long_turn = [t for t in everything[start:start + 1]] + [
-        t for t in everything[start + 1:] if t.prompt.startswith(CONTINUE_OPENING)
+    point = window / 100
+    below = [t for t in work if t.carried < floor - point]
+    cuts = [c for t in everything for c in t.cuts]
+    # Every compaction taskcut makes ends a turn it then carries on: one the
+    # next turn does not carry on was made at the end of a turn.
+    at_the_end = [
+        t for k, t in enumerate(everything)
+        if t.cuts and not (k + 1 < len(everything) and everything[k + 1].prompt.startswith(CONTINUE_OPENING))
     ]
-    carried_on = [t for t in long_turn[1:] if t.contexts]
-    mid_turn_cuts = [c for t in long_turn[:-1] for c in t.cuts] if len(long_turn) > 1 else []
-    written = {
-        name: (workspace / name).read_text().strip() if workspace and (workspace / name).exists() else None
-        for name in LONG_TURN_ANSWERS
-    }
-    ending = " ".join(long_turn[-1].texts) if long_turn else ""
-    question, answered = step[STEPS[1]], step[STEPS[2]]
-    recall = " ".join(step[STEPS[6]].texts) if step[STEPS[6]] else ""
-    wanted = ["3", SECTION_3_FIRST, "epsilon", *LAST_LINES.values()]
-    cuts = [c for t in work for c in t.cuts]
-    finished = [t for t in work if any("is finished" in v for v in t.verdicts)]
-    skipped = [v for t in work for v in t.verdicts if "skipped" in v]
+
+    def long_turn(message: str) -> list[Turn]:
+        """The turn that message opened, and every turn taskcut started to carry it on."""
+        start = next((k for k, t in enumerate(everything) if t.prompt.strip() == message), None)
+        if start is None:
+            return []
+        parts = [everything[start]]
+        for t in everything[start + 1:]:
+            if not t.prompt.startswith(CONTINUE_OPENING):
+                break
+            parts.append(t)
+        return [t for t in parts if t.contexts]
+
+    inside: dict[str, int] = {}
+    after_last: dict[str, int | None] = {}
+    finished: dict[str, bool] = {}
+    for n, (message, answers) in enumerate(LONG_TURNS.items(), 1):
+        ran = long_turn(message)
+        count = next(name for name in answers if name.startswith("count"))
+        last = next((k for k, t in enumerate(ran) if any(count in call for call in t.touched)), None)
+        inside[f"turn {n}"] = sum(len(t.cuts) for t in ran[:-1])
+        if last is None:
+            after_last[f"turn {n}"] = None
+        else:
+            # A cut judged on the step that starts the last piece is the move to
+            # it, even when that step does the whole piece; one judged on any
+            # step after that is a cut after the last piece.
+            call = next(k for k, c in enumerate(ran[last].touched) if count in c)
+            after_last[f"turn {n}"] = sum(start > call for start in ran[last].cut_steps) + sum(len(t.cuts) for t in ran[last + 1:])
+        written = {
+            name: (workspace / name).read_text().strip() if workspace and (workspace / name).exists() else None
+            for name in answers
+        }
+        ending = " ".join(ran[-1].texts) if ran else ""
+        finished[f"turn {n}"] = all(written[name] == want for name, want in answers.items()) and "ALL DONE" in ending
+
+    recalled = next((t for t in work if t.prompt.strip() == STEPS[2]), None)
+    recall = " ".join(recalled.texts) if recalled else ""
+    wanted = ["3", *(LAST_LINES[f"notes{n}.txt"] for n in (1, 2, 3))]
+    skipped = [v for t in everything for v in t.verdicts if "skipped" in v]
     closes = [c for t in work for c in t.closes]
     return [
         Result(
@@ -239,40 +286,35 @@ def check(path: Path, window: int, workspace: Path | None = None) -> list[Result
             f"{len(below)} turn(s) below the floor, {sum(t.active for t in below)} with any taskcut activity",
         ),
         Result(
-            "every turn past the floor is judged",
-            all(t.verdicts for t in above),
-            f"{sum(bool(t.verdicts) for t in above)}/{len(above)} judged",
+            "a piece finished inside a turn, with another to follow, is compacted there",
+            all(inside.values()) and not skipped,
+            f"compactions inside each long turn: {inside}; {len(skipped)} skipped",
         ),
         Result(
-            "a turn that ends in a question is kept",
-            question is not None and any("not finished" in v for v in question.verdicts) and not question.cuts,
-            "; ".join(question.verdicts) if question else "step not found",
+            "the last piece is not compacted",
+            all(v == 0 for v in after_last.values()),
+            f"compactions from the last piece on: {after_last}",
         ),
         Result(
-            "a finished turn is compacted",
-            bool(finished) and all(t.cuts for t in finished) and answered in finished and not skipped,
-            f"{len(finished)} judged finished, {sum(bool(t.cuts) for t in finished)} compacted, {len(skipped)} skipped",
+            "nothing is compacted at the end of a turn",
+            not at_the_end,
+            f"{len(at_the_end)} turn(s) ended in a compaction nobody carried on",
         ),
         Result(
             "nothing is compacted below the floor",
-            all(c >= floor - window / 100 for c in cuts),
+            all(c >= floor - point for c in cuts),
             f"compactions at {cuts}",
         ),
         Result("crossing again compacts again", len(cuts) >= 2, f"{len(cuts)} compaction(s)"),
         Result(
             "what was compacted can be recalled",
             all(w in recall for w in wanted),
-            "missing: " + ", ".join(w for w in wanted if w not in recall) if any(w not in recall for w in wanted) else "all six",
-        ),
-        Result(
-            "a piece finished inside a turn is compacted there",
-            bool(mid_turn_cuts) and bool(carried_on),
-            f"{len(mid_turn_cuts)} compaction(s) inside the turn, {len(carried_on)} turn(s) carried on with {CONTINUE_OPENING!r}",
+            "missing: " + ", ".join(w for w in wanted if w not in recall) if any(w not in recall for w in wanted) else "all four",
         ),
         Result(
             "the work that was interrupted gets finished",
-            all(written[name] == want for name, want in LONG_TURN_ANSWERS.items()) and "ALL DONE" in ending,
-            f"files: {written}; ends with ALL DONE: {'ALL DONE' in ending}",
+            all(finished.values()),
+            f"files right and ALL DONE: {finished}",
         ),
         Result(
             "the working model is never asked for anything",

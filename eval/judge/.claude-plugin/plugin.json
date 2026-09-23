@@ -1,0 +1,5 @@
+{
+  "name": "taskcut-judgebench",
+  "version": "0.0.0",
+  "description": "Benchmark harness, not a plugin to install: runs taskcut's judge over labelled steps."
+}

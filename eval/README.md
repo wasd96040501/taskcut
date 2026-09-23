@@ -75,21 +75,31 @@ absolute paths.
 Run each pair several times. Model behaviour varies enough that one pair shows
 the shape of a difference, not its size.
 
+## The judge on its own
+
+`make eval-judge` asks the judge about the labelled steps in
+`taskcut_eval/judgecases.py` -- each with the verdict a person watching would
+give -- three times each, through the same `$.model.complete` call taskcut
+makes, in one headless session. The harness plugin in `eval/judge` runs with a
+copy of the plugin's own `hooks/judge.ts`, so what is measured is what ships. A
+change to the question is measured on the same steps before and after; it
+costs a few cents a step and about half a minute.
+
 ## The mechanism check
 
 A benchmark run at a realistic floor crosses it once, if at all, so it cannot
 show that the mechanism behaves every time. `make eval-mechanism` drives one
-short session with the floor at 5%, reading files large enough to cross it
-twice, and asserts from the transcript:
+short session with the floor at 5%: two messages of four tasks each, handed
+over with nobody stepping in and reading files large enough to cross the floor
+in each, and a question between them. It asserts from the transcript:
 
 * below the floor, nothing -- no judgement, no tool, no reminder;
-* past it, every finished turn is judged, a turn that ends in a question is
-  kept, and a finished one is compacted, none skipped;
+* in each long turn, a finished task with another to follow is compacted
+  inside the turn, none skipped, and the work carries on with `Continue.`;
+* the last task is not compacted, and no turn ends in a compaction;
 * nothing is compacted below the floor, and crossing again compacts again;
 * what was compacted can still be recalled, value for value;
-* in one message with three tasks and nobody stepping in, a finished task is
-  compacted inside the turn, the work carries on with `Continue.`, and every
-  task is done;
+* every task is done;
 * the working model is never asked for anything.
 
 It exits non-zero if any fails. The assertions were also run against a 0.4.0

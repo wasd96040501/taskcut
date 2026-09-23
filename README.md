@@ -4,32 +4,38 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A [Claude Code](https://claude.com/claude-code) plugin that compacts the
-conversation when a sub-task ends, instead of when the context window fills.
+conversation when the work moves on from one sub-task to the next, instead of
+when the context window fills.
 
 ```
   without taskcut                          with taskcut
   ───────────────────────────────────      ───────────────────────────────────
-  you:  "do A"   ... A's work ...          you:  "do A"   ... A's work ...
-  you:  "do B"   ... B's work ...                         A is done
-  you:  "do C"   ... C's work, half-way                   ── compacted ──
-                 ── window full ──         you:  "do B"   ... B's work ...
-                 ── compacted ──                          B is done
-                 C's live detail                          ── compacted ──
-                 summarised away           you:  "do C"   ... C's work ...
+  you:  "do A, B and C"                    you:  "do A, B and C"
+        ... A's work ...                         ... A's work ...
+        ... B's work ...                         A done, on to B
+        ... C's work, half-way                   ── compacted ──
+        ── window full ──                        ... B's work ...
+        ── compacted ──                          B done, on to C
+        C's live detail                          ── compacted ──
+        summarised away                          ... C's work ...
+                                                 C done: kept, it is yours now
 ```
 
 taskcut changes **when** Claude Code compacts, not how. Once the context is
-past a floor, a model judges each step Claude takes — and the reply a turn ends
-on — for whether it just finished a piece of the work, reading what auto mode's
-permission classifier reads. If it did, taskcut runs Claude Code's own
-compaction, the one `/compact` runs. That works inside one long turn too: hand
-over twenty tasks in one message and walk away, and it compacts between them.
-Below the floor it does nothing at all and costs nothing, and nothing in your
-prompts has to mention it.
+past a floor, a model judges each step Claude takes for whether the work is
+moving on from a finished piece to another, reading what auto mode's
+permission classifier reads. If it is, taskcut runs Claude Code's own
+compaction, the one `/compact` runs. A piece being finished is not enough:
+when the last thing you asked for is done, nothing has moved on yet, and what
+you say next may well be about it. Hand over twenty tasks in one message and
+walk away, and it compacts between them, not after the last. Once a turn has
+ended the work is back with you, and so is `/compact`. Below the floor it does
+nothing at all and costs nothing, and nothing in your prompts has to mention
+it.
 
 ## Try it
 
-Needs Claude Code **2.1.278 or newer**. In a project you work on — installed for
+Needs Claude Code **2.1.278 or newer**; developed and measured on 2.1.280. In a project you work on — installed for
 you alone, nothing committed:
 
 ```bash
@@ -53,19 +59,18 @@ grep 'taskcut@taskcut loaded' /tmp/taskcut.log
 ```
 
 Then work as usual. Nothing happens until the context passes 35% — the `ctx`
-figure in the status line. From then on, when a piece of work is finished, a
-dim line says so and Claude Code compacts exactly as `/compact` would:
+figure in the status line. From then on, when Claude finishes one of the things
+you asked for and moves on to the next, a dim line says so:
 
 ```
-taskcut: context at 43%, the work is finished; compacting
+taskcut: context at 43%, compacting before the next piece
 ```
 
-A turn that ends in a question, or with the work half done, is left alone:
-`the work is not finished; keeping it`. In the middle of a long turn the line
-reads `a piece of the work is finished; compacting`: taskcut ends the turn
-before Claude's next request, compacts, and sends `Continue.` in your place —
-the transcript shows it as a message from the taskcut plugin — and the work
-carries on. Nothing you type mentions taskcut.
+taskcut ends the turn before Claude's next request, compacts exactly as
+`/compact` would, and sends `Continue.` in your place — the transcript shows it
+as a message from the taskcut plugin — and the work carries on. A step that
+asks you something, works on a piece not yet finished, or finishes the last
+thing you asked for is left alone. Nothing you type mentions taskcut.
 
 To remove it:
 
@@ -109,7 +114,7 @@ Start sessions with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`, or put
 | | |
 | --- | --- |
 | **Below the floor** | Nothing: no model call, no tool, nothing written. |
-| **Each step past it** | One `sonnet` call of at most ~12k tokens in and a sentence out — a few cents. It runs while the step's tools run, so it rarely adds a wait. |
+| **Each step Claude explains past it** | One `sonnet` call and a sentence out. What goes in is your messages and Claude's commands since the last compaction, never their output: a few thousand tokens, tens of thousands in a long stretch of work, uncached (`$.model.complete` marks no cache point) — a few cents. It runs while the step's tools run, so it rarely adds a wait. |
 | **Each compaction** | Whatever `/compact` costs, because it is `/compact`. |
 
 Past the floor is a short stretch: a compaction takes the context back under
@@ -133,26 +138,25 @@ installed with.
 | Setting | Default | What it controls |
 | --- | --- | --- |
 | `floorPercent` | `35` | Context fill, as a percentage, below which taskcut does nothing at all: no model is asked and nothing is compacted. A compaction invalidates the prompt cache, so below the floor it costs more than it saves. `0` judges every turn. |
-| `model` | `sonnet` | The model that judges whether a step finished a piece of the work — the model auto mode's permission classifier uses by default. `haiku` costs about a third and misses more boundaries. An alias or a full id, resolved the way a `--model` value is. |
+| `model` | `sonnet` | The model that judges whether the work moves on to another piece — the model auto mode's permission classifier uses by default. `haiku` costs about a third and misses more boundaries. An alias or a full id, resolved the way a `--model` value is. |
 
 ## How it works
 
-After each step of the main conversation, and at the end of each turn, taskcut
-reads the context fill the status line shows. Below `floorPercent` it stops
-there. Past it, it asks `model`, through the hooks API's `$.model.complete`,
-whether the step reports a piece of the work complete. The judge reads what
-auto mode's permission classifier reads — your messages, the assistant's tool
-calls except read-only lookups, and `CLAUDE.md`, never any tool output — plus
-the step it is judging: what Claude just said, and the calls it is making or
-the reply it stopped on. A step that ends by asking you something is never a
-boundary.
+After each step of the main conversation, taskcut reads the context fill the
+status line shows. Below `floorPercent` it stops there. Past it, it asks
+`model`, through the hooks API's `$.model.complete`, whether the work moves on
+from a finished piece to another at that step. The judge reads what auto mode's
+permission classifier reads — your messages, the assistant's tool calls except
+read-only lookups, and `CLAUDE.md`, never any tool output, all of it however
+long the session — plus the step it is judging: what Claude just said and the
+calls it is making. A step that asks you something is never a boundary, and
+the end of a turn is never judged.
 
-On a yes at the end of a turn, taskcut calls `$.session.compact()`, the call
-`/compact` makes. On a yes inside a turn, it waits for that step's tools to
-finish, ends the turn with `$.turn.abort` before the next request goes out,
-compacts the same way, and submits `Continue.` with `$.prompt.submit` — what you
-would do yourself with Esc, `/compact` and "continue". On anything else it
-leaves the conversation alone.
+On a yes, taskcut waits for that step's tools to finish, ends the turn with
+`$.turn.abort` before the next request goes out, calls `$.session.compact()` —
+the call `/compact` makes — and submits `Continue.` with `$.prompt.submit`:
+what you would do yourself with Esc, `/compact` and "continue". On anything
+else it leaves the conversation alone.
 
 The source is two files: `hooks/register.ts` (the hooks) and `hooks/judge.ts`
 (what the judge reads and asks). [docs/design.md](docs/design.md) has the
@@ -164,12 +168,18 @@ reasoning, and the designs this one replaced.
   compact, and taskcut never ends a turn there.
 * **The judge never sees tool output**, so a reply that claims more than was
   done can fool it. The cost is a compaction a little early.
-* **A compaction inside a turn splits it in two.** Claude Code can only
-  compact between turns, so taskcut ends the turn and starts the next with
+* **A compaction inside a turn splits it in two.** Claude Code compacts only
+  between turns, so taskcut ends the turn and starts the next with
   `Continue.`, which the transcript shows as a message from the plugin. What
-  the compaction keeps is the same as at the end of a turn.
-* **A prompt typed while the judge runs wins.** The compaction is skipped and
-  the next finished turn is judged again.
+  the compaction keeps is the same as `/compact` keeps.
+* **Only inside a turn.** taskcut compacts between the pieces of one turn's
+  work. Once the turn ends, a new piece starts with your next message, and
+  `/compact` before it is yours to run; Claude Code's own threshold still
+  applies.
+* **Not in a turn's first step.** On Claude Code 2.1.280 a compaction right
+  after a request that ended on your own message — `/compact` typed by hand
+  included — answers that message instead of summarising the conversation, so
+  taskcut compacts only after a step that followed tool results.
 * **Early access.** The function-hooks API may change between Claude Code
   releases; `make validate` reports anything the engine would refuse.
 

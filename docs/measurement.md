@@ -33,7 +33,44 @@ to 0.5, which built the compacted transcript themselves and, until 0.5, had the
 working model call `close_task` at every boundary. Those numbers describe a
 mechanism that no longer ships; they are kept because they are what led here.
 
-### The mechanism, end to end
+### Moving on, not finishing (unreleased)
+
+Measured on Claude Code 2.1.280, Sonnet 5.
+
+**The judge alone.** `make eval-judge`, 16 labelled steps, three times each,
+against the 0.8 question on the same steps:
+
+| steps | 0.8, "finished?" | "moves on?" |
+| --- | --- | --- |
+| a piece done, another asked for | 18/18 | 18/18 |
+| the last piece done | 0/15 | 15/15 |
+| a piece in progress | 12/15 | 15/15 |
+
+**The mechanism.** `make eval-mechanism`, all nine checks passing:
+
+| message | taskcut |
+| --- | --- |
+| `wc -l a.txt` | below the floor |
+| four tasks in one message | compacted inside the turn after tasks 1, 2 and 3 (87,409, 71,714 and 72,911 tokens), each carried on with `Continue.`; not after task 4, nor at the end of the turn; every file right, `ALL DONE` |
+| list every task, no tools | not judged: the end of a turn is not; all four results recalled |
+| four more tasks in one message | compacted after tasks 1, 2 and 3 again (74,342, 73,528 and 74,196); every file right, `ALL DONE` |
+
+In the second long turn the model finished task 3 and wrote task 4's file in
+the same step ("task 3 done; on to task 4"). The judge called that step the
+move to task 4, which it is, and the compaction came once the step's calls had
+run. The check counts a compaction as after the last piece only when it was
+judged on a step after the one that did it.
+
+**The judge's prompt.** Replaying this change's own development session -- 104
+steps with calls, three compactions -- through `judgePrompt`: 15,000
+characters on average and 30,500 at most, every prompt beginning with the
+whole of the one before it up to its step, and 96% of all the characters a
+prefix of the prompt before. The conversation never ran past 0.8's 40,000
+characters between two compactions there, so 0.8's cut changed nothing on it.
+None of it is served from a cache: `$.model.complete` marks no cache point --
+see [the judge's prompt cache](design.md#the-judges-prompt-cache).
+
+### The mechanism, end to end (0.6 and 0.7)
 
 `make eval-mechanism`, one real session on Sonnet 5 with the floor at 5%:
 

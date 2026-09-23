@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import arms, driver, mechanism, metrics, models, report, transcript, workload
+from . import arms, driver, judgebench, judgecases, mechanism, metrics, models, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -149,8 +149,6 @@ def _numbers(run) -> dict:
         "ledger_tokens": run.ledger,
         "ledger_messages": run.ledger_messages,
         "cuts": run.cuts,
-        "judged": run.judged,
-        "judged_finished": run.finished,
         "nudges": run.nudges,
         "continued": run.continued,
         "request_context_peak": run.peak_request,
@@ -196,6 +194,24 @@ def cmd_mechanism(args) -> int:
     return 0 if all(v.passed for v in verdicts) else 1
 
 
+def cmd_judge(args) -> int:
+    """The judge alone, over the labelled steps, a few times each."""
+    work = Path(args.work)
+    cases = [c for c in judgecases.CASES if not args.case or c.id in args.case]
+    plugin = judgebench.prepare(EVAL_ROOT / "judge", REPO_ROOT / "hooks" / "judge.ts", work / "plugins" / "judgebench")
+    answers = judgebench.ask(cases, plugin, work / "judge", args.model, args.repeats)
+    scored = judgebench.score(cases, answers)
+
+    results = Path(args.results)
+    results.mkdir(parents=True, exist_ok=True)
+    destination = results / f"judge--{args.model}.json"
+    destination.write_text(json.dumps([vars(s) for s in scored], indent=1) + "\n")
+    print(f"verdicts -> {destination}")
+    for line in judgebench.summary(scored):
+        print(line)
+    return 0 if all(s.right == len(s.verdicts) for s in scored) else 1
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -214,6 +230,12 @@ def main(argv=None) -> int:
     mech = sub.add_parser("mechanism", help="check the mechanism end to end in one short real session")
     mech.add_argument("--model", default="sonnet", help=f"one of {', '.join(models.MODELS)}, or any --model alias")
     mech.set_defaults(func=cmd_mechanism)
+
+    judge = sub.add_parser("judge", help="ask the judge about the labelled steps, a few times each")
+    judge.add_argument("--model", default="sonnet", help="the judge's model, as the plugin's `model` setting takes it")
+    judge.add_argument("--repeats", type=int, default=3)
+    judge.add_argument("--case", action="append", default=[], help="only this case id (repeatable)")
+    judge.set_defaults(func=cmd_judge)
 
     rep = sub.add_parser("report", help="render the collected results")
     rep.add_argument("--out", default="")

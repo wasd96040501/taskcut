@@ -3,16 +3,19 @@
  *
  * Claude Code compacts when the context window fills, which is rarely the moment
  * a piece of work ends: the compaction lands in the middle of one. taskcut moves
- * it to the end of a piece. Once the context is past the floor, a model judges
- * each step the working model makes -- and the reply a turn ends on -- for
- * whether it reports a piece of the work complete. When it does, taskcut calls
- * `$.session.compact()`, the same call `/compact` makes, and Claude Code
- * compacts as it always does.
+ * it to the point where the work moves on from one piece to the next. Once the
+ * context is past the floor, a model judges each step the working model makes
+ * for whether the work moves on from a finished piece to another. When it
+ * does, taskcut calls `$.session.compact()`, the same call `/compact` makes,
+ * and Claude Code compacts as it always does.
  *
- * A compaction can only run between turns. At the end of a turn it runs there
- * and then. Inside a long turn, taskcut ends the turn before its next model
- * request, compacts, and submits one line that picks the work back up: what a
- * person watching would do with Esc, `/compact` and "continue".
+ * The end of a turn is left alone: the work is back with the person, and what
+ * they say next may well be about the piece just finished. When they move on,
+ * `/compact` is theirs.
+ *
+ * A compaction can only run between turns. So taskcut ends the turn before its
+ * next model request, compacts, and submits one line that picks the work back
+ * up: what a person watching would do with Esc, `/compact` and "continue".
  *
  * taskcut decides when; the engine decides what is kept. Below the floor it
  * does nothing at all: no model is asked, nothing is written, and the working
@@ -27,7 +30,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import { ENV_VAR, INERT, decideActivation, type Activation } from './activation'
 import { readConfig, type Config } from './config'
-import { ANSWER_TOKENS, JUDGE_SYSTEM, judgePrompt, readReply, saysDone, type Step } from './judge'
+import { ANSWER_TOKENS, JUDGE_SYSTEM, acts, judgeable, judgePrompt, readReply, saysNext, type Step } from './judge'
 
 /**
  * Resolved once, at `session.start`. It starts inert so that a session in which
@@ -42,13 +45,29 @@ let activation: Activation = INERT
 let interactive = false
 
 /**
- * The context fill at which the step the working model just made was judged
- * to have finished a piece; the turn is ended before the next request.
+ * The context fill at which a step was judged to move the work on to another
+ * piece. The turn is ended before its next request.
  */
-let finishedAt: number | undefined
+let movedOnAt: number | undefined
 
 /** Set when taskcut itself ended the running turn in order to compact. */
 let cutting = false
+
+/**
+ * Whether the last request the main loop sent ended on tool results -- every
+ * step's but the first of a turn, whose request ends on the prompt that opened
+ * it. Claude Code builds its summary request on the last request it sent, so
+ * when that ended on the person's own words, the summary instruction reads as
+ * part of them, and the model answers them instead of summarising (2.1.280,
+ * `/compact` typed by hand included). taskcut compacts only when it did not.
+ */
+let lastSentOnResults = false
+
+/**
+ * Whether the working model has changed anything since the last compaction.
+ * Until it has, no piece can have been finished since, and no step is judged.
+ */
+let actedSince = true
 
 /**
  * The context fill the last compaction left. When a compaction cannot bring
@@ -98,9 +117,12 @@ async function memoryFiles($: EngineInterface): Promise<string[]> {
 }
 
 /**
- * Whether the step reports a piece of the work complete, as the judge sees it.
- * Anything but a clear yes keeps the context: a compaction in the middle of a
- * piece costs re-reading, and a missed boundary only waits for the next one.
+ * Whether the work moves on from a finished piece to another at this moment,
+ * as the judge sees it. Anything but a clear yes keeps the context: a
+ * compaction in the middle of a piece costs re-reading, and a missed boundary
+ * only waits for the next one.
+ * A conversation too long for the judge's own window is one such no: like the
+ * classifier's transcript, the judge's prompt is never cut down to fit.
  */
 async function judge($: EngineInterface, step: Step, config: Config): Promise<boolean> {
   try {
@@ -113,7 +135,7 @@ async function judge($: EngineInterface, step: Step, config: Config): Promise<bo
       $.ui.log(`could not judge the step (${reply.reason})`, { to: 'debug' })
       return false
     }
-    return saysDone(reply.text)
+    return saysNext(reply.text)
   } catch (error) {
     $.ui.log(`could not judge the step (${String(error)})`, { to: 'debug' })
     return false
@@ -127,6 +149,7 @@ async function judge($: EngineInterface, step: Step, config: Config): Promise<bo
 async function compact($: EngineInterface): Promise<void> {
   try {
     await $.session.compact()
+    actedSince = false
   } catch (error) {
     $.ui.log(`compaction skipped (${String(error)})`)
   }
@@ -149,17 +172,17 @@ export const register: Register = (on, options) => {
   })
 
   // Inside a turn: each step the main loop makes is judged once its response
-  // is in, while the engine runs the step's tools, and a step that finished a
-  // piece ends the turn before the next request goes out -- with every tool
-  // result of that step already in. The judgement is a `$` call made inside
-  // the step's own hook, so it runs beside the tools and costs the hook's
-  // budget nothing; the engine sends the next request once both are done.
+  // is in, while the engine runs the step's tools, and a step that moves on to
+  // another piece ends the turn before the next request goes out -- with every
+  // tool result of that step already in. The judgement is a `$` call made
+  // inside the step's own hook, so it runs beside the tools and costs the
+  // hook's budget nothing; the engine sends the next request once both are done.
   on('turn.step', async function* ($, e, next) {
     if (e.agentId !== undefined || !activation.active || !interactive) return yield* next(e)
 
-    if (finishedAt !== undefined) {
-      $.ui.log(`context at ${finishedAt}%, a piece of the work is finished; compacting`)
-      finishedAt = undefined
+    if (movedOnAt !== undefined) {
+      $.ui.log(`context at ${movedOnAt}%, compacting before the next piece`)
+      movedOnAt = undefined
       try {
         await $.turn.abort({ turnId: e.turnId })
         cutting = true
@@ -169,14 +192,18 @@ export const register: Register = (on, options) => {
       }
     }
 
+    lastSentOnResults = e.index > 0
     const result = yield* next(e)
-    // A step that ends the turn is judged at turn.complete, as its reply.
-    if (result.stopReason !== 'tool_use') return result
+    // A step that ends the turn hands the work back to the person.
+    const step: Step = { text: result.answer, calls: result.toolUses }
+    const acted = actedSince
+    if (acts(step.calls)) actedSince = true
+    if (result.stopReason !== 'tool_use' || !acted || !lastSentOnResults || !judgeable(step)) return result
     const percent = await pastFloor($, config)
     if (percent === undefined) return result
-    const done = await judge($, { text: result.answer, calls: result.toolUses }, config)
-    $.ui.log(`context at ${percent}%, step judged ${done ? 'done' : 'working'}`, { to: 'debug' })
-    if (done) finishedAt = percent
+    const movesOn = await judge($, step, config)
+    $.ui.log(`context at ${percent}%, step judged ${movesOn ? 'a new piece' : 'the same work'}`, { to: 'debug' })
+    if (movesOn) movedOnAt = percent
     return result
   })
 
@@ -185,29 +212,13 @@ export const register: Register = (on, options) => {
     // compaction is raised against it.
     const result = await next(e)
     if (e.agentId !== undefined) return result
-    finishedAt = undefined
+    movedOnAt = undefined
+    if (!cutting) return result
 
-    if (cutting) {
-      cutting = false
-      await compact($)
-      // Whether or not it compacted, the work taskcut interrupted goes on.
-      void $.prompt.submit({ text: CONTINUE })
-      return result
-    }
-
-    // Only a turn the model finished. One that was interrupted or failed
-    // stopped in the middle of its work: that transcript is what explains what
-    // went wrong, and it is exactly what a compaction would summarise away.
-    if (!activation.active || e.reason !== 'answer') return result
-
-    const percent = await pastFloor($, config)
-    if (percent === undefined) return result
-    if (!(await judge($, { text: e.answer, calls: [] }, config))) {
-      $.ui.log(`context at ${percent}%, the work is not finished; keeping it`)
-      return result
-    }
-    $.ui.log(`context at ${percent}%, the work is finished; compacting`)
+    cutting = false
     await compact($)
+    // Whether or not it compacted, the work taskcut interrupted goes on.
+    void $.prompt.submit({ text: CONTINUE })
     return result
   })
 }
