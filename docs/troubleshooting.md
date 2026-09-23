@@ -78,23 +78,19 @@ plugin was installed at.
 
 ### 5. What did the judge say?
 
-Past the floor, every turn the model finished ends with a dim line, and a
-piece finished inside a turn gets one of its own:
+Past the floor, every compaction taskcut makes gets a dim line:
 
 ```
-taskcut: context at 43%, the work is finished; compacting
-taskcut: context at 43%, the work is not finished; keeping it
-taskcut: context at 43%, a piece of the work is finished; compacting
+taskcut: context at 43%, compacting before the next piece
 ```
 
-Steps inside a turn that are judged still working get no line; `claude --debug`
-shows them. No line at all at the end of a turn past the floor means it was not
-judged: it was a subagent's, or it was interrupted or failed. `not finished` on
-a turn you consider done usually means the reply ended by proposing more work
-or asking a question -- which is never a boundary, even when asking is what you
-told it to do. The judge reads what auto mode's permission classifier reads --
-your messages, the assistant's non-read-only tool calls and `CLAUDE.md` -- plus
-the step, and never any tool output.
+Every other judgement is silent; `claude --debug` shows each one, as `step
+judged a new piece` or `step judged the same work`. The end of a turn is never
+judged, even when everything you asked for is done: what you say next may be
+about it, and `/compact` before new work is yours. The judge reads what auto
+mode's permission classifier reads -- your messages, the assistant's
+non-read-only tool calls and `CLAUDE.md` -- plus the step it is judging, and
+never any tool output.
 
 ### 6. Nothing is compacted inside a long turn
 
@@ -118,17 +114,26 @@ compaction leaves, typically a few percent: raise `floorPercent`.
 
 ## A message from the taskcut plugin says `Continue.`
 
-That is taskcut picking the work back up after compacting inside a turn: Claude
-Code compacts only between turns, so taskcut ended the turn, compacted, and
-started the next one. It is what you would do yourself with Esc, `/compact` and
-"continue".
+That is taskcut picking the work back up after compacting inside a turn:
+Claude Code compacts only between turns, so taskcut ended the turn, compacted,
+and started the next one. It is what you would do yourself with Esc,
+`/compact` and "continue".
+
+## A compaction's summary answers a question instead
+
+A compaction right after a request that ended on your own message -- a reply
+Claude gave without using a tool, say -- answers that message in place of a
+summary, on Claude Code 2.1.280, `/compact` typed by hand included. taskcut
+compacts only after a step that followed tool results, so one it made cannot
+do this.
 
 ## Something was lost in a compaction
 
 What a compaction keeps is Claude Code's, exactly as for `/compact`; taskcut
-only chose the moment. If the moment was wrong -- the judge called a turn
-finished that was not -- the dim line for that turn says `finished`. The judge
-never reads tool output, so a reply that claims more than was done can fool it.
+only chose the moment. If the moment was wrong -- the judge took a step for the
+move to the next piece when it was not -- `claude --debug` shows the step it
+judged. The judge never reads tool output, so a reply that claims more than
+was done can fool it.
 
 ## After upgrading Claude Code
 

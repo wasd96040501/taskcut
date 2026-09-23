@@ -45,7 +45,6 @@ def context_table(runs: list[Run], model: Model | None = None) -> str:
             f"{run.mean_context:,.0f}",
             f"{run.prefix[-1]:,}" if run.prefix else "-",
             f"{run.ledger:,}" if run.ledger else "-",
-            f"{run.finished}/{run.judged}" if run.judged else "-",
             str(run.cuts) if run.cuts else "-",
             f"{run.peak_request:,}",
             f"{run.mean_request:,.0f}",
@@ -53,7 +52,7 @@ def context_table(runs: list[Run], model: Model | None = None) -> str:
             f"{run.elapsed / 60:,.0f} min" if run.elapsed else "-",
         ])
     return table(
-        ["arm", "first turn", "peak", "of window", "mean", "last turn", "ledger", "finished/judged", "cuts",
+        ["arm", "first turn", "peak", "of window", "mean", "last turn", "ledger", "cuts",
          "peak request", "mean request", "nudged/carried on", "elapsed"], rows
     )
 

@@ -53,6 +53,10 @@ eval-ab: ## Run both arms of one workload and print the comparison (WORKLOAD=, M
 eval-mechanism: ## Check the mechanism end to end in one short real session (MODEL=)
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) mechanism --model $(MODEL)
 
+.PHONY: eval-judge
+eval-judge: ## Ask the judge about the labelled steps, three times each (MODEL=)
+	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) judge --model $(MODEL)
+
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report

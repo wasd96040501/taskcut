@@ -3,17 +3,18 @@ import assert from 'node:assert/strict'
 
 import {
   CALL_LIMIT,
-  CONVERSATION_LIMIT,
-  DONE,
   JUDGE_SYSTEM,
   MESSAGE_LIMIT,
+  NEXT,
+  SAME,
   STEP_LIMIT,
-  WORKING,
   beforeStep,
   conversationLines,
+  acts,
+  judgeable,
   judgePrompt,
   readReply,
-  saysDone,
+  saysNext,
 } from '../hooks/judge.ts'
 
 type Message = Parameters<typeof conversationLines>[0][number]
@@ -30,7 +31,7 @@ function output(text: string): Message {
   return { role: 'user', text: '', toolUses: [], toolResults: [{ tool_use_id: 't', text, isError: false }] }
 }
 
-const reply = (text: string) => ({ text, calls: [] })
+const step = (text: string, calls: { name: string; input: unknown }[] = [{ name: 'Bash', input: { command: 'ls' } }]) => ({ text, calls })
 
 describe('conversationLines', () => {
   test('keeps what the person said and what the assistant ran, in order', () => {
@@ -65,21 +66,32 @@ describe('conversationLines', () => {
 })
 
 describe('beforeStep', () => {
-  const step = { text: 'task 1 is done; now task 2', calls: [{ name: 'Bash', input: { command: 'pytest' } }] }
+  const judged = step('task 1 is done; now task 2', [{ name: 'Bash', input: { command: 'pytest' } }])
 
   test('leaves out the step when the transcript already holds it', () => {
     const messages = [person('go'), ran('Bash', { command: 'pytest' })]
-    assert.deepEqual(beforeStep(messages, step), [person('go')])
+    assert.deepEqual(beforeStep(messages, judged), [person('go')])
   })
 
   test('keeps everything when the transcript does not hold it yet', () => {
     const messages = [person('go'), ran('Bash', { command: 'ls' })]
-    assert.equal(beforeStep(messages, step), messages)
+    assert.equal(beforeStep(messages, judged), messages)
   })
+})
 
-  test('keeps everything for a reply, which has no calls to repeat', () => {
-    const messages = [person('go'), ran('Bash', { command: 'pytest' })]
-    assert.equal(beforeStep(messages, reply('done')), messages)
+describe('judgeable', () => {
+  test('a step that says nothing is never a boundary, so it is not asked about', () => {
+    assert.equal(judgeable(step('')), false)
+    assert.equal(judgeable(step('  \n')), false)
+    assert.equal(judgeable(step('Task 1 done. Now task 2.')), true)
+  })
+})
+
+describe('acts', () => {
+  test('a call that changes something acts; a lookup does not', () => {
+    assert.equal(acts([{ name: 'Read' }, { name: 'Grep' }]), false)
+    assert.equal(acts([{ name: 'Read' }, { name: 'Write' }]), true)
+    assert.equal(acts([]), false)
   })
 })
 
@@ -87,81 +99,88 @@ describe('judgePrompt', () => {
   test('carries the conversation, the step, its calls and the project instructions', () => {
     const text = judgePrompt(
       [person('fix issue 3'), ran('Bash', { command: 'pytest' })],
-      { text: 'issue 3 is fixed; on to issue 4', calls: [{ name: 'Edit', input: { file_path: 'b.py' } }] },
+      step('issue 3 is fixed; on to issue 4', [{ name: 'Edit', input: { file_path: 'b.py' } }]),
       ['Never edit tests.'],
     )
     for (const expected of ['fix issue 3', 'pytest', 'issue 3 is fixed; on to issue 4', 'Calls Edit: {"file_path":"b.py"}', 'Never edit tests.']) {
       assert.ok(text.includes(expected), expected)
     }
-    assert.doesNotMatch(text, /handed back/)
-  })
-
-  test('says so when the step is a reply the turn ended on', () => {
-    assert.match(judgePrompt([], reply('done'), []), /stopped here and handed back to the person/)
+    assert.ok(text.indexOf('Never edit tests.') < text.indexOf('fix issue 3'))
+    assert.ok(text.indexOf('pytest') < text.indexOf('issue 3 is fixed'))
   })
 
   test('keeps the end of a long step, where a model says whether it is done', () => {
-    const text = judgePrompt([], reply('x'.repeat(STEP_LIMIT * 2) + 'Should I continue?'), [])
-    assert.match(text, /Should I continue\?/)
+    const text = judgePrompt([], step('x'.repeat(STEP_LIMIT * 2) + 'Now task 3.'), [])
+    assert.match(text, /Now task 3\./)
   })
 
-  test('keeps the most recent conversation when it runs long, and says so', () => {
+  test('keeps all of a long conversation, as the classifier keeps its transcript', () => {
     const many = Array.from({ length: 200 }, (_, i) => person(`request ${i} ${'z'.repeat(500)}`))
-    const text = judgePrompt(many, reply('done'), [])
+    const text = judgePrompt(many, step('go on'), [])
+    assert.match(text, /request 0 /)
     assert.match(text, /request 199/)
-    assert.doesNotMatch(text, /request 0 /)
-    assert.match(text, /earlier line\(s\) left out/)
-    assert.ok(text.length < CONVERSATION_LIMIT + STEP_LIMIT + 2000)
+  })
+
+  test('begins with the whole of the judgement before it, up to that one\'s step', () => {
+    // What a prefix cache serves: as the conversation grows, each prompt
+    // starts with everything the one before it was shown ahead of its step.
+    const messages = Array.from({ length: 300 }, (_, i) => (i % 3 === 0 ? person(`task ${i}`) : ran('Bash', { command: `step ${i}` })))
+    const marker = '\n\n--- latest step'
+    for (let n = 1; n < messages.length; n++) {
+      const before = judgePrompt(messages.slice(0, n), step('go on'), ['Never edit tests.'])
+      const after = judgePrompt(messages.slice(0, n + 1), step('go on'), ['Never edit tests.'])
+      assert.ok(after.startsWith(before.slice(0, before.indexOf(marker))), `at ${n}`)
+    }
   })
 
   test('has no instructions section when the project has none', () => {
-    assert.doesNotMatch(judgePrompt([], reply('done'), []), /CLAUDE\.md/)
+    assert.doesNotMatch(judgePrompt([], step('go'), []), /CLAUDE\.md/)
   })
 
-  test('says so when the step has no text', () => {
-    assert.match(judgePrompt([], reply(''), []), /\(no text\)/)
+  test('says so when there is no text', () => {
+    assert.match(judgePrompt([], step(''), []), /\(no text\)/)
   })
 
   test('the question names both answers', () => {
-    assert.ok(JUDGE_SYSTEM.includes(DONE) && JUDGE_SYSTEM.includes(WORKING))
+    assert.ok(JUDGE_SYSTEM.includes(NEXT) && JUDGE_SYSTEM.includes(SAME))
   })
 })
 
 describe('readReply', () => {
   test('reads the text $.model.complete resolved up to 2.1.278', () => {
-    assert.deepEqual(readReply('It reports task 2 complete.\nDONE'), { text: 'It reports task 2 complete.\nDONE' })
+    assert.deepEqual(readReply('It moves on.\nNEXT'), { text: 'It moves on.\nNEXT' })
   })
 
   test('reads the result it resolves from 2.1.280', () => {
     const usage = { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
-    assert.deepEqual(readReply({ isAnswered: true, text: 'WORKING', usage }), { text: 'WORKING' })
+    assert.deepEqual(readReply({ isAnswered: true, text: 'SAME', usage }), { text: 'SAME' })
     assert.deepEqual(readReply({ isAnswered: false, reason: 'api-error', status: 529, error: 'overloaded', usage }), { reason: 'api-error' })
   })
 
   test('anything else is no reply, never a verdict', () => {
-    for (const odd of [undefined, null, 42, {}, { isAnswered: true }, { text: 'DONE' }]) {
+    for (const odd of [undefined, null, 42, {}, { isAnswered: true }, { text: 'NEXT' }]) {
       assert.ok('reason' in readReply(odd), JSON.stringify(odd))
     }
   })
 })
 
-describe('saysDone', () => {
+describe('saysNext', () => {
   test('reads the verdict off the last line', () => {
-    assert.equal(saysDone('It reports task 2 complete and starts task 3.\nDONE'), true)
-    assert.equal(saysDone('It is still reading the file.\nWORKING'), false)
+    assert.equal(saysNext('It reports task 2 complete and starts task 3.\nNEXT'), true)
+    assert.equal(saysNext('It reports the last task complete.\nSAME'), false)
   })
 
   test('ignores the emphasis a model puts round the word', () => {
-    assert.equal(saysDone('Task 1 is finished.\n**DONE**'), true)
-    assert.equal(saysDone('Task 1 is finished.\n"Done."'), true)
+    assert.equal(saysNext('Task 1 is finished; task 2 starts.\n**NEXT**'), true)
+    assert.equal(saysNext('Task 1 is finished; task 2 starts.\n"Next."'), true)
   })
 
   test('a verdict mentioned in the reasoning is not the verdict', () => {
-    assert.equal(saysDone('It is not DONE yet; it is still testing.\nWORKING'), false)
+    assert.equal(saysNext('It does not move to the NEXT task yet.\nSAME'), false)
   })
 
-  test('no answer is not done', () => {
-    assert.equal(saysDone(''), false)
-    assert.equal(saysDone('I cannot tell.'), false)
+  test('no answer is not a new piece', () => {
+    assert.equal(saysNext(''), false)
+    assert.equal(saysNext('I cannot tell.'), false)
   })
 })

@@ -9,7 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **taskcut compacts when the work moves on, not when a piece is finished.**
+  Hand over A, B and C in one message: it compacts between A and B and between
+  B and C, and no longer after C, where nothing follows yet. On 16 labelled
+  steps, three times each, the judge finds the boundaries between pieces as
+  often as before (18/18) and no longer calls the last piece one (15/15, from
+  0/15).
+- **The end of a turn is no longer judged or compacted.** The work is back with
+  you there, and what you say next may well be about it; `/compact` before new
+  work is yours. taskcut compacts only between the pieces of one turn's work.
+- A step that says nothing is not judged: it cannot say a piece is complete.
+  Nor is any step after a compaction until Claude has changed something.
+- A turn is never ended at its first step: on Claude Code 2.1.280 a compaction
+  after a request that ended on your own words, `/compact` typed by hand
+  included, answers them instead of summarising the conversation.
+- The judge reads the whole conversation, as the permission classifier reads
+  its whole transcript, rather than the newest 40,000 characters, so each
+  judgement's prompt begins with everything the one before it read. A
+  conversation too long for the judge's window is no verdict, and keeps the
+  context.
+- The notice reads `compacting before the next piece`.
 - taskcut is released under the MIT License, in place of Apache-2.0.
+
+### Added
+
+- `make eval-judge`: the judge alone, over labelled steps, three times each,
+  through the call taskcut makes.
 
 ### Fixed
 

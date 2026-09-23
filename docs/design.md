@@ -8,8 +8,8 @@ compaction lands mid-sub-task, where every detail is still live, and summarises
 it; meanwhile the detail from work that finished an hour ago is kept, because a
 summariser looking at a flat transcript has no way to tell which is which.
 
-The end of a sub-task is the one moment where "what still matters" has a clean
-answer. taskcut moves the decision there.
+The move from one sub-task to the next is the one moment where "what still
+matters" has a clean answer. taskcut moves the decision there.
 
 ## taskcut decides when, and nothing else
 
@@ -60,21 +60,63 @@ Four things could mark the end of a sub-task:
    below the floor as much as above it. And a tool cannot be unregistered: once
    the model has been told about it, it is there for the rest of the session.
 4. **A judge.** What taskcut does. Once the context is past the floor, each
-   step of the main conversation, and the reply each turn ends on, gets one
-   `$.model.complete` call asking whether it reports a piece of the work
-   complete. Below the floor it never runs, and the working model is never told
-   taskcut exists.
+   step of the main conversation gets one `$.model.complete` call asking
+   whether the work moves on there from a finished piece to another. Below the
+   floor it never runs, and the working model is never told taskcut exists.
 
-The question is asked as three rules in order. A step that ends by asking the
-person something, waiting for their decision or proposing work it has not done
-is `WORKING` -- even when asking is exactly what the person told it to do,
-since their answer carries the same piece on. A step that says a piece is
-complete is `DONE`, whether or not it has already started the next piece. Anything
-else is `WORKING`. The judge writes one sentence about the step before its
-verdict: asked for the word alone, it read "task 2 is done; now task 3" as work
-in progress and missed two boundaries in three. Anything but a clear `DONE` --
-no verdict, a failed request -- keeps the context: a missed boundary waits for
-the next one, and the threshold is still there.
+## Moving on, not finishing
+
+Up to 0.8 the judge was asked whether a step *finished* a piece, and the reply
+a turn ended on was judged too. That compacts in two places where nothing is
+gained. Hand over A, B and C in one message: when C is done, C was finished,
+and the conversation was compacted -- inside the turn it was then carried on
+with `Continue.` only to write the closing summary from a summary. Ask for one
+thing per message: every finished turn was compacted before the person had
+said a word about it, and what people say after a finished piece is as often
+about that piece -- a correction, "also handle None", "commit that" -- as it
+is something new.
+
+A compaction pays for itself when the work that follows does not need the
+detail of the work before. So the question is whether the work *moves on*: a
+piece is finished and a different one begins. Inside a turn the step itself
+says so -- "task 2 is done; now task 3". The end of a turn cannot: the work is
+back with the person, and whether they move on is theirs to say, and theirs to
+`/compact` before. So the end of a turn is no longer judged at all, and the
+structure is otherwise 0.8's: the same steps judged, the same way of ending a
+turn to compact.
+
+The rules are, in order: a step that asks the person something, waits for
+their decision or proposes work it has not done is `SAME`; a step that itself
+says a piece is complete, with another piece the person asked for still to do
+-- it names or starts it, or the request plainly lists more -- is `NEXT`;
+anything else is `SAME`, the last piece being complete included.
+
+Two kinds of step are not asked about at all. One with no text cannot say a
+piece is complete. And after a compaction, no step is until the working model
+has changed something -- a call other than a read-only lookup: nothing can have
+been finished since, and the summary, which reads like a message listing the
+pieces done, made the first step of the next piece look to the judge like the
+move to it. In a real session the judge called that step `NEXT` and the work
+was compacted twice in a row; on the same step in the benchmark it did so
+three times in three.
+
+The judge writes one sentence about the step before its verdict: asked for
+the word alone, it read "task 2 is done; now task 3" as work in progress and
+missed two boundaries in three. Anything but a clear `NEXT` -- no verdict, a
+failed request -- keeps the context: a missed boundary waits for the next one,
+and the threshold is still there.
+
+`make eval-judge` asks the judge about 16 labelled steps, three times each,
+through the same call. Against 0.8's question on the same steps:
+
+| steps | 0.8, "finished?" | "moves on?" |
+| --- | --- | --- |
+| a piece done, another asked for | 18/18 | 18/18 |
+| the last piece done | 0/15 | 15/15 |
+| a piece in progress | 12/15 | 15/15 |
+
+The boundaries that matter are found as often as before; the last piece, which
+0.8 compacted every time, is now kept every time.
 
 The first version of this asked `$.model.classify`, which wraps the text in a
 fixed classifier prompt and treats every word of it as data. The instructions
@@ -87,14 +129,20 @@ The judge reads what auto mode's permission classifier reads, which decides
 from a portion of the transcript rather than all of it: every message the
 person sent, every tool call the assistant made except read-only lookups, and
 `CLAUDE.md`, with all tool output stripped. To that it adds the step being
-judged -- what the assistant just said, and the calls it is making or the fact
-that it stopped -- as the classifier adds the pending action.
+judged -- what the assistant just said and the calls it is making -- as the
+classifier adds the pending action.
 
-Reading the whole transcript would cost a full-price read of everything past
-the floor on every judged turn, since the judge shares no cache with the
-session, and would add nothing to the question it answers. Each piece is
-clipped, and when the conversation runs long its oldest lines are left out:
-whether the latest request is done lives at the end.
+It reads all of that portion, as the classifier does. Claude Code 2.1.280's
+classifier (`xLt` and `Zke` in the bundle) puts every entry of the transcript
+in its request and never leaves the oldest out; when the request no longer fits
+its window it gives no verdict (`transcript_too_long`) and falls back to asking
+the person. 0.8's judge kept the newest 40,000 characters instead, which moved
+the start of what it read with every line once the conversation passed that.
+Now the conversation is read whole, and a conversation too long for the
+judge's own window is a failed request: no verdict, the context kept -- the
+judge's own way of falling back. Each message and each call is still clipped
+on its own, and what the judge reads is a fraction of the context: no tool
+output, and nothing from before the last compaction.
 
 The default model is `sonnet`, as the permission classifier's is. On twelve
 steps of one long turn -- three boundaries among them -- judged three times
@@ -154,12 +202,35 @@ so an unattended job does not need a terminal held open for it.
 
 ## Where the compaction is triggered from
 
-`$.session.compact` rejects while a turn is running. At the end of a turn, both
-the judgement and the compaction happen in `turn.complete`, after `next(e)` has
-settled the turn. Only a main-loop turn that ended with `reason: 'answer'` is
-judged: a subagent's run is not the person's conversation, and an interrupted or
-failed turn stopped in the middle of its work, which is the transcript that
-explains what went wrong.
+`$.session.compact` rejects while a turn is running, so taskcut ends the turn
+first and compacts from `turn.complete`, after `next(e)` has settled it -- see
+[Inside a turn](#inside-a-turn). A subagent's steps are never judged: its run
+is not the person's conversation.
+
+## When a compaction can summarise
+
+On Claude Code 2.1.280 a compaction summarises only when the last request the
+main loop sent ended on tool results. When it ended on the person's own words --
+a turn's first request, or a turn they asked and Claude answered without a
+tool -- the summary instruction reaches the model as part of those words: it
+answers them, and says the rest looks like an instruction smuggled into their
+message. The "summary" that replaces the conversation is that answer.
+
+Three one-message sessions, then a compaction, isolate it:
+
+| the request before | compacted from | summary |
+| --- | --- | --- |
+| a question, answered without a tool | `turn.complete`, as 0.8 did at a turn's end | `4` -- the answer to the question |
+| a question, answered without a tool | a plugin, before the next message went in | the answer, and a note that the rest "looks injected" |
+| tool results | a plugin, before the next message went in | a summary |
+
+and `/compact` typed by hand after a turn answered without a tool, with no
+plugin loaded, gives the same answer in place of a summary. It is not taskcut's
+to fix, but taskcut does not make it: it records whether the request each step
+sent ended on tool results -- every step's but a turn's first -- and ends a
+turn only after one that did. 0.8 was exposed to it at every turn answered
+without a tool, since it judged the end of every turn; its mechanism check never
+compacted one, and did not show it.
 
 ## Inside a turn
 
@@ -178,19 +249,19 @@ earlier version started the judgement in one step and awaited it in the next,
 where it was a plain promise; the budget ran out and the engine skipped the
 hook.
 
-When a step is judged to have finished a piece, the next dispatch of the hook
-does what a person watching would do with Esc, `/compact` and "continue":
+When a step is judged to move the work on, the next dispatch of the hook does
+what a person watching would do with Esc, `/compact` and "continue":
 
 1. `$.turn.abort` ends the turn before the request goes out. Every tool result
-   of the finished step is already in, and no interruption marker is written.
+   of the step is already in, and no interruption marker is written.
 2. In `turn.complete`, `$.session.compact()` compacts -- the same call, the same
-   summary, the same kept messages as at the end of a turn.
+   summary, the same kept messages as `/compact`.
 3. `$.prompt.submit({ text: 'Continue.' })` starts the next turn. The summary
    Claude Code writes already tells the model to pick up where it left off.
 
 The turn becomes two, and the transcript shows `Continue.` as a message from the
-taskcut plugin. That is the whole difference from a compaction at the end of a
-turn.
+taskcut plugin. That is the whole difference from a `/compact` typed between
+turns.
 
 Two other ways were tried and do not work. Lowering
 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` with `$.env.set` at a boundary, to make Claude
@@ -200,8 +271,8 @@ not read it again. And `$.session.compact()` itself cannot run inside a turn.
 A turn is only ended in an interactive session. A `-p` run would end with it,
 and could not compact anyway. A compaction that leaves the context above the
 floor -- a very large `CLAUDE.md`, a large kept tail -- would otherwise have the
-next finished piece compacted again at once, so the next judgement then waits
-until the context has grown five points past what the compaction left.
+next piece compacted again at once, so the next judgement then waits until the
+context has grown five points past what the compaction left.
 
 Two other candidates were tried. `classic.Stop` never reached the hooks module.
 Deferring the call with `$.clock.after(0, ...)` was unnecessary: in an
@@ -209,6 +280,44 @@ interactive session the straight call from `turn.complete` succeeds.
 
 A failure there is caught and logged rather than thrown. A plugin that cannot
 compact should not be able to take the turn down with it.
+
+## The judge's prompt cache
+
+The judge's calls are not served from a prompt cache, and on Claude Code
+2.1.280 nothing a plugin puts in its prompt can change that. `$.model.complete`
+(`YTe` in the bundle) sends a system block and one user message holding the
+prompt as a single string, with no `cache_control` anywhere in the request, and
+the API caches only up to a breakpoint. The usage it resolves is the API's own,
+copied field for field -- the same mapping `$.model.fork` reports its cache
+reads through -- so two identical 30,000-token prompts sent one after the other
+reporting `cache_creation_input_tokens: 0` and `cache_read_input_tokens: 0` is
+the request going uncached, not the count going missing.
+
+The permission classifier is cached because it builds its own request (`Zke`,
+`iRr`): a breakpoint after its rules, one after `CLAUDE.md`, one after the last
+block of the transcript and one after the action. It splits the transcript
+into a block of its own at every call it has classified before, so the action
+it judged last time is now a whole block of the transcript, and the next
+request is served from the cache up to it; its second stage changes only what
+follows the action, and is served whole.
+
+A plugin could build that request itself, with `$.session.authorize()` and
+`$.http.fetch`, but only by copying what the engine does to send one -- the
+credential's beta header, the identity block a subscription requires, the base
+URL, the model id -- which is the engine's to change. So the judge uses
+`$.model.complete`, and its prompt is built the way the classifier's is, ready
+for a call that caches: the rules, `CLAUDE.md`, the whole conversation oldest
+first, and the step last. `$.session.messages()` only ever adds to what the
+judge reads -- between two steps the one field that changes on an earlier
+message is a call's `result`, which the judge never reads -- so each
+judgement's prompt begins with everything the one before it read ahead of its
+step.
+
+`$.model.fork`, the one call that is served from a cache, reads the main
+thread's whole transcript with the main model: past a floor of 35% on a 1M
+window that is 350,000 tokens a judgement at the cache-read price, several
+times what the judge's own prompt costs uncached, and it puts every tool output
+back in front of the judge.
 
 ## The one structural rule in the source
 

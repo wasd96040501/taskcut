@@ -1,0 +1,6 @@
+{
+  "description": "The judge benchmark: asks taskcut's judge about labelled steps and writes down its answers.",
+  "modules": [
+    "./bench.ts"
+  ]
+}

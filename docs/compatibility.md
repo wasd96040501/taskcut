@@ -12,7 +12,9 @@ declarations it is written against are generated per Claude Code version by
 | `$.session.usage`, `$.session.messages`, `$.session.compact`, `$.fs.read`, `$.env.get`, `$.model.complete`, `$.turn.abort`, `$.prompt.submit`, `$.ui.log` | engine calls | same: refused at load, named in the validation output |
 | a hook's budget counting only its own code, not its `$` calls | engine rule | the judgement inside a step would overrun it, and the engine would skip the hook: taskcut would compact only at the end of a turn, and say so in the transcript |
 | what `$.model.complete` resolves to | data shape | `claude plugin validate` does not see it; only `tsc` against regenerated types does. 2.1.278, which taskcut was measured on, resolved the reply's text; 2.1.280 resolves `{ isAnswered, text, usage }`, and 0.8.0 read that object as text, so every judgement failed and nothing was ever compacted. The reply is now taken as `unknown` and read by `readReply`, which knows both shapes and treats anything else as no reply |
-| `session.start`'s `isInteractive` | data shape | taskcut would stop ending turns early; a compaction at the end of a turn still works |
+| a compaction after a request that ended on the person's words answering them instead of summarising | engine bug, 2.1.280 | taskcut never ends a turn at its first step; when it is fixed, that guard can go |
+| `$.model.complete` sending no cache breakpoint | engine behaviour, 2.1.280 | none needed: the judge's prompt keeps a stable prefix, so a release that caches it serves it with no change here |
+| `session.start`'s `isInteractive` | data shape | taskcut would stop ending turns early, and so would not compact at all |
 | `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` | early-access flag | **nothing**, by design — see below |
 
 ## The early-access flag is not a dependency
@@ -35,6 +37,7 @@ installed, and `TASKCUT=0` remains a kill switch either way.
 
 | taskcut | Claude Code |
 | --- | --- |
+| unreleased | 2.1.278 and newer; measured on 2.1.280 |
 | 0.7.x | 2.1.278 and newer |
 | 0.6.x | 2.1.278 and newer |
 | 0.5.x | 2.1.278 and newer |
