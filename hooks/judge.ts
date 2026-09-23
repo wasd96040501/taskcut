@@ -155,6 +155,24 @@ export function judgePrompt(messages: readonly SessionMessage[], step: Step, mem
  * the emphasis a model sometimes puts round it. Anything else, including no
  * answer, is not.
  */
+export type Reply = { text: string } | { reason: string }
+
+/**
+ * The judge's reply, whichever shape `$.model.complete` resolved: the reply's
+ * text up to Claude Code 2.1.278, `{ isAnswered, text }` or
+ * `{ isAnswered: false, reason }` from 2.1.280. Either is read here, where the
+ * engine's answer enters, and nothing past this point knows there were two.
+ */
+export function readReply(answer: unknown): Reply {
+  if (typeof answer === 'string') return { text: answer }
+  if (typeof answer === 'object' && answer !== null && 'isAnswered' in answer) {
+    const { isAnswered, text, reason } = answer as { isAnswered: unknown; text?: unknown; reason?: unknown }
+    if (isAnswered === true && typeof text === 'string') return { text }
+    if (isAnswered === false) return { reason: String(reason) }
+  }
+  return { reason: 'a reply of no shape taskcut knows' }
+}
+
 export function saysDone(answer: string): boolean {
   const lines = answer.trim().split('\n')
   const last = lines[lines.length - 1] ?? ''

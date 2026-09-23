@@ -11,6 +11,7 @@ declarations it is written against are generated per Claude Code version by
 | `session.start`, `turn.step`, `turn.complete` | hook events | taskcut stops working; `claude plugin validate` reports the unknown event before a session loads it |
 | `$.session.usage`, `$.session.messages`, `$.session.compact`, `$.fs.read`, `$.env.get`, `$.model.complete`, `$.turn.abort`, `$.prompt.submit`, `$.ui.log` | engine calls | same: refused at load, named in the validation output |
 | a hook's budget counting only its own code, not its `$` calls | engine rule | the judgement inside a step would overrun it, and the engine would skip the hook: taskcut would compact only at the end of a turn, and say so in the transcript |
+| what `$.model.complete` resolves to | data shape | `claude plugin validate` does not see it; only `tsc` against regenerated types does. 2.1.278, which taskcut was measured on, resolved the reply's text; 2.1.280 resolves `{ isAnswered, text, usage }`, and 0.8.0 read that object as text, so every judgement failed and nothing was ever compacted. The reply is now taken as `unknown` and read by `readReply`, which knows both shapes and treats anything else as no reply |
 | `session.start`'s `isInteractive` | data shape | taskcut would stop ending turns early; a compaction at the end of a turn still works |
 | `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` | early-access flag | **nothing**, by design — see below |
 

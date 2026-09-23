@@ -27,7 +27,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import { ENV_VAR, INERT, decideActivation, type Activation } from './activation'
 import { readConfig, type Config } from './config'
-import { ANSWER_TOKENS, JUDGE_SYSTEM, judgePrompt, saysDone, type Step } from './judge'
+import { ANSWER_TOKENS, JUDGE_SYSTEM, judgePrompt, readReply, saysDone, type Step } from './judge'
 
 /**
  * Resolved once, at `session.start`. It starts inert so that a session in which
@@ -105,8 +105,15 @@ async function memoryFiles($: EngineInterface): Promise<string[]> {
 async function judge($: EngineInterface, step: Step, config: Config): Promise<boolean> {
   try {
     const prompt = judgePrompt(await $.session.messages(), step, await memoryFiles($))
-    const answer = await $.model.complete({ model: config.model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
-    return saysDone(answer)
+    // `unknown`: what the call resolves to has changed between releases, and
+    // readReply takes every shape it has had.
+    const answer: unknown = await $.model.complete({ model: config.model, system: JUDGE_SYSTEM, prompt, maxTokens: ANSWER_TOKENS })
+    const reply = readReply(answer)
+    if ('reason' in reply) {
+      $.ui.log(`could not judge the step (${reply.reason})`, { to: 'debug' })
+      return false
+    }
+    return saysDone(reply.text)
   } catch (error) {
     $.ui.log(`could not judge the step (${String(error)})`, { to: 'debug' })
     return false

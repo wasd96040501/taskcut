@@ -12,6 +12,7 @@ import {
   beforeStep,
   conversationLines,
   judgePrompt,
+  readReply,
   saysDone,
 } from '../hooks/judge.ts'
 
@@ -123,6 +124,24 @@ describe('judgePrompt', () => {
 
   test('the question names both answers', () => {
     assert.ok(JUDGE_SYSTEM.includes(DONE) && JUDGE_SYSTEM.includes(WORKING))
+  })
+})
+
+describe('readReply', () => {
+  test('reads the text $.model.complete resolved up to 2.1.278', () => {
+    assert.deepEqual(readReply('It reports task 2 complete.\nDONE'), { text: 'It reports task 2 complete.\nDONE' })
+  })
+
+  test('reads the result it resolves from 2.1.280', () => {
+    const usage = { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
+    assert.deepEqual(readReply({ isAnswered: true, text: 'WORKING', usage }), { text: 'WORKING' })
+    assert.deepEqual(readReply({ isAnswered: false, reason: 'api-error', status: 529, error: 'overloaded', usage }), { reason: 'api-error' })
+  })
+
+  test('anything else is no reply, never a verdict', () => {
+    for (const odd of [undefined, null, 42, {}, { isAnswered: true }, { text: 'DONE' }]) {
+      assert.ok('reason' in readReply(odd), JSON.stringify(odd))
+    }
   })
 })
 
