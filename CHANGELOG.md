@@ -57,6 +57,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   only to the debug log. The reply is now read in either shape, so 2.1.278
   keeps working, and a failed call is logged with its reason -- for an API
   error, its status and kind, so a spent rate limit reads as one.
+- **The judge read the step it was judging twice**, once as the step and once
+  as the latest thing the assistant said, on most steps -- and whether it did
+  depended on how fast the step's tools ran. When a step is judged,
+  `$.session.messages()` already holds it, a block at a time (its words, then
+  each call, then any result already in), and only a last message matching
+  the step whole was left out. The step's messages are now found and left
+  out whatever their shape. Found by checking the replay benchmark against
+  the prompts a live session builds.
 - **A `floorPercent` of 0 judged nothing until the context reached 5%.** The
   wait taskcut keeps after a compaction that could not get under the floor
   read "no compaction yet" as one that had left the context at 0%.

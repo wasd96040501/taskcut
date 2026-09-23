@@ -191,17 +191,43 @@ export function taskList(messages: readonly SessionMessage[], step: Step): strin
 }
 
 /**
- * The messages before the step. Whether the transcript already holds the step
- * when it is judged is the engine's business; if it does, it is left out here
- * so that the step is not read twice.
+ * The messages before the step, without the step.
+ *
+ * When the step is judged, `$.session.messages()` (2.1.280) already holds it,
+ * and as more than one message: a response is recorded a block at a time, so
+ * its words are one message and each call another -- and a call that has
+ * already run is followed by its result. Left in, the step would be read
+ * twice, once as the latest thing the assistant said, and whether it was
+ * would depend on how fast its tools ran.
+ *
+ * So the step is the shortest run of messages at the end whose words, joined,
+ * are the step's and whose calls are the step's, with nothing between them
+ * but the results of those calls. When there is none -- the engine does not
+ * hold the step yet -- every message is before it.
  */
 export function beforeStep(messages: readonly SessionMessage[], step: Step): readonly SessionMessage[] {
-  const last = messages[messages.length - 1]
-  if (last?.role !== 'assistant') return messages
-  const same =
-    last.toolUses.length === step.calls.length &&
-    last.toolUses.every((use, i) => use.tool === step.calls[i]!.name && JSON.stringify(use.input) === JSON.stringify(step.calls[i]!.input))
-  return same ? messages.slice(0, -1) : messages
+  const words = oneLine(step.text)
+  const calls = step.calls.map((call) => `${call.name} ${JSON.stringify(call.input)}`)
+  const said: string[] = []
+  const made: string[] = []
+  const madeIds = new Set<string>()
+  const resultIds: string[] = []
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i]!
+    if (message.role === 'user') {
+      if (!message.toolResults?.length) return messages
+      resultIds.push(...message.toolResults.map((result) => result.tool_use_id))
+      continue
+    }
+    said.unshift(message.text)
+    made.unshift(...message.toolUses.map((use) => `${use.tool} ${JSON.stringify(use.input)}`))
+    for (const use of message.toolUses) madeIds.add(use.tool_use_id)
+    if (made.length > calls.length) return messages
+    const isStep = oneLine(said.join(' ')) === words && made.length === calls.length && made.every((call, k) => call === calls[k])
+    // Nothing may come between the step's messages but its own calls' results.
+    if (isStep) return resultIds.every((id) => madeIds.has(id)) ? messages.slice(0, i) : messages
+  }
+  return messages
 }
 
 /**

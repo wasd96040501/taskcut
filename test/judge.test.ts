@@ -37,8 +37,8 @@ function said(text: string): Message {
   return { role: 'assistant', text, toolUses: [] }
 }
 
-function output(text: string): Message {
-  return { role: 'user', text: '', toolUses: [], toolResults: [{ tool_use_id: 't', text, isError: false }] }
+function output(text: string, id = 't'): Message {
+  return { role: 'user', text: '', toolUses: [], toolResults: [{ tool_use_id: id, text, isError: false }] }
 }
 
 const step = (text: string, calls: { name: string; input: unknown }[] = [{ name: 'Bash', input: { command: 'ls' } }]) => ({ text, calls })
@@ -165,14 +165,61 @@ describe('taskList', () => {
 describe('beforeStep', () => {
   const judged = step('task 1 is done; now task 2', [{ name: 'Bash', input: { command: 'pytest' } }])
 
-  test('leaves out the step when the transcript already holds it', () => {
-    const messages = [person('go'), ran('Bash', { command: 'pytest' })]
+  test('leaves out the step when the transcript already holds it, as one message', () => {
+    const messages = [person('go'), ran('Bash', { command: 'pytest' }, 'task 1 is done; now task 2')]
     assert.deepEqual(beforeStep(messages, judged), [person('go')])
   })
 
   test('keeps everything when the transcript does not hold it yet', () => {
     const messages = [person('go'), ran('Bash', { command: 'ls' })]
     assert.equal(beforeStep(messages, judged), messages)
+  })
+
+  // What `$.session.messages()` holds when the step is judged, on 2.1.280: the
+  // response a block at a time, and the results of calls that have already run.
+  const earlier = [person('go'), ran('Bash', { command: 'ls' }), output('a.txt')]
+
+  test('leaves out a step held a block at a time', () => {
+    const messages = [...earlier, said('task 1 is done; now task 2'), ran('Bash', { command: 'pytest' })]
+    assert.deepEqual(beforeStep(messages, judged), earlier)
+  })
+
+  test('leaves out the results of its calls when they have already run', () => {
+    const messages = [...earlier, said('task 1 is done; now task 2'), ran('Bash', { command: 'pytest' }), output('3 passed', 'Bash')]
+    assert.deepEqual(beforeStep(messages, judged), earlier)
+  })
+
+  test('leaves out a step of several calls, their results after them', () => {
+    const two = step('both', [{ name: 'Read', input: { file_path: 'a' } }, { name: 'Bash', input: { command: 'ls' } }])
+    const messages = [person('go'), said('both'), ran('Read', { file_path: 'a' }), ran('Bash', { command: 'ls' }), output('A', 'Read'), output('B', 'Bash')]
+    assert.deepEqual(beforeStep(messages, two), [person('go')])
+  })
+
+  test('leaves out a step that only calls', () => {
+    const quiet = step('', [{ name: 'Bash', input: { command: 'pytest' } }])
+    assert.deepEqual(beforeStep([...earlier, ran('Bash', { command: 'pytest' })], quiet), earlier)
+  })
+
+  test('keeps the results of the step before it', () => {
+    const messages = [...earlier, said('task 1 is done; now task 2')]
+    assert.equal(beforeStep(messages, judged), messages)
+  })
+
+  test('keeps everything when something else comes between the step and the end', () => {
+    const messages = [...earlier, said('task 1 is done; now task 2'), ran('Bash', { command: 'pytest' }), person('stop')]
+    assert.equal(beforeStep(messages, judged), messages)
+  })
+
+  test('keeps everything when a result is not of the step\'s calls', () => {
+    const messages = [...earlier, said('task 1 is done; now task 2'), ran('Bash', { command: 'pytest' }), output('?', 'Other')]
+    assert.equal(beforeStep(messages, judged), messages)
+  })
+
+  test('the step is not read twice in the prompt', () => {
+    const messages = [...earlier, said('task 1 is done; now task 2'), ran('Bash', { command: 'pytest' }), output('3 passed', 'Bash')]
+    const text = judgePrompt(messages, judged)
+    assert.equal(text.split('task 1 is done; now task 2').length - 1, 1)
+    assert.equal(text.split('Assistant ran Bash').length - 1, 1)
   })
 })
 
