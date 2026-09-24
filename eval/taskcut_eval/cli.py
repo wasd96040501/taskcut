@@ -467,6 +467,8 @@ def cmd_handoff_judge(args) -> int:
     work = Path(args.work) / "handoff"
     labels = Path(args.labels) if args.labels else work / "labels.jsonl"
     steps, sets = handoffjudge.prepare(labels, PROJECTS, work / "sets")
+    if args.split:
+        steps = [s for s in steps if handoffjudge.half(s.session) == args.split]
     chosen = handoffjudge.select(steps, args.sample, args.head)
     judge = REPO_ROOT / "hooks" / "judge.ts"
     if args.ref:
@@ -570,6 +572,7 @@ def main(argv=None) -> int:
     hj.add_argument("--sample", type=int, default=300, help="COMPACT steps asked, beside every KEEP step")
     hj.add_argument("--head", type=int, default=8, help="each segment's first candidates, asked in order")
     hj.add_argument("--concurrency", type=int, default=8)
+    hj.add_argument("--split", choices=("tune", "test"), default="", help="only the sessions in this half")
     hj.add_argument("--dry", action="store_true", help="ask nothing; score what is held")
     hj.set_defaults(func=cmd_handoff_judge)
 

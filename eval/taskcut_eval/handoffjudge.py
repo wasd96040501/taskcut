@@ -79,6 +79,12 @@ def prepare(labels: Path, projects: Path, sets_dir: Path) -> tuple[list[Step], l
     return steps, set_paths
 
 
+def half(session: str) -> str:
+    """Which half a session is in: the judge is tuned on one and measured on
+    the other, so that a prompt fitted to the labels is not scored on them."""
+    return "tune" if int(hashlib.sha256(session.encode()).hexdigest(), 16) % 2 == 0 else "test"
+
+
 def select(steps: list[Step], sample: int, head: int, seed: int = 0) -> list[Step]:
     """Every KEEP step, `sample` COMPACT ones, and each segment's first `head`
     candidates."""
