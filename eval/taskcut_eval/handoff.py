@@ -57,9 +57,11 @@ At each candidate step, apply the handoff test: suppose that, once the step's ca
 Work is open until it is finished and nothing more is expected of it. A piece just finished is still open while the person has not reacted to it. Work set aside for a side question is still open.
 
 You have hindsight: you can see what happened after each step. Use it. The label is what turned out to be true, not what could be predicted at the time.
-- KEEP when some open work went on to need detail from before the step that the summary drops and the workspace cannot give back: what a command printed, what an experiment or a query found, why an approach failed, what was read somewhere that is not in the repository.
-- COMPACT when the open work went on needing only conclusions, or detail the colleague could simply read again, such as code in the repository.
+- KEEP when some open work went on to need detail from before the step that the summary drops and that cannot be got back cheaply: output a quick re-run would not reproduce (a long run, a remote or changing system, a one-off experiment), what a query or an investigation found, why an approach failed, what was read somewhere that is not in the repository.
+- COMPACT when the open work went on needing only conclusions, or detail the colleague could get back cheaply: reading a file again, or re-running a quick command that gives the same result.
 - UNSURE only when the session does not show which. Use it sparingly.
+
+"As well" means as well, not eventually. Redoing an investigation, repeating a failed attempt, or re-running something slow to recover what was already known counts against compacting.
 
 Nothing is sent to anyone: you are reading a record. Look up the full text when a label turns on it -- whether a later step relied on something a command printed earlier, or whether a finding was ever written down.
 
