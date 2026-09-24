@@ -12,7 +12,7 @@ import re
 import subprocess
 from statistics import mean
 
-from . import arms, driver, handoff, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
+from . import arms, driver, handoff, handoffjudge, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -460,6 +460,34 @@ def cmd_handoff_label(args) -> int:
     return 0
 
 
+def cmd_handoff_judge(args) -> int:
+    """The judge against the handoff labels, with only what taskcut gives it
+    live. Its verdicts are kept under the work directory, per judge text and
+    model, and a step asked before is not asked again."""
+    work = Path(args.work) / "handoff"
+    labels = Path(args.labels) if args.labels else work / "labels.jsonl"
+    steps, sets = handoffjudge.prepare(labels, PROJECTS, work / "sets")
+    chosen = handoffjudge.select(steps, args.sample, args.head)
+    judge = REPO_ROOT / "hooks" / "judge.ts"
+    if args.ref:
+        judge = judgebench.judge_at(REPO_ROOT, args.ref, work / "judges" / f"{args.ref.replace('/', '-')}.ts")
+    harness = EVAL_ROOT / "judge"
+    tag = handoffjudge.tag(judge, harness, args.model)
+    counts = {k: sum(s.label == k for s in chosen) for k in ("KEEP", "COMPACT", "UNSURE")}
+    print(f"hooks/judge.ts at {args.ref or 'the working tree'}, {args.model} ({tag}): {len(chosen)} of {len(steps)} labelled steps, {counts}", flush=True)
+    store = work / "verdicts" / f"{tag}.jsonl"
+    store.parent.mkdir(parents=True, exist_ok=True)
+    if not args.dry:
+        plugin = judgebench.prepare(harness, judge, work / "plugins" / f"judgebench-{tag}")
+        handoffjudge.ask(chosen, sets, plugin, work / "bench" / tag, store, args.model, args.repeats, args.concurrency,
+                         log=lambda line: print(line, flush=True))
+    answers = handoffjudge.cached(store)
+    report = handoffjudge.score(chosen, answers, args.model, args.repeats, args.head)
+    (work / "verdicts" / f"{tag}.report.txt").write_text("\n".join(report) + "\n")
+    print("\n".join(report))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -533,6 +561,17 @@ def main(argv=None) -> int:
     ho.add_argument("--workers", type=int, default=4)
     ho.add_argument("--dry", action="store_true", help="build the prompts and files, call nothing")
     ho.set_defaults(func=cmd_handoff_label)
+
+    hj = sub.add_parser("handoff-judge", help="ask the judge about handoff-labelled steps and score it against the labels")
+    hj.add_argument("--labels", default="", help="a labels file; the full labelling's by default")
+    hj.add_argument("--ref", default="", help="measure hooks/judge.ts as it was at this commit")
+    hj.add_argument("--model", default="sonnet")
+    hj.add_argument("--repeats", type=int, default=3)
+    hj.add_argument("--sample", type=int, default=300, help="COMPACT steps asked, beside every KEEP step")
+    hj.add_argument("--head", type=int, default=8, help="each segment's first candidates, asked in order")
+    hj.add_argument("--concurrency", type=int, default=8)
+    hj.add_argument("--dry", action="store_true", help="ask nothing; score what is held")
+    hj.set_defaults(func=cmd_handoff_judge)
 
     rep = sub.add_parser("report", help="render the collected results")
     rep.add_argument("--out", default="")

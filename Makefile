@@ -86,6 +86,10 @@ LIMIT ?=
 eval-handoff-label: ## Label your own long sessions for the handoff test, with hindsight; cached (LIMIT= calls)
 	@$(PYTHON) -m taskcut_eval.cli handoff-label $(if $(LIMIT),--limit $(LIMIT))
 
+.PHONY: eval-handoff-judge
+eval-handoff-judge: ## Score the judge against the handoff labels; cached (REF= commit, MODEL=)
+	@$(PYTHON) -m taskcut_eval.cli handoff-judge $(if $(REF),--ref $(REF)) $(if $(MODEL),--model $(MODEL))
+
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report
