@@ -80,6 +80,12 @@ eval-replay-build: ## A replay set from a transcript, with a labels file to fill
 eval-replay-sheet: ## Every judged step of a set with its context, for labelling (SET=)
 	@$(PYTHON) -m taskcut_eval.cli replay-sheet --set $(SET) --unlabelled
 
+LIMIT ?=
+
+.PHONY: eval-handoff-label
+eval-handoff-label: ## Label your own long sessions for the handoff test, with hindsight; cached (LIMIT= calls)
+	@$(PYTHON) -m taskcut_eval.cli handoff-label $(if $(LIMIT),--limit $(LIMIT))
+
 .PHONY: eval-report
 eval-report: ## Render the collected transcripts
 	@$(PYTHON) -m taskcut_eval.cli --results $(RESULTS) report

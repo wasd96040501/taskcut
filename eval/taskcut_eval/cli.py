@@ -12,7 +12,7 @@ import re
 import subprocess
 from statistics import mean
 
-from . import arms, driver, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
+from . import arms, driver, handoff, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -434,6 +434,32 @@ def cmd_replay_check(args) -> int:
     return 0 if outcome.passed else 1
 
 
+def cmd_handoff_label(args) -> int:
+    """Handoff labels for the person's own long sessions: every step taskcut
+    would judge past the floor, labelled with hindsight by `handoff.MODEL`.
+    Everything is written under the work directory, never in the repository,
+    and every call is cached there."""
+    import random
+    work = Path(args.work) / "handoff"
+    paths = handoff.sessions(PROJECTS)
+    all_jobs = [job for path in paths for job in handoff.jobs(path, work / "segments")]
+    print(f"{len(paths)} sessions past the floor, {len(all_jobs)} calls, "
+          f"{sum(len(j.steps) for j in all_jobs)} steps to label", flush=True)
+    if args.limit:
+        random.Random(0).shuffle(all_jobs)
+        all_jobs = all_jobs[: args.limit]
+    if args.dry:
+        sizes = sorted(len(j.prompt) for j in all_jobs)
+        print(f"prompt characters: median {sizes[len(sizes) // 2]:,}, max {sizes[-1]:,}")
+        return 0
+    rows, spent = handoff.label(all_jobs, work / "cache", args.workers, log=lambda line: print(line, flush=True))
+    out = work / ("labels.jsonl" if not args.limit else f"labels--sample{args.limit}.jsonl")
+    out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+    labelled = [r for r in rows if r["label"]]
+    print(f"{len(labelled)}/{len(rows)} steps labelled, ${spent:.2f} spent -> {out}")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -501,6 +527,12 @@ def main(argv=None) -> int:
     ck.add_argument("--model", default="sonnet")
     ck.add_argument("--again", action="store_true", help="compare the last check's session again, without running one")
     ck.set_defaults(func=cmd_replay_check)
+
+    ho = sub.add_parser("handoff-label", help="label the person's own long sessions for the handoff test, with hindsight")
+    ho.add_argument("--limit", type=int, default=0, help="only this many calls, a fixed sample")
+    ho.add_argument("--workers", type=int, default=4)
+    ho.add_argument("--dry", action="store_true", help="build the prompts and files, call nothing")
+    ho.set_defaults(func=cmd_handoff_label)
 
     rep = sub.add_parser("report", help="render the collected results")
     rep.add_argument("--out", default="")
