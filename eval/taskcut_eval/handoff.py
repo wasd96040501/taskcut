@@ -22,6 +22,7 @@ person's own: nothing here is written inside the repository.
 
 from __future__ import annotations
 
+import dataclasses
 import glob
 import hashlib
 import json
@@ -47,6 +48,8 @@ OUTPUT_HEAD, OUTPUT_TAIL = 12_000, 6_000
 CALL_LIMIT = 2_000
 #: The trail after a segment: enough to see whether later work drew on it.
 AFTER_STEPS = 400
+#: The line that ends a prompt's shared head and starts its list of steps.
+CANDIDATES = "--- candidate steps to label ---"
 
 SYSTEM = """You label moments in a real coding session between a person and an AI assistant, for an evaluation of a component that decides when to compact the conversation.
 
@@ -206,10 +209,14 @@ class Job:
 
     #: The full texts the prompt points at: this segment's and the ones after it.
     files: tuple[Path, ...] = ()
+    #: Who is asked, and what they are told: the labeller, unless a check asks another.
+    model: str = MODEL
+    effort: str = EFFORT
+    system: str = SYSTEM
 
     def key(self) -> str:
         digests = [hashlib.sha256(f.read_bytes()).hexdigest() for f in self.files]
-        blob = json.dumps([MODEL, EFFORT, SYSTEM, self.prompt, digests])
+        blob = json.dumps([self.model, self.effort, self.system, self.prompt, digests])
         return hashlib.sha256(blob.encode()).hexdigest()
 
 
@@ -297,13 +304,13 @@ def jobs(path: Path, work: Path, floor: int = FLOOR) -> list[Job]:
         files = (texts[seg.index], *reached)
         for i in range(0, len(mine), BATCH):
             batch = tuple(mine[i:i + BATCH])
-            prompt = "\n".join(head + ["--- candidate steps to label ---", " ".join(f"#{n}" for n in batch)])
+            prompt = "\n".join(head + [CANDIDATES, " ".join(f"#{n}" for n in batch)])
             out.append(Job(path.stem, seg.index, batch, work / path.stem, prompt, files))
     return out
 
 
 def _ask(job: Job) -> dict:
-    command = ["claude", "-p", "--model", MODEL, "--effort", EFFORT, "--system-prompt", SYSTEM,
+    command = ["claude", "-p", "--model", job.model, "--effort", job.effort, "--system-prompt", job.system,
                "--tools", "Read,Grep,Glob", "--allowedTools", "Read,Grep,Glob",
                "--no-session-persistence", "--strict-mcp-config", "--disable-slash-commands",
                "--output-format", "json"]
@@ -343,7 +350,9 @@ def run(job: Job, cache: Path) -> tuple[dict[int, dict], float, bool]:
     reply = _ask(job)
     labels = _labels(reply.get("result", ""), job.steps)
     cost = float(reply.get("total_cost_usd") or 0)
-    if "error" not in reply and not reply.get("is_error"):
+    # A reply that labelled nothing is not kept: asked again, the same call
+    # would come back from the cache.
+    if labels and "error" not in reply and not reply.get("is_error"):
         stored.write_text(json.dumps({"session": job.session, "segment": job.segment, "steps": job.steps,
                                       "model": MODEL, "effort": EFFORT, "cost": cost, "turns": reply.get("num_turns"),
                                       "labels": labels, "result": reply.get("result", "")}, ensure_ascii=False))
@@ -360,9 +369,8 @@ def label(all_jobs: list[Job], cache: Path, workers: int, log=print) -> tuple[li
         labels, cost, cached = run(job, cache)
         missing = tuple(n for n in job.steps if n not in labels)
         if missing:
-            retry = Job(job.session, job.segment, missing, job.directory,
-                        job.prompt.rsplit("--- candidate steps to label ---", 1)[0]
-                        + "--- candidate steps to label ---\n" + " ".join(f"#{n}" for n in missing), job.files)
+            retry = dataclasses.replace(job, steps=missing, prompt=job.prompt.rsplit(CANDIDATES, 1)[0]
+                                        + CANDIDATES + "\n" + " ".join(f"#{n}" for n in missing))
             more, extra, _ = run(retry, cache)
             labels.update(more)
             cost += extra

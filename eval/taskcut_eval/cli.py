@@ -10,9 +10,10 @@ from pathlib import Path
 import dataclasses
 import re
 import subprocess
+from collections import Counter
 from statistics import mean
 
-from . import arms, driver, handoff, handoffjudge, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
+from . import arms, driver, handoff, handoffjudge, judgebench, judgecases, labelcheck, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -490,6 +491,51 @@ def cmd_handoff_judge(args) -> int:
     return 0
 
 
+def cmd_handoff_check(args) -> int:
+    """Whether the handoff labels hold: the labeller again and another model,
+    both blind, on a sample; and real compactions, whose outcome is on record.
+    Everything is written under the work directory, and every call cached."""
+    work = Path(args.work) / "handoff"
+    check = work / "check"
+    check.mkdir(parents=True, exist_ok=True)
+    rows = [json.loads(line) for line in (work / "labels.jsonl").read_text().splitlines() if line.strip()]
+    labels = {(r["session"], r["step"]): r["label"] for r in rows if r["label"]}
+    log = lambda line: print(line, flush=True)
+
+    if args.what in ("again", "other"):
+        chosen = labelcheck.sample([r for r in rows if r["label"]], args.per_label, args.cap)
+        model = handoff.MODEL if args.what == "again" else labelcheck.OTHER
+        jobs = labelcheck.relabel_jobs(chosen, PROJECTS, work / "segments", model, handoff.EFFORT)
+        print(f"{len(chosen)} steps from {len({r['session'] for r in chosen})} sessions, {len(jobs)} calls to {model}", flush=True)
+        if args.dry:
+            return 0
+        found, spent = handoff.label(jobs, work / "cache", args.workers, log=log)
+        (check / f"{args.what}.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in found))
+        theirs = {(r["session"], r["step"]): r["label"] for r in found if r["label"]}
+        mine = {(r["session"], r["step"]): r["label"] for r in chosen}
+        n, agree, kappa, pairs = labelcheck.agreement(mine, theirs)
+        print(f"${spent:.2f}; {n} steps: agree {agree:.1%}, kappa {kappa:.2f}")
+        for (a, b), k in sorted(pairs.items()):
+            print(f"  labelled {a:<8} {args.what} {b:<8} {k}")
+        return 0
+
+    found = labelcheck.boundaries(PROJECTS, work / "segments", labels)
+    print(f"{len(found)} real compactions with a labelled step before them: "
+          f"{dict(Counter((b.trigger, b.label) for b in found))}", flush=True)
+    if args.dry:
+        return 0
+    reviewed, spent = labelcheck.review_all(found, check / "outcome-cache", args.workers, log=log)
+    (check / "outcome.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in reviewed))
+    expect = {"COMPACT": "FINE", "KEEP": "HURT"}
+    said = {(r["session"], r["last"]): expect.get(r["label"], r["label"]) for r in reviewed if r["verdict"]}
+    seen = {(r["session"], r["last"]): r["verdict"] for r in reviewed if r["verdict"]}
+    n, agree, kappa, pairs = labelcheck.agreement(said, seen)
+    print(f"${spent:.2f}; {n} compactions: the label foretold the outcome {agree:.1%}, kappa {kappa:.2f}")
+    for (a, b), k in sorted(pairs.items()):
+        print(f"  label says {a:<5} outcome {b:<5} {k}")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -563,6 +609,15 @@ def main(argv=None) -> int:
     ho.add_argument("--workers", type=int, default=4)
     ho.add_argument("--dry", action="store_true", help="build the prompts and files, call nothing")
     ho.set_defaults(func=cmd_handoff_label)
+
+    hc = sub.add_parser("handoff-check", help="check the handoff labels: blind relabelling, and real compactions' outcomes")
+    hc.add_argument("what", choices=("again", "other", "outcome"),
+                    help="the labeller again, another model, or what real compactions did to the work")
+    hc.add_argument("--per-label", type=int, default=100, help="KEEP steps sampled, and as many COMPACT")
+    hc.add_argument("--cap", type=int, default=4, help="at most this many of a label from one session")
+    hc.add_argument("--workers", type=int, default=4)
+    hc.add_argument("--dry", action="store_true", help="build the calls, make none")
+    hc.set_defaults(func=cmd_handoff_check)
 
     hj = sub.add_parser("handoff-judge", help="ask the judge about handoff-labelled steps and score it against the labels")
     hj.add_argument("--labels", default="", help="a labels file; the full labelling's by default")
