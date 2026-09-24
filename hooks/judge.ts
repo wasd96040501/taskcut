@@ -4,15 +4,15 @@
  * same file, never across an import, which is why the code that fetches these
  * inputs lives in register.ts.
  *
- * The judge is asked one thing -- does the work move on here from a finished
- * piece to another? -- and most of a session says nothing about it. What does,
- * in order of how much:
+ * The judge is asked one thing -- could the work be handed over here, to a
+ * colleague holding only the summary a compaction writes and the workspace? --
+ * and most of a session says nothing about it. What does, in order of how much:
  *
- *  1. the step itself, which says in its own words that a piece is complete and
- *     names the next;
- *  2. what the person asked for, which says whether there is a next;
+ *  1. the step itself, which says what has just been found or finished;
+ *  2. what the person asked for, which says what work is still open;
  *  3. a trail of what the assistant has been doing -- what its recent calls
- *     touched, what it said, its task list -- which says where it has got to.
+ *     touched, what it said, its task list -- which says where it has got to,
+ *     and whether what it found so far was written anywhere.
  *
  * So the judge reads those and nothing else: every message the person sent,
  * the first and the latest whole and the rest cut to a line; the assistant's
@@ -30,11 +30,11 @@
 import type { SessionMessage } from 'claude-code'
 
 /**
- * The two answers the judge gives, as it writes them: the work moves on from a
- * finished piece to another, or it stays where it is.
+ * The two answers the judge gives, as it writes them: the work could be handed
+ * over now, or it still needs detail only the conversation holds.
  */
-export const NEXT = 'NEXT'
-export const SAME = 'SAME'
+export const COMPACT = 'COMPACT'
+export const KEEP = 'KEEP'
 
 /**
  * Lookups that change nothing. What the assistant read says nothing about
@@ -75,40 +75,59 @@ export const ANSWER_TOKENS = 300
 export type Step = { text: string; calls: readonly { name: string; input: unknown }[] }
 
 /**
- * The question. A compaction pays for itself only when the work moves on to a
- * piece that does not need the detail of the one before, so that is what is
- * asked -- not whether a piece is done. The last piece of a list is done, and
- * nothing follows it yet: whatever the person says next may well be about it.
+ * The question: the handoff test. A compaction keeps what the person asked for,
+ * the decisions and conclusions, the files changed and the work in progress; it
+ * drops how the work got there. So the moment to compact is one where every
+ * piece of work still open would go on as well from the summary and the
+ * workspace -- not the moment a task changes, which is only the commonest case
+ * of it. A piece just finished stays open until the person has reacted to it,
+ * and work set aside for a side question stays open, so neither the end of a
+ * list nor a detour is a moment to compact.
+ *
+ * Nothing is predicted that the work so far does not show: a switch to other
+ * work that turns out not to need the earlier detail can still be compacted a
+ * few steps later, and uncertainty keeps the context, because a compaction
+ * cannot be taken back.
  *
  * One sentence of reasoning before the verdict is what makes a small answer
- * reliable: asked for the word alone, the judge reads "task 2 is done; now task
- * 3" as the same work and misses the boundary it was asked to find.
+ * reliable: asked for the word alone, an earlier judge missed two boundaries in
+ * three.
  */
 export const JUDGE_SYSTEM = [
-  'You watch an assistant working through what a person asked for. You are shown what the person',
-  "said (older messages shortened), the assistant's latest messages, what its latest commands",
-  'touched, its task list if it keeps one, and the latest step the assistant is taking: what it just',
-  'said and the calls it is making now. The output of every command is left out.',
+  "You are deciding whether now is a good moment to compact an assistant's working conversation.",
   '',
-  'The conversation may open with a summary Claude Code wrote when it compacted what came before: it',
-  'is a record of past work, not a request.',
+  'Compacting replaces the conversation with a summary. The summary keeps what the person asked for,',
+  'the decisions and conclusions reached, which files were changed, and the work in progress. It drops',
+  'how the work got there: the contents of files that were read, the output of commands, attempts that',
+  'failed, and the reasoning along the way.',
   '',
-  'Decide whether, at this step, the work moves on from a finished piece to another piece. A piece',
-  'is one of the things the person asked for -- one task in a list, one fix, one feature, one',
-  'question answered -- or one clearly separate phase of a single task.',
+  'The test: suppose the work were handed over right now to a capable colleague who gets only that',
+  'summary and the workspace -- the repository and anything saved to files, which they can read again.',
+  'Would they carry on every piece of work that is still open as well as the assistant can with the',
+  'full conversation?',
   '',
-  'Apply these rules in order, and stop at the first that fits:',
-  `1. The step asks the person something, waits for their decision, or proposes work it has not`,
-  `   done: ${SAME}.`,
-  `2. The step itself says, in its own words, that a piece is complete (checked, where it could be`,
-  `   checked), and another piece the person asked for is still to do -- the step names or starts`,
-  `   it, or the person's request plainly lists more: ${NEXT}. A piece finished before this step,`,
-  `   whatever came after it, does not count.`,
-  `3. Anything else: ${SAME}. That includes the last piece asked for being complete, wrapping up`,
-  '   once every piece is done (a final check, a summary, a commit), and work on a piece not yet',
-  '   said to be complete.',
+  'Work is open until it is finished and nothing more is expected of it. A piece the assistant has just',
+  'finished is still open while the person has not reacted to it: what they say next is usually about',
+  'it. Work set aside for a side question is still open.',
   '',
-  `First say in one sentence what the step does. Then, on its own last line, write ${NEXT} or ${SAME}.`,
+  `If the colleague would do as well, answer ${COMPACT}. If any open work needs detail that the summary`,
+  'drops and that cannot be got back cheaply -- output a quick re-run would not reproduce, what an',
+  `experiment or an investigation found, why an approach failed -- answer ${KEEP}. Detail the colleague`,
+  'can get back by reading a file again, or by re-running a quick command, is no reason to keep.',
+  '',
+  'Judge from what the work so far shows. When the open work has already gone on for a while without',
+  'drawing on earlier detail, that is evidence it does not need it. Its own detail counts too: once it',
+  'has produced output of its own that the summary would drop, it needs that detail as much as',
+  `anything before it. When you cannot tell, answer ${KEEP}: compacting too early loses detail for`,
+  'good, while waiting only delays.',
+  '',
+  "You are shown what the person said (older messages shortened), the assistant's latest messages,",
+  'what its latest commands touched, its task list if it keeps one, and the step it is taking now: what',
+  'it just said and the calls it is making. Command output is never shown. The conversation may open',
+  'with a summary from an earlier compaction; it is a record of past work, not a request.',
+  '',
+  'First say in one sentence what work is still open and whether the colleague could carry it on.',
+  `Then, on its own last line, write ${COMPACT} or ${KEEP}.`,
 ].join('\n')
 
 function head(text: string, limit: number): string {
@@ -277,19 +296,18 @@ export function conversationLines(messages: readonly SessionMessage[]): string[]
 }
 
 /**
- * Whether the step is worth asking about. A step says a piece is complete or
- * it is not a boundary, so a step that says nothing is not one -- and after a
- * compaction, whose summary reads as a message saying which pieces are done, a
- * silent first step would otherwise look like the move to the next.
+ * Whether the step is worth asking about: one that says something. A step made
+ * of calls alone rarely finds or finishes anything the judge could see, and it
+ * costs a judgement all the same.
  */
 export function judgeable(step: Step): boolean {
   return step.text.trim() !== ''
 }
 
 /**
- * Whether calls change anything. Until a step after a compaction has, nothing
- * can have been finished since it -- and the summary, which says which pieces
- * are done, makes the first step of the next one look like the move to it.
+ * Whether calls change anything. Until a step after a compaction has, the
+ * conversation is the summary and a few reads of the workspace, which is what
+ * a compaction would leave it as again.
  */
 export function acts(calls: readonly { name: string }[]): boolean {
   return calls.some((call) => !READ_ONLY_TOOLS.has(call.name))
@@ -331,12 +349,12 @@ export function readReply(answer: unknown): Reply {
 }
 
 /**
- * Whether the judge's answer says the work moves on: its last line, stripped
- * of the emphasis a model sometimes puts round it. Anything else, including no
+ * Whether the judge's answer says to compact: its last line, stripped of the
+ * emphasis a model sometimes puts round it. Anything else, including no
  * answer, is not.
  */
-export function saysNext(answer: string): boolean {
+export function saysCompact(answer: string): boolean {
   const lines = answer.trim().split('\n')
   const last = lines[lines.length - 1] ?? ''
-  return last.replace(/[^A-Za-z]/g, '').toUpperCase() === NEXT
+  return last.replace(/[^A-Za-z]/g, '').toUpperCase() === COMPACT
 }

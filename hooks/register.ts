@@ -1,16 +1,17 @@
 /**
- * taskcut: compaction at sub-task boundaries.
+ * taskcut: compaction where the work can be handed over.
  *
- * Claude Code compacts when the context window fills, which is rarely the moment
- * a piece of work ends: the compaction lands in the middle of one. taskcut moves
- * it to the point where the work moves on from one piece to the next. Once the
- * context is past the floor, a model judges each step the working model makes
- * for whether the work moves on from a finished piece to another. When it
- * does, taskcut calls `$.session.compact()`, the same call `/compact` makes,
- * and Claude Code compacts as it always does.
+ * Claude Code compacts when the context window fills, which is rarely a moment
+ * the conversation can spare: the compaction lands in the middle of work that
+ * still needs what it summarises away. taskcut moves it to a moment that can.
+ * Once the context is past the floor, a model judges each step the working
+ * model makes for whether the work could be handed over there -- whether every
+ * piece still open would go on as well from the summary and the workspace.
+ * When it could, taskcut calls `$.session.compact()`, the same call `/compact`
+ * makes, and Claude Code compacts as it always does.
  *
  * The end of a turn is left alone: the work is back with the person, and what
- * they say next may well be about the piece just finished. When they move on,
+ * they say next is usually about the piece just finished. When they move on,
  * `/compact` is theirs.
  *
  * A compaction can only run between turns. So taskcut ends the turn before its
@@ -30,7 +31,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import { ENV_VAR, INERT, decideActivation, type Activation } from './activation'
 import { judgingFrom, readConfig, type Config } from './config'
-import { ANSWER_TOKENS, JUDGE_SYSTEM, acts, judgeable, judgePrompt, readReply, saysNext, type Step } from './judge'
+import { ANSWER_TOKENS, JUDGE_SYSTEM, acts, judgeable, judgePrompt, readReply, saysCompact, type Step } from './judge'
 import { NOTHING, addCompaction, addJudgement, judgementLine, readUsage, spendReport, type Spend } from './spend'
 
 /**
@@ -46,10 +47,10 @@ let activation: Activation = INERT
 let interactive = false
 
 /**
- * The context fill at which a step was judged to move the work on to another
- * piece. The turn is ended before its next request.
+ * The context fill at which a step was judged a moment the work could be
+ * handed over. The turn is ended before its next request.
  */
-let movedOnAt: number | undefined
+let handOverAt: number | undefined
 
 /** Set when taskcut itself ended the running turn in order to compact. */
 let cutting = false
@@ -102,10 +103,10 @@ async function pastFloor($: EngineInterface, config: Config): Promise<number | u
 }
 
 /**
- * Whether the work moves on from a finished piece to another at this moment,
- * as the judge sees it. Anything but a clear yes keeps the context: a
- * compaction in the middle of a piece costs re-reading, and a missed boundary
- * only waits for the next one.
+ * Whether the work could be handed over at this moment, as the judge sees it.
+ * Anything but a clear yes keeps the context: a compaction that drops what
+ * the work still needs cannot be taken back, and a moment missed only waits
+ * for the next one.
  *
  * Every call is counted, answered or not, and logged to the debug log with
  * what it cost.
@@ -113,7 +114,7 @@ async function pastFloor($: EngineInterface, config: Config): Promise<number | u
 async function judge($: EngineInterface, step: Step, config: Config, percent: number): Promise<boolean> {
   const started = Date.now()
   let verdict: string
-  let movesOn = false
+  let handOver = false
   let answer: unknown
   try {
     const prompt = judgePrompt(await $.session.messages(), step)
@@ -124,15 +125,15 @@ async function judge($: EngineInterface, step: Step, config: Config, percent: nu
     spend = addJudgement(spend, readUsage(answer), 'text' in reply)
     if ('reason' in reply) verdict = `could not judge the step (${reply.reason})`
     else {
-      movesOn = saysNext(reply.text)
-      verdict = `step judged ${movesOn ? 'a new piece' : 'the same work'}`
+      handOver = saysCompact(reply.text)
+      verdict = `step judged ${handOver ? 'a moment to compact' : 'a moment to keep'}`
     }
   } catch (error) {
     // Refused before it was sent: nothing was spent.
     verdict = `could not judge the step (${String(error)})`
   }
   $.ui.log(judgementLine(percent, verdict, config.model, readUsage(answer), Date.now() - started), { to: 'debug' })
-  return movesOn
+  return handOver
 }
 
 /**
@@ -183,17 +184,17 @@ export const register: Register = (on, options) => {
   })
 
   // Inside a turn: each step the main loop makes is judged once its response
-  // is in, while the engine runs the step's tools, and a step that moves on to
-  // another piece ends the turn before the next request goes out -- with every
+  // is in, while the engine runs the step's tools, and a step at which the work
+  // could be handed over ends the turn before the next request goes out -- with every
   // tool result of that step already in. The judgement is a `$` call made
   // inside the step's own hook, so it runs beside the tools and costs the
   // hook's budget nothing; the engine sends the next request once both are done.
   on('turn.step', async function* ($, e, next) {
     if (e.agentId !== undefined || !activation.active || !interactive) return yield* next(e)
 
-    if (movedOnAt !== undefined) {
-      $.ui.log(`context at ${movedOnAt}%, compacting before the next piece`)
-      movedOnAt = undefined
+    if (handOverAt !== undefined) {
+      $.ui.log(`context at ${handOverAt}%, compacting: the work can go on from here without what it drops`)
+      handOverAt = undefined
       try {
         await $.turn.abort({ turnId: e.turnId })
         cutting = true
@@ -212,7 +213,7 @@ export const register: Register = (on, options) => {
     if (result.stopReason !== 'tool_use' || !acted || !lastSentOnResults || !judgeable(step)) return result
     const percent = await pastFloor($, config)
     if (percent === undefined) return result
-    if (await judge($, step, config, percent)) movedOnAt = percent
+    if (await judge($, step, config, percent)) handOverAt = percent
     return result
   })
 
@@ -221,7 +222,7 @@ export const register: Register = (on, options) => {
     // compaction is raised against it.
     const result = await next(e)
     if (e.agentId !== undefined) return result
-    movedOnAt = undefined
+    handOverAt = undefined
     if (!cutting) return result
 
     cutting = false

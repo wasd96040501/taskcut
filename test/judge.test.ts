@@ -2,13 +2,13 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 
 import {
+  COMPACT,
   JUDGE_SYSTEM,
-  NEXT,
+  KEEP,
   RECENT_ACTIONS,
   RECENT_REQUESTS,
   RECENT_SAYINGS,
   REQUEST_LINE,
-  SAME,
   STEP_LIMIT,
   TOUCH_LIMIT,
   beforeStep,
@@ -18,7 +18,7 @@ import {
   judgeable,
   judgePrompt,
   readReply,
-  saysNext,
+  saysCompact,
   taskList,
   touched,
 } from '../hooks/judge.ts'
@@ -281,7 +281,7 @@ describe('judgePrompt', () => {
   })
 
   test('the question names both answers', () => {
-    assert.ok(JUDGE_SYSTEM.includes(NEXT) && JUDGE_SYSTEM.includes(SAME))
+    assert.ok(JUDGE_SYSTEM.includes(COMPACT) && JUDGE_SYSTEM.includes(KEEP))
   })
 })
 
@@ -305,23 +305,23 @@ describe('readReply', () => {
   })
 })
 
-describe('saysNext', () => {
+describe('saysCompact', () => {
   test('reads the verdict off the last line', () => {
-    assert.equal(saysNext('It reports task 2 complete and starts task 3.\nNEXT'), true)
-    assert.equal(saysNext('It reports the last task complete.\nSAME'), false)
+    assert.equal(saysCompact('Task 2 is done and task 3 needs none of it.\nCOMPACT'), true)
+    assert.equal(saysCompact('The next step needs what the query printed.\nKEEP'), false)
   })
 
   test('ignores the emphasis a model puts round the word', () => {
-    assert.equal(saysNext('Task 1 is finished; task 2 starts.\n**NEXT**'), true)
-    assert.equal(saysNext('Task 1 is finished; task 2 starts.\n"Next."'), true)
+    assert.equal(saysCompact('Nothing open needs the earlier output.\n**COMPACT**'), true)
+    assert.equal(saysCompact('Nothing open needs the earlier output.\n"Compact."'), true)
   })
 
   test('a verdict mentioned in the reasoning is not the verdict', () => {
-    assert.equal(saysNext('It does not move to the NEXT task yet.\nSAME'), false)
+    assert.equal(saysCompact('It is not yet safe to COMPACT.\nKEEP'), false)
   })
 
-  test('no answer is not a new piece', () => {
-    assert.equal(saysNext(''), false)
-    assert.equal(saysNext('I cannot tell.'), false)
+  test('no answer is not a moment to compact', () => {
+    assert.equal(saysCompact(''), false)
+    assert.equal(saysCompact('I cannot tell.'), false)
   })
 })

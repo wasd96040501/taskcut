@@ -15,7 +15,18 @@
 
 import type { EngineInterface, Register } from 'claude-code'
 
-import { ANSWER_TOKENS, JUDGE_SYSTEM, judgePrompt, readReply, saysNext, NEXT, SAME, type Step } from './judge'
+import * as judge from './judge'
+import { ANSWER_TOKENS, JUDGE_SYSTEM, judgePrompt, readReply, type Step } from './judge'
+
+/**
+ * The verdict, in whichever words the judge being measured writes it: a judge
+ * up to 0.9 answers NEXT or SAME, the handoff judge COMPACT or KEEP. Read
+ * through the module, so that either can be copied in and measured.
+ */
+const words = judge as unknown as Record<string, unknown>
+const YES = String(words.COMPACT ?? words.NEXT)
+const NO = String(words.KEEP ?? words.SAME)
+const says = (words.saysCompact ?? words.saysNext) as (answer: string) => boolean
 
 type Messages = Parameters<typeof judgePrompt>[0]
 
@@ -67,7 +78,7 @@ async function ask($: EngineInterface, model: string, messages: Messages, memory
     attempts++
   } while (transient(answer) && attempts < ATTEMPTS)
   const reply = readReply(answer)
-  const verdict = 'text' in reply ? (saysNext(reply.text) ? NEXT : SAME) : `unanswered: ${reply.reason}`
+  const verdict = 'text' in reply ? (says(reply.text) ? YES : NO) : `unanswered: ${reply.reason}`
   const usage = typeof answer === 'object' && answer !== null && 'usage' in answer ? (answer as { usage: unknown }).usage : null
   return { id: item.id, run, verdict, text: 'text' in reply ? reply.text : '', usage, attempts, ms: Date.now() - started, promptChars: prompt.length }
 }
