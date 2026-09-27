@@ -32,7 +32,7 @@ else.
 
 Usage:
   churn.py <directory> <level>      lay the files down
-  churn.py --workload <level> [--silent]    print the workload's JSON
+  churn.py --workload <level> [silent|blind]    print the workload's JSON
 """
 
 import json
@@ -94,6 +94,23 @@ SILENT_BRIEFING = (
 SILENT_STEP = (
     "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then report its owner and its "
     "retry budget."
+)
+
+#: Told nothing of the settings. The silent pilot showed why: told it would be
+#: asked about them at the end, the model wrote a running record of all six
+#: into every report unprompted, and answered from that. A value a model does
+#: not know will matter is one it keeps no record of, and that is the value a
+#: crowded context can lose behind its successors.
+BLIND_BRIEFING = (
+    "I am auditing the ingest pipeline before a release. We will go through its twelve services "
+    "one at a time, and I will tell you which. For each, I need its owner and its retry budget, and "
+    "nothing else.\n\nUse no tool but the one Read each step names: no search, no command, no second "
+    "look at an earlier file. Acknowledge this and wait for the first service."
+)
+
+BLIND_STEP = (
+    "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then give its owner and its "
+    "retry budget, and nothing else."
 )
 
 #: For the silent variant: the service after which each setting's value is asked
@@ -180,7 +197,16 @@ def tracked(level: str) -> list[dict]:
     return steps
 
 
-def workload(level: str, silent: bool = False) -> dict:
+#: How much the model is told about the settings: asked to report them every
+#: step, told it will be asked at the end, or told nothing until then.
+VARIANTS = {
+    "reported": None,
+    "silent": (SILENT_BRIEFING, SILENT_STEP, "nothing reported along the way"),
+    "blind": (BLIND_BRIEFING, BLIND_STEP, "the settings never mentioned until the end"),
+}
+
+
+def workload(level: str, variant: str = "reported") -> dict:
     files = [f"svc_{i:02d}.py" for i in range(SERVICES)]
     steps = tracked(level)
     final = steps[-1]
@@ -195,7 +221,7 @@ def workload(level: str, silent: bool = False) -> dict:
         }
         for n, (key, value) in enumerate(final.items(), 1)
     ]
-    if not silent:
+    if variant == "reported":
         return {
             "name": f"churn-{level}",
             "description": (
@@ -224,16 +250,17 @@ def workload(level: str, silent: bool = False) -> dict:
             "expect": [value],
             "reject": [v for v in every if v != value],
         })
+    briefing, step, told = VARIANTS[variant]
     return {
-        "name": f"churn-{level}-silent",
+        "name": f"churn-{level}-{variant}",
         "description": (
-            f"churn-{level}'s twelve files with nothing reported along the way: {overrides} overrides of "
+            f"churn-{level}'s twelve files with {told}: {overrides} overrides of "
             f"six settings, asked about only at the end, as they stand and as they stood mid-way."
         ),
         "source": {"kind": "generated", "generator": f"churn.py {level}"},
         "files": files,
-        "briefing": SILENT_BRIEFING,
-        "step_template": SILENT_STEP,
+        "briefing": briefing,
+        "step_template": step,
         "probes": now + then,
     }
 
@@ -246,8 +273,8 @@ def main(out: str, level: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) in (3, 4) and sys.argv[1] == "--workload":
-        print(json.dumps(workload(sys.argv[2], silent=sys.argv[3:] == ["--silent"]), indent=1))
+    if len(sys.argv) in (3, 4) and sys.argv[1] == "--workload" and (sys.argv[3:] or ["reported"])[0] in VARIANTS:
+        print(json.dumps(workload(sys.argv[2], *sys.argv[3:]), indent=1))
     elif len(sys.argv) == 3 and sys.argv[2] in LEVELS:
         main(sys.argv[1], sys.argv[2])
     else:

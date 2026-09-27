@@ -92,7 +92,7 @@ class Churn(unittest.TestCase):
 
     def test_the_committed_workloads_are_what_the_generator_prints(self):
         for level in ("lo", "mid", "hi"):
-            for flag, suffix in (([], ""), (["--silent"], "-silent")):
+            for flag, suffix in (([], ""), (["silent"], "-silent"), (["blind"], "-blind")):
                 printed = subprocess.run(["python3", str(REPO / "eval/generators/churn.py"), "--workload", level, *flag],
                                          check=True, capture_output=True, text=True).stdout
                 committed = (REPO / f"eval/workloads/churn-{level}{suffix}.json").read_text()

@@ -1,0 +1,212 @@
+{
+ "name": "churn-hi-blind",
+ "description": "churn-hi's twelve files with the settings never mentioned until the end: 33 overrides of six settings, asked about only at the end, as they stand and as they stood mid-way.",
+ "source": {
+  "kind": "generated",
+  "generator": "churn.py hi"
+ },
+ "files": [
+  "svc_00.py",
+  "svc_01.py",
+  "svc_02.py",
+  "svc_03.py",
+  "svc_04.py",
+  "svc_05.py",
+  "svc_06.py",
+  "svc_07.py",
+  "svc_08.py",
+  "svc_09.py",
+  "svc_10.py",
+  "svc_11.py"
+ ],
+ "briefing": "I am auditing the ingest pipeline before a release. We will go through its twelve services one at a time, and I will tell you which. For each, I need its owner and its retry budget, and nothing else.\n\nUse no tool but the one Read each step names: no search, no command, no second look at an earlier file. Acknowledge this and wait for the first service.",
+ "step_template": "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then give its owner and its retry budget, and nothing else.",
+ "probes": [
+  {
+   "id": "F1",
+   "kind": "superseded",
+   "question": "State the pipeline-wide DEFAULT_TIMEOUT_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "2714"
+   ],
+   "reject": [
+    "7810",
+    "4029",
+    "2985",
+    "8300",
+    "6825",
+    "6642",
+    "8219"
+   ]
+  },
+  {
+   "id": "F2",
+   "kind": "superseded",
+   "question": "State the pipeline-wide BATCH_LIMIT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "2663"
+   ],
+   "reject": [
+    "3158",
+    "9446",
+    "8805",
+    "1066",
+    "6030",
+    "5550"
+   ]
+  },
+  {
+   "id": "F3",
+   "kind": "superseded",
+   "question": "State the pipeline-wide LEASE_TTL_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "8052"
+   ],
+   "reject": [
+    "1466",
+    "3578",
+    "6225"
+   ]
+  },
+  {
+   "id": "F4",
+   "kind": "superseded",
+   "question": "State the pipeline-wide SHARD_COUNT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "9662"
+   ],
+   "reject": [
+    "7394",
+    "3808",
+    "3720"
+   ]
+  },
+  {
+   "id": "F5",
+   "kind": "superseded",
+   "question": "State the pipeline-wide QUOTA_BURST in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "4628"
+   ],
+   "reject": [
+    "7208",
+    "1441",
+    "4894",
+    "7463",
+    "8835",
+    "9101"
+   ]
+  },
+  {
+   "id": "F6",
+   "kind": "superseded",
+   "question": "State the pipeline-wide FENCE_EPOCH in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7900"
+   ],
+   "reject": [
+    "6259",
+    "5507",
+    "3327",
+    "5493",
+    "5390",
+    "3736",
+    "8641",
+    "7797"
+   ]
+  },
+  {
+   "id": "H1",
+   "kind": "superseded",
+   "question": "Which value of the pipeline-wide DEFAULT_TIMEOUT_MS was in force once svc_04.py had been read, before svc_05.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "8300"
+   ],
+   "reject": [
+    "7810",
+    "4029",
+    "2985",
+    "6825",
+    "6642",
+    "8219",
+    "2714"
+   ]
+  },
+  {
+   "id": "H2",
+   "kind": "superseded",
+   "question": "Which value of the pipeline-wide BATCH_LIMIT was in force once svc_05.py had been read, before svc_06.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "1066"
+   ],
+   "reject": [
+    "3158",
+    "9446",
+    "8805",
+    "6030",
+    "5550",
+    "2663"
+   ]
+  },
+  {
+   "id": "H3",
+   "kind": "superseded",
+   "question": "Which value of the pipeline-wide LEASE_TTL_MS was in force once svc_06.py had been read, before svc_07.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "6225"
+   ],
+   "reject": [
+    "1466",
+    "3578",
+    "8052"
+   ]
+  },
+  {
+   "id": "H4",
+   "kind": "superseded",
+   "question": "Which value of the pipeline-wide SHARD_COUNT was in force once svc_07.py had been read, before svc_08.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "3808"
+   ],
+   "reject": [
+    "7394",
+    "3720",
+    "9662"
+   ]
+  },
+  {
+   "id": "H5",
+   "kind": "superseded",
+   "question": "Which value of the pipeline-wide QUOTA_BURST was in force once svc_08.py had been read, before svc_09.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "8835"
+   ],
+   "reject": [
+    "7208",
+    "1441",
+    "4894",
+    "7463",
+    "9101",
+    "4628"
+   ]
+  },
+  {
+   "id": "H6",
+   "kind": "superseded",
+   "question": "Which value of the pipeline-wide FENCE_EPOCH was in force once svc_09.py had been read, before svc_10.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "8641"
+   ],
+   "reject": [
+    "6259",
+    "5507",
+    "3327",
+    "5493",
+    "5390",
+    "3736",
+    "7797",
+    "7900"
+   ]
+  }
+ ]
+}
