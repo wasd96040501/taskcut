@@ -18,6 +18,13 @@ tokens cannot see: earlier values of the same key, retrieved in place of the
 current one (proactive interference, arXiv 2506.08184). The context is the
 same size at every level; only the interference differs.
 
+Each file is read with the Read tool, not `cat`. A file is about 36,000
+characters; Claude Code (2.1.283) keeps a Bash output that large on disk and
+puts a preview of about 2,000 characters in the context, so a `cat` never puts
+the file where interference could happen, and the model goes back to the file
+with a search instead -- which the first pilot of this workload did at every
+step. Read returns the whole file.
+
 After each file the model reports the six settings in force, so the answer is
 graded at every step, against a value known in advance, and a wrong answer can
 be told apart as stale -- an earlier value of the same setting -- or anything
@@ -62,12 +69,13 @@ BRIEFING = (
     "your report with one line in exactly this form, giving the value of each setting in force once "
     "that service has been read:\n\nIN FORCE: "
     + " ".join(f"{k}=<n>" for k in KEYS)
-    + "\n\nAnswer from what you have read. Run nothing but the one command each step names. "
+    + "\n\nAnswer from what you have read. Use no tool but the one Read each step names: no search, "
+    "no command, no second look at an earlier file. "
     "Acknowledge this and wait for the first service."
 )
 
 STEP = (
-    "Sub-task {n} of {total}: run `cat {file}` to read the whole file, then report its owner and its "
+    "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then report its owner and its "
     "retry budget, and end with the IN FORCE line."
 )
 
