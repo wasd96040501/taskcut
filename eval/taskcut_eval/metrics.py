@@ -202,14 +202,19 @@ class Drift:
         return None
 
 
-def constraint_drift(transcript: Transcript, workload: Workload) -> list[Drift]:
-    steps = workload.steps()
-    answers = []
-    for step in steps:
+def step_turns(transcript: Transcript, workload: Workload) -> list[Turn | None]:
+    """The turn that answered each step, in order; None for a step never answered."""
+    out = []
+    for step in workload.steps():
         # An arm may append its own clause to a step, so match on the step text.
         candidates = [t for t in transcript.turns if t.prompt.strip().startswith(step.strip()[:60])]
         live = [t for t in candidates if t.requests] or candidates
-        answers.append(live[-1].answer if live else "")
+        out.append(live[-1] if live else None)
+    return out
+
+
+def constraint_drift(transcript: Transcript, workload: Workload) -> list[Drift]:
+    answers = [t.answer if t else "" for t in step_turns(transcript, workload)]
     out = []
     for constraint in workload.constraints:
         expression = re.compile(constraint.pattern, re.IGNORECASE)
@@ -221,6 +226,51 @@ def constraint_drift(transcript: Transcript, workload: Workload) -> list[Drift]:
             )
         )
     return out
+
+
+#: How a tracked value was reported: the one in force, an earlier value of the
+#: same key, something else, or not at all.
+CURRENT, STALE, OTHER, MISSING = "current", "stale", "other", "missing"
+
+
+@dataclass(frozen=True)
+class Tracking:
+    """Every tracked value at every step, graded. The shape over steps is the finding."""
+
+    #: One dict per step, key -> CURRENT | STALE | OTHER | MISSING.
+    per_step: tuple[dict[str, str], ...]
+    #: Tool calls each step made. The workload names one; more is the model
+    #: going back to the source rather than trusting its context.
+    calls: tuple[int, ...]
+
+    def count(self, verdict: str) -> int:
+        return sum(1 for step in self.per_step for v in step.values() if v == verdict)
+
+    @property
+    def graded(self) -> int:
+        return sum(len(step) for step in self.per_step)
+
+
+def tracking(transcript: Transcript, workload: Workload) -> Tracking | None:
+    if workload.tracked is None:
+        return None
+    per_step, calls = [], []
+    for turn, expected in zip(step_turns(transcript, workload), workload.tracked.steps):
+        answer = turn.answer if turn else ""
+        verdicts = {}
+        for key, value in expected.items():
+            found = re.findall(workload.tracked.pattern.replace("{key}", re.escape(key)), answer)
+            # The last: a report may mention a value on the way to the line that counts.
+            given = found[-1] if found else None
+            verdicts[key] = (
+                MISSING if given is None
+                else CURRENT if given == value["current"]
+                else STALE if given in value["stale"]
+                else OTHER
+            )
+        per_step.append(verdicts)
+        calls.append(len(turn.tools) if turn else 0)
+    return Tracking(per_step=tuple(per_step), calls=tuple(calls))
 
 
 @dataclass(frozen=True)
@@ -290,6 +340,8 @@ class Run:
     #: What the judge cost, from the run's sidecar. None for a run recorded
     #: before taskcut logged it, which is not the same as a run that judged nothing.
     judging: Judging | None = None
+    #: For a workload that tracks values step by step; None otherwise.
+    tracking: Tracking | None = None
 
     @property
     def fidelity(self) -> dict[str, Fidelity]:
@@ -327,6 +379,7 @@ def summarise(transcript: Transcript, workload: Workload, arm: str) -> Run:
         continued=sum(t.prompt.startswith(CONTINUE_OPENING) for t in transcript.turns),
         requests=[r.read + r.write + r.plain for r in transcript.requests],
         elapsed=transcript.elapsed,
+        tracking=tracking(transcript, workload),
     )
 
 

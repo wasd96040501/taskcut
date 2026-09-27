@@ -105,6 +105,28 @@ def drift_table(runs: list[Run]) -> str:
     return table(["arm", "rule", "steps held", "first lapse", "by step"], rows)
 
 
+def tracking_table(runs: list[Run]) -> str:
+    """Per step: `+` every value in force, `s` any earlier value given, `x` anything else wrong."""
+    rows = []
+    for run in runs:
+        t = run.tracking
+        if t is None:
+            continue
+        marks = "".join(
+            "s" if "stale" in step.values() else "x" if set(step.values()) - {"current"} else "+"
+            for step in t.per_step
+        )
+        rows.append([
+            run.arm,
+            f"{t.count('current')}/{t.graded}",
+            str(t.count("stale")),
+            str(t.count("other") + t.count("missing")),
+            marks,
+            " ".join(str(c) for c in t.calls),
+        ])
+    return table(["arm", "in force", "stale", "other", "by step", "calls by step"], rows)
+
+
 def probe_detail(run: Run) -> str:
     rows = []
     for p in run.probes:
@@ -140,6 +162,12 @@ def render(title: str, runs: list[Run], model: Model | None = None) -> str:
                 "`+` is a step that applied the rule, `.` one that did not. A rule",
                 "is set once, in the opening turn, and never repeated.", "",
                 drift_table(runs), ""]
+    if any(run.tracking for run in runs):
+        out += ["", "## Values in force, reported step by step", "",
+                "Each step reports every tracked value. `+` is a step that gave each",
+                "the value in force, `s` one that gave an earlier value of the same",
+                "key -- the error interference makes -- and `x` one wrong otherwise.", "",
+                tracking_table(runs), ""]
     out += ["", "## Fidelity after the work", "",
             f"`{KIND_HEADLINE}` facts were asked for during the work, so a conclusion",
             f"written at a boundary should carry them. `{KIND_INCIDENTAL}` facts were in",

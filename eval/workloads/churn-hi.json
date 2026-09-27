@@ -1,0 +1,696 @@
+{
+ "name": "churn-hi",
+ "description": "Twelve service modules, identical in length at every level, in which six pipeline-wide settings are overridden 33 times in all. The settings in force are graded after every file.",
+ "source": {
+  "kind": "generated",
+  "generator": "churn.py hi"
+ },
+ "files": [
+  "svc_00.py",
+  "svc_01.py",
+  "svc_02.py",
+  "svc_03.py",
+  "svc_04.py",
+  "svc_05.py",
+  "svc_06.py",
+  "svc_07.py",
+  "svc_08.py",
+  "svc_09.py",
+  "svc_10.py",
+  "svc_11.py"
+ ],
+ "briefing": "I am auditing the ingest pipeline before a release. We will go through its twelve services one at a time, and I will tell you which. Six settings are pipeline-wide: DEFAULT_TIMEOUT_MS, BATCH_LIMIT, LEASE_TTL_MS, SHARD_COUNT, QUOTA_BURST, FENCE_EPOCH. svc_00 declares them, and a later service may override any of them from that point on; a constant a service declares for itself changes nothing pipeline-wide. After every service, end your report with one line in exactly this form, giving the value of each setting in force once that service has been read:\n\nIN FORCE: DEFAULT_TIMEOUT_MS=<n> BATCH_LIMIT=<n> LEASE_TTL_MS=<n> SHARD_COUNT=<n> QUOTA_BURST=<n> FENCE_EPOCH=<n>\n\nAnswer from what you have read. Run nothing but the one command each step names. Acknowledge this and wait for the first service.",
+ "step_template": "Sub-task {n} of {total}: run `cat {file}` to read the whole file, then report its owner and its retry budget, and end with the IN FORCE line.",
+ "tracked": {
+  "pattern": "\\b{key}\\s*[=:]\\s*(\\d+)",
+  "steps": [
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "4029",
+     "stale": [
+      "7810"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "9446",
+     "stale": [
+      "3158"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "5507",
+     "stale": [
+      "6259"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "4029",
+     "stale": [
+      "7810"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "8805",
+     "stale": [
+      "3158",
+      "9446"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "3578",
+     "stale": [
+      "1466"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "1441",
+     "stale": [
+      "7208"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "5507",
+     "stale": [
+      "6259"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "2985",
+     "stale": [
+      "7810",
+      "4029"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "8805",
+     "stale": [
+      "3158",
+      "9446"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "3578",
+     "stale": [
+      "1466"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3808",
+     "stale": [
+      "7394"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "1441",
+     "stale": [
+      "7208"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "3327",
+     "stale": [
+      "6259",
+      "5507"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "8300",
+     "stale": [
+      "7810",
+      "4029",
+      "2985"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "8805",
+     "stale": [
+      "3158",
+      "9446"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "3578",
+     "stale": [
+      "1466"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3808",
+     "stale": [
+      "7394"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "4894",
+     "stale": [
+      "7208",
+      "1441"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "5493",
+     "stale": [
+      "6259",
+      "5507",
+      "3327"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "6825",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "1066",
+     "stale": [
+      "3158",
+      "9446",
+      "8805"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "6225",
+     "stale": [
+      "1466",
+      "3578"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3808",
+     "stale": [
+      "7394"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "4894",
+     "stale": [
+      "7208",
+      "1441"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "5493",
+     "stale": [
+      "6259",
+      "5507",
+      "3327"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "6642",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300",
+      "6825"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "6030",
+     "stale": [
+      "3158",
+      "9446",
+      "8805",
+      "1066"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "6225",
+     "stale": [
+      "1466",
+      "3578"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3808",
+     "stale": [
+      "7394"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "7463",
+     "stale": [
+      "7208",
+      "1441",
+      "4894"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "5493",
+     "stale": [
+      "6259",
+      "5507",
+      "3327"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "8219",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300",
+      "6825",
+      "6642"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "6030",
+     "stale": [
+      "3158",
+      "9446",
+      "8805",
+      "1066"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "6225",
+     "stale": [
+      "1466",
+      "3578"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3808",
+     "stale": [
+      "7394"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "8835",
+     "stale": [
+      "7208",
+      "1441",
+      "4894",
+      "7463"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "5390",
+     "stale": [
+      "6259",
+      "5507",
+      "3327",
+      "5493"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "8219",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300",
+      "6825",
+      "6642"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "5550",
+     "stale": [
+      "3158",
+      "9446",
+      "8805",
+      "1066",
+      "6030"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "6225",
+     "stale": [
+      "1466",
+      "3578"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3720",
+     "stale": [
+      "7394",
+      "3808"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "8835",
+     "stale": [
+      "7208",
+      "1441",
+      "4894",
+      "7463"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "3736",
+     "stale": [
+      "6259",
+      "5507",
+      "3327",
+      "5493",
+      "5390"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "8219",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300",
+      "6825",
+      "6642"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "2663",
+     "stale": [
+      "3158",
+      "9446",
+      "8805",
+      "1066",
+      "6030",
+      "5550"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "8052",
+     "stale": [
+      "1466",
+      "3578",
+      "6225"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3720",
+     "stale": [
+      "7394",
+      "3808"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "8835",
+     "stale": [
+      "7208",
+      "1441",
+      "4894",
+      "7463"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "8641",
+     "stale": [
+      "6259",
+      "5507",
+      "3327",
+      "5493",
+      "5390",
+      "3736"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "2714",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300",
+      "6825",
+      "6642",
+      "8219"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "2663",
+     "stale": [
+      "3158",
+      "9446",
+      "8805",
+      "1066",
+      "6030",
+      "5550"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "8052",
+     "stale": [
+      "1466",
+      "3578",
+      "6225"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "3720",
+     "stale": [
+      "7394",
+      "3808"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "9101",
+     "stale": [
+      "7208",
+      "1441",
+      "4894",
+      "7463",
+      "8835"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "7797",
+     "stale": [
+      "6259",
+      "5507",
+      "3327",
+      "5493",
+      "5390",
+      "3736",
+      "8641"
+     ]
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "2714",
+     "stale": [
+      "7810",
+      "4029",
+      "2985",
+      "8300",
+      "6825",
+      "6642",
+      "8219"
+     ]
+    },
+    "BATCH_LIMIT": {
+     "current": "2663",
+     "stale": [
+      "3158",
+      "9446",
+      "8805",
+      "1066",
+      "6030",
+      "5550"
+     ]
+    },
+    "LEASE_TTL_MS": {
+     "current": "8052",
+     "stale": [
+      "1466",
+      "3578",
+      "6225"
+     ]
+    },
+    "SHARD_COUNT": {
+     "current": "9662",
+     "stale": [
+      "7394",
+      "3808",
+      "3720"
+     ]
+    },
+    "QUOTA_BURST": {
+     "current": "4628",
+     "stale": [
+      "7208",
+      "1441",
+      "4894",
+      "7463",
+      "8835",
+      "9101"
+     ]
+    },
+    "FENCE_EPOCH": {
+     "current": "7900",
+     "stale": [
+      "6259",
+      "5507",
+      "3327",
+      "5493",
+      "5390",
+      "3736",
+      "8641",
+      "7797"
+     ]
+    }
+   }
+  ]
+ },
+ "probes": [
+  {
+   "id": "F1",
+   "kind": "superseded",
+   "question": "State the pipeline-wide DEFAULT_TIMEOUT_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "2714"
+   ],
+   "reject": [
+    "7810",
+    "4029",
+    "2985",
+    "8300",
+    "6825",
+    "6642",
+    "8219"
+   ]
+  },
+  {
+   "id": "F2",
+   "kind": "superseded",
+   "question": "State the pipeline-wide BATCH_LIMIT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "2663"
+   ],
+   "reject": [
+    "3158",
+    "9446",
+    "8805",
+    "1066",
+    "6030",
+    "5550"
+   ]
+  },
+  {
+   "id": "F3",
+   "kind": "superseded",
+   "question": "State the pipeline-wide LEASE_TTL_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "8052"
+   ],
+   "reject": [
+    "1466",
+    "3578",
+    "6225"
+   ]
+  },
+  {
+   "id": "F4",
+   "kind": "superseded",
+   "question": "State the pipeline-wide SHARD_COUNT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "9662"
+   ],
+   "reject": [
+    "7394",
+    "3808",
+    "3720"
+   ]
+  },
+  {
+   "id": "F5",
+   "kind": "superseded",
+   "question": "State the pipeline-wide QUOTA_BURST in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "4628"
+   ],
+   "reject": [
+    "7208",
+    "1441",
+    "4894",
+    "7463",
+    "8835",
+    "9101"
+   ]
+  },
+  {
+   "id": "F6",
+   "kind": "superseded",
+   "question": "State the pipeline-wide FENCE_EPOCH in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7900"
+   ],
+   "reject": [
+    "6259",
+    "5507",
+    "3327",
+    "5493",
+    "5390",
+    "3736",
+    "8641",
+    "7797"
+   ]
+  }
+ ]
+}

@@ -12,7 +12,7 @@ import re
 import subprocess
 from statistics import mean
 
-from . import arms, driver, judgebench, judgecases, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
+from . import arms, driver, judgebench, judgecases, load, mechanism, metrics, models, replay, replaycheck, report, transcript, workload
 
 HERE = Path(__file__).resolve().parent
 EVAL_ROOT = HERE.parent
@@ -193,6 +193,10 @@ def _numbers(run) -> dict:
                    "per_step": list(d.per_step)}
             for d in run.drift
         },
+        "tracking": (
+            {"per_step": list(run.tracking.per_step), "calls": list(run.tracking.calls)}
+            if run.tracking else None
+        ),
         "fidelity": {
             kind: {
                 "asked": f.asked,
@@ -434,6 +438,33 @@ def cmd_replay_check(args) -> int:
     return 0 if outcome.passed else 1
 
 
+def cmd_load(args) -> int:
+    """What each collected transcript's context held that competes with the work."""
+    results = Path(args.results)
+    paths = [Path(p) for p in args.transcripts] or sorted(results.glob("*.jsonl"))
+    rows, summaries = [], {}
+    for path in paths:
+        s = load.summary(load.load(path))
+        if not s:
+            continue
+        summaries[path.stem] = s
+        share = (lambda n: f"{100 * n / s['peak_context']:.0f}%") if s["peak_context"] else (lambda n: "-")
+        rows.append([
+            path.stem, str(s["requests"]), str(s["cuts"]), f"{s['peak_context']:,}",
+            share(s["peak_output"]), f"{s['peak_stale']:,} ({share(s['peak_stale'])})",
+            share(s["peak_redundant"]), str(s["peak_conflicted"]),
+            f"{s['peak_versions']} {s['peak_busiest'][:40]}",
+        ])
+    print(report.table(
+        ["session", "requests", "cuts", "peak context", "tool output", "stale", "redundant", "conflicted", "most versions"],
+        rows,
+    ))
+    if args.out:
+        Path(args.out).write_text(json.dumps(summaries, indent=1, sort_keys=True) + "\n")
+        print(f"load -> {args.out}")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="taskcut_eval", description=__doc__)
     parser.add_argument("--work", default=str(DEFAULT_WORK), help="scratch directory for workspaces and plugin copies")
@@ -501,6 +532,11 @@ def main(argv=None) -> int:
     ck.add_argument("--model", default="sonnet")
     ck.add_argument("--again", action="store_true", help="compare the last check's session again, without running one")
     ck.set_defaults(func=cmd_replay_check)
+
+    ld = sub.add_parser("load", help="what each transcript's context held that competes with the work: stale and redundant tool output")
+    ld.add_argument("transcripts", nargs="*", help="transcripts to read; every one collected under --results when none is given")
+    ld.add_argument("--out", default="", help="write the summaries here as JSON")
+    ld.set_defaults(func=cmd_load)
 
     rep = sub.add_parser("report", help="render the collected results")
     rep.add_argument("--out", default="")

@@ -91,6 +91,23 @@ class Constraint:
 
 
 @dataclass(frozen=True)
+class Tracked:
+    """Values the model reports at every step, each graded against the one in force.
+
+    A constraint is a rule that holds at every step; a tracked value changes
+    from step to step, and so can be wrong in a particular way: the model can
+    give an earlier value of the same thing, which the work has since replaced.
+    That is the error interference makes, and grading every step for it is the
+    point.
+    """
+
+    #: A regular expression with `{key}` in it, and one group: the value.
+    pattern: str
+    #: For each step, each key's value in force after it, and its earlier values.
+    steps: tuple[dict[str, dict], ...]
+
+
+@dataclass(frozen=True)
 class Source:
     """Where the workspace comes from."""
 
@@ -133,6 +150,7 @@ class Workload:
     #: work needs of Claude Code itself, such as its task-list tools, which
     #: are off unless CLAUDE_CODE_ENABLE_TODO_TOOLS is set (2.1.280).
     env: tuple[tuple[str, str], ...] = ()
+    tracked: Tracked | None = None
 
     def steps(self) -> list[str]:
         """The prompt for each sub-task, in order.
@@ -186,6 +204,10 @@ def load(path: str | Path) -> Workload:
         done_marker=raw.get("done_marker", ""),
         max_nudges=int(raw.get("max_nudges", 0)),
         env=tuple(sorted(raw.get("env", {}).items())),
+        tracked=(
+            Tracked(pattern=raw["tracked"]["pattern"], steps=tuple(raw["tracked"]["steps"]))
+            if "tracked" in raw else None
+        ),
     )
 
 
@@ -233,10 +255,12 @@ def materialise(workload: Workload, root: Path, generators: Path) -> Path:
                 raise FileNotFoundError(f"prepare script not found: {script}")
             subprocess.run(["python3", str(script), str(root), *extra], check=True)
     elif workload.source.kind == "generated":
-        script = generators / workload.source.generator
+        # "script.py arg ...", as for `prepare`: one generator, several levels.
+        name, *extra = workload.source.generator.split()
+        script = generators / name
         if not script.exists():
             raise FileNotFoundError(f"generator not found: {script}")
-        subprocess.run(["python3", str(script), str(root)], check=True)
+        subprocess.run(["python3", str(script), str(root), *extra], check=True)
     else:
         raise ValueError(f"unknown source kind: {workload.source.kind}")
 
@@ -274,4 +298,12 @@ def check_ground_truth(workload: Workload, root: Path) -> list[str]:
                 problems.append(f"{workload.name}/{probe.id}: rejects {rejected!r}, which is not in the source files")
         if set(probe.expect) & set(probe.reject):
             problems.append(f"{workload.name}/{probe.id}: expects and rejects the same string")
+    if workload.tracked:
+        if len(workload.tracked.steps) != len(workload.files):
+            problems.append(f"{workload.name}: {len(workload.tracked.steps)} tracked steps for {len(workload.files)} files")
+        for n, step in enumerate(workload.tracked.steps, 1):
+            for key, value in step.items():
+                for v in [value["current"], *value["stale"]]:
+                    if str(v).lower() not in haystack:
+                        problems.append(f"{workload.name}: step {n} tracks {key}={v}, which is not in the source files")
     return problems

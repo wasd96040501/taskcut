@@ -1,0 +1,397 @@
+{
+ "name": "churn-lo",
+ "description": "Twelve service modules, identical in length at every level, in which six pipeline-wide settings are overridden 0 times in all. The settings in force are graded after every file.",
+ "source": {
+  "kind": "generated",
+  "generator": "churn.py lo"
+ },
+ "files": [
+  "svc_00.py",
+  "svc_01.py",
+  "svc_02.py",
+  "svc_03.py",
+  "svc_04.py",
+  "svc_05.py",
+  "svc_06.py",
+  "svc_07.py",
+  "svc_08.py",
+  "svc_09.py",
+  "svc_10.py",
+  "svc_11.py"
+ ],
+ "briefing": "I am auditing the ingest pipeline before a release. We will go through its twelve services one at a time, and I will tell you which. Six settings are pipeline-wide: DEFAULT_TIMEOUT_MS, BATCH_LIMIT, LEASE_TTL_MS, SHARD_COUNT, QUOTA_BURST, FENCE_EPOCH. svc_00 declares them, and a later service may override any of them from that point on; a constant a service declares for itself changes nothing pipeline-wide. After every service, end your report with one line in exactly this form, giving the value of each setting in force once that service has been read:\n\nIN FORCE: DEFAULT_TIMEOUT_MS=<n> BATCH_LIMIT=<n> LEASE_TTL_MS=<n> SHARD_COUNT=<n> QUOTA_BURST=<n> FENCE_EPOCH=<n>\n\nAnswer from what you have read. Run nothing but the one command each step names. Acknowledge this and wait for the first service.",
+ "step_template": "Sub-task {n} of {total}: run `cat {file}` to read the whole file, then report its owner and its retry budget, and end with the IN FORCE line.",
+ "tracked": {
+  "pattern": "\\b{key}\\s*[=:]\\s*(\\d+)",
+  "steps": [
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   },
+   {
+    "DEFAULT_TIMEOUT_MS": {
+     "current": "7810",
+     "stale": []
+    },
+    "BATCH_LIMIT": {
+     "current": "3158",
+     "stale": []
+    },
+    "LEASE_TTL_MS": {
+     "current": "1466",
+     "stale": []
+    },
+    "SHARD_COUNT": {
+     "current": "7394",
+     "stale": []
+    },
+    "QUOTA_BURST": {
+     "current": "7208",
+     "stale": []
+    },
+    "FENCE_EPOCH": {
+     "current": "6259",
+     "stale": []
+    }
+   }
+  ]
+ },
+ "probes": [
+  {
+   "id": "F1",
+   "kind": "headline",
+   "question": "State the pipeline-wide DEFAULT_TIMEOUT_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7810"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F2",
+   "kind": "headline",
+   "question": "State the pipeline-wide BATCH_LIMIT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "3158"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F3",
+   "kind": "headline",
+   "question": "State the pipeline-wide LEASE_TTL_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "1466"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F4",
+   "kind": "headline",
+   "question": "State the pipeline-wide SHARD_COUNT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7394"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F5",
+   "kind": "headline",
+   "question": "State the pipeline-wide QUOTA_BURST in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7208"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F6",
+   "kind": "headline",
+   "question": "State the pipeline-wide FENCE_EPOCH in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "6259"
+   ],
+   "reject": []
+  }
+ ]
+}
