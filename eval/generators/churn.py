@@ -53,8 +53,20 @@ BLOCKS = 160
 #: through the file, and the same in every file and at every level.
 SLOTS = [18, 44, 71, 97, 124, 150]
 
+#: The dense shape: twelve settings and thirty-six numbered lines a file, for a
+#: dose closer to the one proactive interference was found at -- tens of
+#: updates to a key, not a handful. The blind pilot at the six-line shape, 33
+#: overrides in all, was answered without an error.
+DENSE_KEYS = KEYS + ["SPOOL_DEPTH_KB", "CURSOR_TTL_S", "REAP_INTERVAL_S", "TENANT_CAP", "DIGEST_WINDOW", "BUFFER_HWM"]
+DENSE_SLOTS = list(range(4, 148, 4))
+
 #: Overrides per service after svc_00, by level.
-LEVELS = {"lo": 0, "mid": 1, "hi": 3}
+LEVELS = {"lo": 0, "mid": 1, "hi": 3, "lo-dense": 0, "hi-dense": 30}
+
+
+def shape(level: str) -> tuple[list[str], list[int]]:
+    """The settings tracked, and the blocks the numbered lines follow."""
+    return (DENSE_KEYS, DENSE_SLOTS) if level.endswith("-dense") else (KEYS, SLOTS)
 
 #: Every line that carries a number is padded to this, so that a level changes
 #: what a line says and never how long it is.
@@ -130,28 +142,38 @@ def _line(text: str) -> str:
 
 
 def plan(level: str) -> list[list[tuple[str, int, bool]]]:
-    """For each service, its six numbered lines in order: (name, value, overrides?)."""
+    """For each service, its numbered lines in order: (name, value, pipeline-wide?)."""
     overrides = LEVELS[level]
-    pool = random.Random(4242).sample(range(1000, 10000), SERVICES * len(SLOTS))
+    settings, slots_ = shape(level)
+    dense = len(slots_) > len(LOCALS)
+    pool = random.Random(4242).sample(range(1000, 10000), SERVICES * len(slots_))
     services = []
     for i in range(SERVICES):
-        values = pool[i * len(SLOTS):(i + 1) * len(SLOTS)]
+        values = pool[i * len(slots_):(i + 1) * len(slots_)]
+        local = [(f"SVC{i:02d}_{LOCALS[s % len(LOCALS)]}" + (f"_{s:02d}" if dense else ""), values[s], False)
+                 for s in range(len(slots_))]
         if i == 0:
-            services.append([(k, v, True) for k, v in zip(KEYS, values)])
+            # svc_00 declares every setting, in its first lines.
+            services.append([(k, v, True) for k, v in zip(settings, values)] + local[len(settings):])
             continue
         # Which settings this service overrides, and in which of its lines:
         # drawn once per service, so `mid` and `hi` agree on what they share.
         rnd = random.Random(9100 + i)
-        keys = rnd.sample(KEYS, len(KEYS))[:overrides]
-        slots = sorted(rnd.sample(range(len(SLOTS)), len(SLOTS))[:overrides])
-        lines = [(f"SVC{i:02d}_{LOCALS[s]}", values[s], False) for s in range(len(SLOTS))]
+        if overrides <= len(settings):
+            keys = rnd.sample(settings, len(settings))[:overrides]
+        else:
+            # More overrides than settings: some settings more than once a file,
+            # the later line the one in force.
+            keys = [rnd.choice(settings) for _ in range(overrides)]
+        slots = sorted(rnd.sample(range(len(slots_)), len(slots_))[:overrides])
+        lines = list(local)
         for key, s in zip(keys, slots):
             lines[s] = (key, values[s], True)
         services.append(lines)
     return services
 
 
-def render(i: int, lines: list[tuple[str, int, bool]]) -> str:
+def render(i: int, lines: list[tuple[str, int, bool]], slots: list[int]) -> str:
     rnd = random.Random(7000 + i)
     out = [
         f'"""Service svc_{i:02d} of the ingest pipeline."""',
@@ -165,9 +187,9 @@ def render(i: int, lines: list[tuple[str, int, bool]]) -> str:
         "",
     ]
     for j in range(BLOCKS):
-        if j in SLOTS:
-            name, value, pipeline = lines[SLOTS.index(j)]
-            if i == 0:
+        if j in slots:
+            name, value, pipeline = lines[slots.index(j)]
+            if pipeline and i == 0:
                 note = "pipeline-wide; a later service may override it"
             elif pipeline:
                 note = "overrides the pipeline-wide value from here on"
@@ -187,7 +209,7 @@ def render(i: int, lines: list[tuple[str, int, bool]]) -> str:
 
 def tracked(level: str) -> list[dict]:
     """After each service: every setting's value in force, and the values it had before."""
-    history = {k: [] for k in KEYS}
+    history = {k: [] for k in shape(level)[0]}
     steps = []
     for lines in plan(level):
         for name, value, pipeline in lines:
@@ -207,6 +229,9 @@ VARIANTS = {
 
 
 def workload(level: str, variant: str = "reported") -> dict:
+    if shape(level)[0] != KEYS and variant != "blind":
+        # The other briefings name the six settings they report.
+        raise SystemExit(f"{level} has only a blind variant")
     files = [f"svc_{i:02d}.py" for i in range(SERVICES)]
     steps = tracked(level)
     final = steps[-1]
@@ -237,7 +262,8 @@ def workload(level: str, variant: str = "reported") -> dict:
             "probes": now,
         }
     then = []
-    for n, (key, at) in enumerate(zip(KEYS, HISTORY_AT), 1):
+    settings = list(final)
+    for n, (key, at) in enumerate(zip(settings, HISTORY_AT * 2), 1):
         value = steps[at][key]["current"]
         every = final[key]["stale"] + [final[key]["current"]]
         then.append({
@@ -255,7 +281,8 @@ def workload(level: str, variant: str = "reported") -> dict:
         "name": f"churn-{level}-{variant}",
         "description": (
             f"churn-{level}'s twelve files with {told}: {overrides} overrides of "
-            f"six settings, asked about only at the end, as they stand and as they stood mid-way."
+            f"{ {6: 'six', 12: 'twelve'}[len(final)]} settings, asked about only at the end, as they stand "
+            f"and as they stood mid-way."
         ),
         "source": {"kind": "generated", "generator": f"churn.py {level}"},
         "files": files,
@@ -269,7 +296,7 @@ def main(out: str, level: str) -> None:
     os.makedirs(out, exist_ok=True)
     for i, lines in enumerate(plan(level)):
         with open(os.path.join(out, f"svc_{i:02d}.py"), "w") as handle:
-            handle.write(render(i, lines))
+            handle.write(render(i, lines, shape(level)[1]))
 
 
 if __name__ == "__main__":

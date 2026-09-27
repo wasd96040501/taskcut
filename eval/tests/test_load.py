@@ -97,6 +97,18 @@ class Churn(unittest.TestCase):
                                          check=True, capture_output=True, text=True).stdout
                 committed = (REPO / f"eval/workloads/churn-{level}{suffix}.json").read_text()
                 self.assertEqual(json.loads(printed), json.loads(committed))
+        for level in ("lo-dense", "hi-dense"):
+            printed = subprocess.run(["python3", str(REPO / "eval/generators/churn.py"), "--workload", level, "blind"],
+                                     check=True, capture_output=True, text=True).stdout
+            committed = (REPO / f"eval/workloads/churn-{level}-blind.json").read_text()
+            self.assertEqual(json.loads(printed), json.loads(committed))
+
+    def test_the_dense_levels_are_the_same_length_too(self):
+        lo, hi = self.generate("lo-dense"), self.generate("hi-dense")
+        self.assertEqual({k: len(v) for k, v in lo.items()}, {k: len(v) for k, v in hi.items()})
+        w = workload.load(REPO / "eval/workloads/churn-hi-dense-blind.json")
+        root = workload.materialise(w, Path(tempfile.mkdtemp()) / "ws", REPO / "eval/generators")
+        self.assertEqual(workload.check_ground_truth(w, root), [])
 
     def test_a_silent_probe_of_the_past_rejects_every_other_value_of_its_setting(self):
         w = workload.load(REPO / "eval/workloads/churn-hi-silent.json")

@@ -1,0 +1,242 @@
+{
+ "name": "churn-lo-dense-blind",
+ "description": "churn-lo-dense's twelve files with the settings never mentioned until the end: 0 overrides of twelve settings, asked about only at the end, as they stand and as they stood mid-way.",
+ "source": {
+  "kind": "generated",
+  "generator": "churn.py lo-dense"
+ },
+ "files": [
+  "svc_00.py",
+  "svc_01.py",
+  "svc_02.py",
+  "svc_03.py",
+  "svc_04.py",
+  "svc_05.py",
+  "svc_06.py",
+  "svc_07.py",
+  "svc_08.py",
+  "svc_09.py",
+  "svc_10.py",
+  "svc_11.py"
+ ],
+ "briefing": "I am auditing the ingest pipeline before a release. We will go through its twelve services one at a time, and I will tell you which. For each, I need its owner and its retry budget, and nothing else.\n\nUse no tool but the one Read each step names: no search, no command, no second look at an earlier file. Acknowledge this and wait for the first service.",
+ "step_template": "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then give its owner and its retry budget, and nothing else.",
+ "probes": [
+  {
+   "id": "F1",
+   "kind": "headline",
+   "question": "State the pipeline-wide DEFAULT_TIMEOUT_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7810"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F2",
+   "kind": "headline",
+   "question": "State the pipeline-wide BATCH_LIMIT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "3158"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F3",
+   "kind": "headline",
+   "question": "State the pipeline-wide LEASE_TTL_MS in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "1466"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F4",
+   "kind": "headline",
+   "question": "State the pipeline-wide SHARD_COUNT in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7394"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F5",
+   "kind": "headline",
+   "question": "State the pipeline-wide QUOTA_BURST in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "7208"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F6",
+   "kind": "headline",
+   "question": "State the pipeline-wide FENCE_EPOCH in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "6259"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F7",
+   "kind": "headline",
+   "question": "State the pipeline-wide SPOOL_DEPTH_KB in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "5507"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F8",
+   "kind": "headline",
+   "question": "State the pipeline-wide CURSOR_TTL_S in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "4029"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F9",
+   "kind": "headline",
+   "question": "State the pipeline-wide REAP_INTERVAL_S in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "9446"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F10",
+   "kind": "headline",
+   "question": "State the pipeline-wide TENANT_CAP in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "9087"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F11",
+   "kind": "headline",
+   "question": "State the pipeline-wide DIGEST_WINDOW in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "1392"
+   ],
+   "reject": []
+  },
+  {
+   "id": "F12",
+   "kind": "headline",
+   "question": "State the pipeline-wide BUFFER_HWM in force now. Answer with the number alone and nothing else.",
+   "expect": [
+    "8686"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H1",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide DEFAULT_TIMEOUT_MS was in force once svc_04.py had been read, before svc_05.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "7810"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H2",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide BATCH_LIMIT was in force once svc_05.py had been read, before svc_06.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "3158"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H3",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide LEASE_TTL_MS was in force once svc_06.py had been read, before svc_07.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "1466"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H4",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide SHARD_COUNT was in force once svc_07.py had been read, before svc_08.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "7394"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H5",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide QUOTA_BURST was in force once svc_08.py had been read, before svc_09.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "7208"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H6",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide FENCE_EPOCH was in force once svc_09.py had been read, before svc_10.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "6259"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H7",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide SPOOL_DEPTH_KB was in force once svc_04.py had been read, before svc_05.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "5507"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H8",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide CURSOR_TTL_S was in force once svc_05.py had been read, before svc_06.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "4029"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H9",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide REAP_INTERVAL_S was in force once svc_06.py had been read, before svc_07.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "9446"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H10",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide TENANT_CAP was in force once svc_07.py had been read, before svc_08.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "9087"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H11",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide DIGEST_WINDOW was in force once svc_08.py had been read, before svc_09.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "1392"
+   ],
+   "reject": []
+  },
+  {
+   "id": "H12",
+   "kind": "headline",
+   "question": "Which value of the pipeline-wide BUFFER_HWM was in force once svc_09.py had been read, before svc_10.py? Answer with the number alone and nothing else.",
+   "expect": [
+    "8686"
+   ],
+   "reject": []
+  }
+ ]
+}
