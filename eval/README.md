@@ -60,6 +60,7 @@ make eval-run WORKLOAD=issues-long ARM=on
 make eval-run WORKLOAD=sqlglot-long ARM=off
 make eval-run WORKLOAD=sqlglot-long ARM=default
 make eval-report
+make eval-load            # stale and redundant tool output in each transcript's context
 make eval-test            # the harness's own tests
 ```
 
@@ -126,6 +127,15 @@ established at step four is overridden at step ten. It exists because the first
 two workloads scored every arm at 100%: retrieval is the last thing a crowded
 context breaks, and a probe asked after the work cannot see a rule that stopped
 being applied during it.
+
+**`churn-*`** -- twelve service modules, identical in length at every level, in
+which pipeline-wide settings are overridden 0 (`lo`), 11 (`mid`), 33 (`hi`) or
+330 (`hi-dense`) times. The context is the same size at every level; only the
+interference differs, so a difference between levels is interference and not
+length. Each level comes three ways: the settings in force reported and graded
+after every file, told they will be asked about at the end (`-silent`), or never
+mentioned until then (`-blind`). `generators/churn.py --workload <level>
+[silent|blind]` prints each workload; a test holds the committed files to it.
 
 **`build`** -- ten steps constructing a package. A public contract changes at
 step seven, and three rules run through the whole job. Nothing is asked of the

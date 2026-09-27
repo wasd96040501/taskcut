@@ -33,6 +33,97 @@ to 0.5, which built the compacted transcript themselves and, until 0.5, had the
 working model call `close_task` at every boundary. Those numbers describe a
 mechanism that no longer ships; they are kept because they are what led here.
 
+### What the context holds, not how much of it
+
+The floor is a count of tokens. The literature on long contexts finds that what
+degrades a model is less the count than what the tokens are, and one kind above
+all: earlier values of something since replaced, which a model retrieves in
+place of the current one (proactive interference, [arXiv
+2506.08184](https://arxiv.org/abs/2506.08184)). If that were what hurt a long
+session, a trigger should read it rather than the count. Two instruments ask
+whether it does, on Claude Code 2.1.283 and Sonnet 5.
+
+**What real sessions carry.** `make eval-load` keeps a ledger of the tool
+output a transcript's main context holds, keyed by what each output is a copy
+of -- a file, a command, a tool call -- and reports at every request how much
+was stale (the file edited since, the command run again since) or redundant.
+Over the 22 collected sessions, stale output at the peak is 0% to 10% of the
+context. sqlglot-long, at 707,187 tokens, held 42,010 stale, and no file in
+more than four versions; issues-long, which keeps returning to click's
+`core.py`, held it in twelve, and 29,353 stale tokens of 297,449. Tool output
+is about 30% of a coding session's context, and most of it is copies of things
+that have not changed. A lower bound: Bash edits are read by pattern, and a
+command whose output shows a file (a `grep`) does not go stale when the file
+changes.
+
+**Whether interference hurts, at a fixed size.** `churn` is twelve service
+modules whose numbered lines are identical in length at every level, so that a
+level changes what the lines say and never how many tokens there are. At `lo`,
+svc_00 declares the pipeline-wide settings and every later number is a
+constant local to its service; at `hi`, later numbers override the settings.
+Three ways of asking, because the first two turned out to measure something
+else: `reported`, the settings in force after every file; `silent`, told the
+settings will be asked about at the end; `blind`, told nothing of them until
+then. Taskcut off throughout, one run each:
+
+| workload | settings | overrides | peak context | graded | right | stale given | tools beyond the Reads |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| churn-lo | 6 | 0 | 264,837 | 72, every step | 72 | 0 | 0 |
+| churn-hi | 6 | 33 | 263,574 | 72, every step | 72 | 0 | 0 |
+| churn-lo-silent | 6 | 0 | 264,212 | 12, at the end | 12 | 0 | 0 |
+| churn-hi-silent | 6 | 33 | 266,000 | 12, at the end | 12 | 0 | 0 |
+| churn-lo-blind | 6 | 0 | 263,156 | 12, at the end | 12 | 0 | 0 |
+| churn-hi-blind | 6 | 33 | 267,836 | 12, at the end | 12 | 0 | 0 |
+| churn-lo-dense-blind | 12 | 0 | 280,061 | 24, at the end | 24 | 0 | 0 |
+| churn-hi-dense-blind | 12 | 330 | 293,424 | 24, at the end | 24 | 0 | 0 |
+
+The questions at the end ask for each setting as it stands and as it stood
+once a named service had been read, mid-way, with every other value it ever
+had rejected. At `hi-dense` a setting was set 27 times on average and
+`BATCH_LIMIT` 35. Not one answer was wrong, not one was a replaced value, and
+no step or answer reached for a tool.
+
+Why the three ways of asking:
+
+* **`reported` measures bookkeeping.** Each step's report is a record of the
+  settings in force, written just before the next file, so the model only ever
+  updates its own latest line -- the recite-then-answer that defeats
+  interference ([arXiv 2510.05381](https://arxiv.org/abs/2510.05381)).
+* **`silent` is `reported` by the model's own choice.** Told it would be asked
+  at the end, it wrote "Running pipeline-wide state: ..." into every report
+  unprompted, and answered from that. A model keeps a record of what it is told
+  will matter.
+* **`blind` is where a real session's stale values live**: in material nobody
+  said would matter. The model gave owner and retry budget and nothing else at
+  every step. Its thinking is not in the transcript, so a note kept there
+  cannot be ruled out.
+
+What the ledger says about these runs is also a finding: stale output 0% at
+every level. Each file is read once and never changes; the settings that were
+replaced were replaced in *other* files. Interference between different things
+that disagree is invisible to a key, and needs a reader.
+
+**What it shows.** On Sonnet 5, at 26% to 29% of a 1M window, proactive
+interference of the kind and dose here produces no error, told or not. Nothing
+in these runs says a trigger that read interference would do better than the
+floor, so none is built. What would change that is a run where the baseline
+fails: a fuller window (60% and up, where no `off` run here has been), or a
+model that is known to fail at this, which would also show the workload can
+see interference at all. Haiku 4.5 is the obvious positive control, and cannot
+run it: its window is 200k and these runs peak near 300k.
+
+**A thing found on the way.** The first pilot read each file with `cat`, as
+`drift` does. A service is about 36,000 characters, and Claude Code 2.1.283
+keeps a Bash output that large on disk and puts a 2,000-character preview in the
+context. From the second step on, the model searched the files for the settings
+instead of recalling them. `churn` reads with the Read tool. `drift` reads files
+of the same size with `cat`; its runs were on 2.1.278 and are not re-checked
+here, but they may not have held the modules in the context at all.
+
+This round spent about $18 at list price: eight runs of 0.8 to 1.4 million
+weighted input tokens each, 8.1 million in all, and the first pilot, stopped at
+step three.
+
 ### What the judge reads, replayed over real sessions (0.9)
 
 Measured on Claude Code 2.1.280, Sonnet 5, with `make eval-replay` over the
