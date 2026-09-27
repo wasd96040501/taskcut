@@ -92,9 +92,19 @@ class Churn(unittest.TestCase):
 
     def test_the_committed_workloads_are_what_the_generator_prints(self):
         for level in ("lo", "mid", "hi"):
-            printed = subprocess.run(["python3", str(REPO / "eval/generators/churn.py"), "--workload", level],
-                                     check=True, capture_output=True, text=True).stdout
-            self.assertEqual(json.loads(printed), json.loads((REPO / f"eval/workloads/churn-{level}.json").read_text()))
+            for flag, suffix in (([], ""), (["--silent"], "-silent")):
+                printed = subprocess.run(["python3", str(REPO / "eval/generators/churn.py"), "--workload", level, *flag],
+                                         check=True, capture_output=True, text=True).stdout
+                committed = (REPO / f"eval/workloads/churn-{level}{suffix}.json").read_text()
+                self.assertEqual(json.loads(printed), json.loads(committed))
+
+    def test_a_silent_probe_of_the_past_rejects_every_other_value_of_its_setting(self):
+        w = workload.load(REPO / "eval/workloads/churn-hi-silent.json")
+        root = workload.materialise(w, Path(tempfile.mkdtemp()) / "ws", REPO / "eval/generators")
+        self.assertEqual(workload.check_ground_truth(w, root), [])
+        past = [p for p in w.probes if p.id.startswith("H")]
+        self.assertEqual(len(past), 6)
+        self.assertTrue(all(p.reject and p.expect[0] not in p.reject for p in past))
 
     def test_every_tracked_value_is_in_the_material(self):
         w = workload.load(REPO / "eval/workloads/churn-hi.json")

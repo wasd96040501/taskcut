@@ -32,7 +32,7 @@ else.
 
 Usage:
   churn.py <directory> <level>      lay the files down
-  churn.py --workload <level>       print the workload's JSON
+  churn.py --workload <level> [--silent]    print the workload's JSON
 """
 
 import json
@@ -73,6 +73,32 @@ BRIEFING = (
     "no command, no second look at an earlier file. "
     "Acknowledge this and wait for the first service."
 )
+
+#: The same briefing with no report of the settings along the way. Each report
+#: is a record of the settings in force, written into the context just before
+#: the next file, so the model only ever has to update its own latest line: the
+#: reported variant measures bookkeeping, and this one measures recall from
+#: behind the values since replaced -- the setting proactive interference is
+#: measured in, where only the end is asked about.
+SILENT_BRIEFING = (
+    "I am auditing the ingest pipeline before a release. We will go through its twelve services "
+    "one at a time, and I will tell you which. Six settings are pipeline-wide: "
+    + ", ".join(KEYS)
+    + ". svc_00 declares them, and a later service may override any of them from that point on; a "
+    "constant a service declares for itself changes nothing pipeline-wide. I will ask about them "
+    "at the end.\n\nAnswer from what you have read. Use no tool but the one Read each step names: no "
+    "search, no command, no second look at an earlier file. Acknowledge this and wait for the first "
+    "service."
+)
+
+SILENT_STEP = (
+    "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then report its owner and its "
+    "retry budget."
+)
+
+#: For the silent variant: the service after which each setting's value is asked
+#: for, one per setting, from the middle of the work.
+HISTORY_AT = [4, 5, 6, 7, 8, 9]
 
 STEP = (
     "Sub-task {n} of {total}: read the whole of {file} with the Read tool, then report its owner and its "
@@ -154,32 +180,61 @@ def tracked(level: str) -> list[dict]:
     return steps
 
 
-def workload(level: str) -> dict:
+def workload(level: str, silent: bool = False) -> dict:
     files = [f"svc_{i:02d}.py" for i in range(SERVICES)]
-    final = tracked(level)[-1]
+    steps = tracked(level)
+    final = steps[-1]
     overrides = sum(len(v["stale"]) for v in final.values())
+    now = [
+        {
+            "id": f"F{n}",
+            "kind": "superseded" if value["stale"] else "headline",
+            "question": f"State the pipeline-wide {key} in force now. Answer with the number alone and nothing else.",
+            "expect": [value["current"]],
+            "reject": value["stale"],
+        }
+        for n, (key, value) in enumerate(final.items(), 1)
+    ]
+    if not silent:
+        return {
+            "name": f"churn-{level}",
+            "description": (
+                f"Twelve service modules, identical in length at every level, in which six pipeline-wide "
+                f"settings are overridden {overrides} times in all. The settings in force are graded after "
+                f"every file."
+            ),
+            "source": {"kind": "generated", "generator": f"churn.py {level}"},
+            "files": files,
+            "briefing": BRIEFING,
+            "step_template": STEP,
+            "tracked": {"pattern": r"\b{key}\s*[=:]\s*(\d+)", "steps": steps},
+            "probes": now,
+        }
+    then = []
+    for n, (key, at) in enumerate(zip(KEYS, HISTORY_AT), 1):
+        value = steps[at][key]["current"]
+        every = final[key]["stale"] + [final[key]["current"]]
+        then.append({
+            "id": f"H{n}",
+            "kind": "superseded" if len(every) > 1 else "headline",
+            "question": (
+                f"Which value of the pipeline-wide {key} was in force once svc_{at:02d}.py had been read, "
+                f"before svc_{at + 1:02d}.py? Answer with the number alone and nothing else."
+            ),
+            "expect": [value],
+            "reject": [v for v in every if v != value],
+        })
     return {
-        "name": f"churn-{level}",
+        "name": f"churn-{level}-silent",
         "description": (
-            f"Twelve service modules, identical in length at every level, in which six pipeline-wide "
-            f"settings are overridden {overrides} times in all. The settings in force are graded after "
-            f"every file."
+            f"churn-{level}'s twelve files with nothing reported along the way: {overrides} overrides of "
+            f"six settings, asked about only at the end, as they stand and as they stood mid-way."
         ),
         "source": {"kind": "generated", "generator": f"churn.py {level}"},
         "files": files,
-        "briefing": BRIEFING,
-        "step_template": STEP,
-        "tracked": {"pattern": r"\b{key}\s*[=:]\s*(\d+)", "steps": tracked(level)},
-        "probes": [
-            {
-                "id": f"F{n}",
-                "kind": "superseded" if value["stale"] else "headline",
-                "question": f"State the pipeline-wide {key} in force now. Answer with the number alone and nothing else.",
-                "expect": [value["current"]],
-                "reject": value["stale"],
-            }
-            for n, (key, value) in enumerate(final.items(), 1)
-        ],
+        "briefing": SILENT_BRIEFING,
+        "step_template": SILENT_STEP,
+        "probes": now + then,
     }
 
 
@@ -191,8 +246,8 @@ def main(out: str, level: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3 and sys.argv[1] == "--workload":
-        print(json.dumps(workload(sys.argv[2]), indent=1))
+    if len(sys.argv) in (3, 4) and sys.argv[1] == "--workload":
+        print(json.dumps(workload(sys.argv[2], silent=sys.argv[3:] == ["--silent"]), indent=1))
     elif len(sys.argv) == 3 and sys.argv[2] in LEVELS:
         main(sys.argv[1], sys.argv[2])
     else:
